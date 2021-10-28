@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/ambv/black
+    rev: 21.6b0
+    hooks:
+    - id: black
+      language_version: python3.9
+  - repo: https://github.com/pycqa/isort
+    rev: 5.9.1
+    hooks:
+      - id: isort
+        name: isort
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true

@@ -1,0 +1,29 @@
+[tool.black]
+line-length=79
+
+[tool.mypy]
+ignore_missing_imports=true
+plugins=["returns.contrib.mypy.returns_plugin"]
+
+[tool.poetry]
+name = "apgorm"
+version = "0.1.0"
+description = ""
+authors = ["Circuit <circuitsacul@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+asyncpg = "^0.24.0"
+returns = "^0.17.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+isort = "^5.9.3"
+mypy = "^0.910"
+flake8 = "^4.0.1"
+pre-commit = "^2.15.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
