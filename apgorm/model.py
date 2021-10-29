@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.field import Field
-from apgorm.field import field as create_field
 from apgorm.sql import DeleteQuery, FetchQuery, InsertQuery, UpdateQuery
 from apgorm.types.numeric import Serial
 from apgorm.undefined import UNDEF
@@ -21,7 +20,7 @@ class Model:
     tablename: str
     database: Database  # populated by Database
 
-    uid = create_field(Serial(), pk=True, read_only=True)
+    uid = Serial.field(pk=True, read_only=True)
 
     def __init__(self, **values):
         if "uid" in values:

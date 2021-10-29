@@ -51,6 +51,7 @@ class Database:
         res = await self.pool.fetchrow(query, *args)
         if res is not None:
             res = dict(res)
+        assert res is None or isinstance(res, dict)
         return res
 
     async def fetchmany(

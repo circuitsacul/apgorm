@@ -8,7 +8,7 @@ from apgorm.sql.sql import Block
 from .constraint import Constraint
 
 if TYPE_CHECKING:
-    from apgorm.fields import Field
+    from apgorm.field import Field
 
 
 class Action(Enum):

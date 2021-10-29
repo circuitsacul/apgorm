@@ -1,30 +1,18 @@
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Literal,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
-
-from returns.primitives.hkt import Kind1
+from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, Union
 
 from apgorm.undefined import UNDEF
 
-from .types.base_type import SqlType
-
 if TYPE_CHECKING:
     from apgorm.model import Model
-    from apgorm.sql.sql import SQL, Sql
+    from apgorm.sql.sql import SQL, Block
+
+    from .types.base_type import SqlType
 
 
 _T = TypeVar("_T")
 _F = TypeVar("_F", bound="SqlType")
-_S = TypeVar("_S", bound="Field")
 
 _MI = TypeVar("_MI")
 MAYBEINST = Union[Type[_MI], _MI]
@@ -35,14 +23,14 @@ class Field(Generic[_F, _T]):
     model: Type[Model]  # populated by Database
 
     def __init__(
-        self: _S,
-        sql_type: Kind1[_F, _T],
+        self,
+        sql_type: _F,
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         not_null: bool = False,
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
-        references: Sql | Field[_F, _T] | None = None,
+        references: Block | Field | None = None,
     ):
         self.sql_type = sql_type
 
@@ -92,59 +80,3 @@ class Field(Generic[_F, _T]):
         n.name = self.name
         n.model = self.model
         return n
-
-
-@overload
-def field(
-    sql_type: Kind1[_F, _T],
-    *,
-    default: SQL[_T] | UNDEF = UNDEF.UNDEF,
-    not_null: Literal[False] = ...,
-    pk: bool = False,
-    unique: bool = False,
-    read_only: bool = False,
-    references: Field[_F, _T] | None = None,
-) -> Field[_F, _T | None]:
-    ...
-
-
-@overload
-def field(
-    sql_type: MAYBEINST[Kind1[_F, _T]],
-    *,
-    default: SQL[_T] | UNDEF = UNDEF.UNDEF,
-    not_null: Literal[True],
-    pk: bool = False,
-    unique: bool = False,
-    read_only: bool = False,
-    references: Field[_F, _T] | None = None,
-) -> Field[_F, _T]:
-    ...
-
-
-def field(
-    sql_type: MAYBEINST[Kind1[_F, _T]],
-    *,
-    default: SQL[_T] | UNDEF = UNDEF.UNDEF,
-    not_null: bool = False,
-    pk: bool = False,
-    unique: bool = False,
-    read_only: bool = False,
-    references: Field[_F, _T] | None = None,
-):
-    sqlt: SqlType
-    if isinstance(sql_type, SqlType):
-        sqlt = sql_type
-    else:
-        sqlt = sql_type()  # type: ignore
-
-    field_cls = sql_type.field_cls or Field  # type: ignore
-    return field_cls(
-        sqlt,
-        not_null=not_null,
-        default=default,
-        pk=pk,
-        unique=unique,
-        read_only=read_only,
-        references=references,
-    )

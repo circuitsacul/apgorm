@@ -1,15 +1,26 @@
 from __future__ import annotations
 
 from collections import UserString
-from typing import TYPE_CHECKING, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
 
 from apgorm.field import Field
 
 if TYPE_CHECKING:
     from apgorm.types.base_type import SqlType
 
-_T = TypeVar("_T")
-SQL = Union["Field[SqlType[_T], _T]", "Sql[_T]", "Parameter[_T]", _T]
+# TODO: add boolean types, fix Block[bool]
+_T = TypeVar("_T", covariant=True)
+_SQLT = TypeVar("_SQLT", bound=SqlType, covariant=True)
+SQL = Union[
+    "Field[SqlType[_T], _T]",
+    "Block[SqlType[_T]]",
+    "Parameter[_T]",
+    _T,
+]
+CASTED = Union[
+    "Field[_SQLT, Any]",
+    "Block[_SQLT]",
+]
 
 
 class Raw(UserString):
@@ -21,13 +32,13 @@ class Parameter(Generic[_T]):
         self.value = value
 
 
-class Block(Generic[_T]):
+class Block(Generic[_SQLT]):
     def __init__(self, *pieces: SQL | Raw):
         self.pieces: list[Raw | Parameter] = []
         for p in pieces:
             if isinstance(p, Field):
                 self.pieces.append(Raw(p.full_name))
-            elif isinstance(p, Sql):
+            elif isinstance(p, Block):
                 self.pieces.extend(p.pieces)
             elif isinstance(p, (Raw, Parameter)):
                 self.pieces.append(p)
@@ -35,7 +46,7 @@ class Block(Generic[_T]):
                 self.pieces.append(Parameter(p))
 
     def __iadd__(self, other: object):
-        if isinstance(other, Sql):
+        if isinstance(other, Block):
             self.pieces.extend(other.pieces)
         elif isinstance(other, Parameter):
             self.pieces.append(other)
@@ -45,6 +56,3 @@ class Block(Generic[_T]):
             raise TypeError
 
         return self
-
-
-Sql = Block

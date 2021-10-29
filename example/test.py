@@ -1,8 +1,7 @@
 import asyncio
 
 import apgorm
-from apgorm.field import field
-from apgorm.sql import Sql, render
+from apgorm.sql import Block, render
 from apgorm.sql.generators.comp import neq
 from apgorm.sql.generators.query import cast, r
 from apgorm.types.numeric import Integer
@@ -11,7 +10,7 @@ from apgorm.types.numeric import Integer
 class User(apgorm.Model):
     tablename = "users"
 
-    some_id = field(Integer, default=5, not_null=True)
+    some_id = Integer.field(default=5)
 
     def __repr__(self) -> str:
         return f"User {self.some_id.value} ({self.uid.value})"
@@ -46,8 +45,8 @@ async def many_rows() -> None:
     print("MANY ROWS:\n")
 
     for i in range(0, 10):
-        await User(name=i).create()
-    await User(name=-1).create()
+        await User(some_id=i).create()
+    await User(some_id=-1).create()
 
     print(await User.fetch_query().fetchmany())
 
@@ -63,7 +62,7 @@ async def many_rows() -> None:
 
 
 async def custom_queries(db: Database) -> None:
-    sql = Sql[int](r("SELECT"), cast(1, Integer))
+    sql = Block[Integer](r("SELECT"), cast(1, Integer))
     print(await db.fetchval(*render(sql)))
 
 

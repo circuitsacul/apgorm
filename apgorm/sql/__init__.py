@@ -8,7 +8,7 @@ from .query_builder import (
     UpdateQuery,
 )
 from .render import Renderer, render
-from .sql import SQL, Block, Parameter, Raw, Sql
+from .sql import SQL, Block, Parameter, Raw
 
 __all__ = (
     "generators",

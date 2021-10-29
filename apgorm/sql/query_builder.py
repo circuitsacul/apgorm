@@ -8,10 +8,11 @@ from .generators.comp import and_, eq
 from .generators.helpers import r
 from .generators.query import delete, insert, select, update
 from .render import render
-from .sql import SQL, Sql
+from .sql import SQL, Block
 
 if TYPE_CHECKING:
     from apgorm.model import Model
+    from apgorm.types.boolean import Bool
 
 _T = TypeVar("_T", bound="Model")
 
@@ -21,18 +22,21 @@ class Query(Generic[_T]):
         self.model = model
 
 
+_S = TypeVar("_S", bound="FilterQuery")
+
+
 class FilterQuery(Query[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
-        self.filters: list[Sql[bool]] = []
+        self.filters: list[Block[Bool]] = []
 
-    def where_logic(self) -> Sql[bool] | None:
+    def where_logic(self) -> Block[Bool] | None:
         if len(self.filters) == 0:
             return None
         return and_(*self.filters)
 
-    def where(self, *filters: Sql[bool], **values: SQL):
+    def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
         for k, v in values.items():
             if isinstance(v, Field):
@@ -47,12 +51,12 @@ class FetchQuery(FilterQuery[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
-        self.order_by_field: Field | Sql | None = None
+        self.order_by_field: Field | Block | None = None
         self.ascending: bool = True
 
     def order_by(
         self,
-        field: Sql | Field,
+        field: Block | Field,
         ascending: bool = True,
     ) -> FetchQuery[_T]:
         self.order_by_field = field
@@ -92,7 +96,7 @@ class UpdateQuery(FilterQuery[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
-        self.set_values: dict[Sql, SQL] = {}
+        self.set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> UpdateQuery[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
@@ -113,7 +117,7 @@ class InsertQuery(Query[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
-        self.set_values: dict[Sql, SQL] = {}
+        self.set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> InsertQuery[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})

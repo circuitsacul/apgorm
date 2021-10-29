@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .sql import Raw, Sql
+from .sql import Block, Raw
 
 
 class Renderer:
@@ -14,7 +14,7 @@ class Renderer:
         self._curr_value_id += 1
         return self._curr_value_id
 
-    def render(self, sql: Sql) -> tuple[str, list[Any]]:
+    def render(self, sql: Block) -> tuple[str, list[Any]]:
         sql_pieces: list[str] = []
         params: list[Any] = []
 
@@ -32,5 +32,5 @@ class Renderer:
         return " ".join(sql_pieces), params
 
 
-def render(sql: Sql) -> tuple[str, list[Any]]:
+def render(sql: Block) -> tuple[str, list[Any]]:
     return Renderer().render(sql)
