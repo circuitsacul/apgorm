@@ -8,9 +8,8 @@ from apgorm.field import Field
 if TYPE_CHECKING:
     from apgorm.types.base_type import SqlType
 
-# TODO: add boolean types, fix Block[bool]
 _T = TypeVar("_T", covariant=True)
-_SQLT = TypeVar("_SQLT", bound=SqlType, covariant=True)
+_SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
 SQL = Union[
     "Field[SqlType[_T], _T]",
     "Block[SqlType[_T]]",
