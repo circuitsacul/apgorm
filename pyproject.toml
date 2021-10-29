@@ -1,10 +1,6 @@
 [tool.black]
 line-length=79
 
-[tool.mypy]
-ignore_missing_imports=true
-plugins=["returns.contrib.mypy.returns_plugin"]
-
 [tool.poetry]
 name = "apgorm"
 version = "0.1.0"
@@ -15,7 +11,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.8"
 asyncpg = "^0.24.0"
-returns = "^0.17.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"

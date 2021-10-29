@@ -245,17 +245,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "returns"
-version = "0.17.0"
-description = "Make your functions return something meaningful, typed, and safe!"
-category = "main"
-optional = false
-python-versions = ">=3.7,<4.0"
-
-[package.dependencies]
-typing-extensions = ">=3.7,<4.0"
-
-[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -283,7 +272,7 @@ python-versions = ">=3.6"
 name = "typing-extensions"
 version = "3.10.0.2"
 description = "Backported and Experimental Type Hints for Python 3.5+"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -309,7 +298,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1b1572aa64d19f63f42f802f2ae59b22fac6c283df8cd8a299202d85e35e6155"
+content-hash = "51b5f780266e68b60c0a5448f66e728a12e50ff347f213696330f028f16fbc3d"
 
 [metadata.files]
 asyncpg = [
@@ -496,10 +485,6 @@ regex = [
     {file = "regex-2021.10.23-cp39-cp39-win32.whl", hash = "sha256:a30513828180264294953cecd942202dfda64e85195ae36c265daf4052af0464"},
     {file = "regex-2021.10.23-cp39-cp39-win_amd64.whl", hash = "sha256:0f7552429dd39f70057ac5d0e897e5bfe211629652399a21671e53f2a9693a4e"},
     {file = "regex-2021.10.23.tar.gz", hash = "sha256:f3f9a91d3cc5e5b0ddf1043c0ae5fa4852f18a1c0050318baf5fc7930ecc1f9c"},
-]
-returns = [
-    {file = "returns-0.17.0-py3-none-any.whl", hash = "sha256:28627f989b19d4bcadbd450a8fe4cf4d98e1335271300a428cc53ec83642259a"},
-    {file = "returns-0.17.0.tar.gz", hash = "sha256:8cb7980454bbb2adfd43c44148d902fbd1a0f7288a797eaa6fad1fef7d5ec06c"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
