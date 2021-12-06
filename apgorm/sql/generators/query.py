@@ -96,7 +96,7 @@ def insert(
         sql += Block[Any](r("("), join(r(","), *fields), r(")"))
 
     if len(values) > 0:
-        sql += Block[Any](r("VALUES ("), *values, r(")"))
+        sql += Block[Any](r("VALUES ("), join(r(","), *values), r(")"))
     else:
         sql += Block[Any](r("DEFAULT VALUES"))
 
