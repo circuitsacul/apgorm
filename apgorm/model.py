@@ -34,7 +34,9 @@ class Model:
             self.fields[f.name] = f
             setattr(self, f.name, f)
 
-            value = values.get(f.name, f.default)
+            value = values.get(f.name, UNDEF.UNDEF)
+            if value is UNDEF.UNDEF:
+                continue
             f._value = value
 
     async def delete(self):
@@ -56,8 +58,15 @@ class Model:
                 if f._value is not UNDEF.UNDEF
             }
         )
-        uid = await q.execute()
-        self.uid._value = uid
+        q.return_fields(
+            *[f for f in self.fields.values() if f._value is UNDEF.UNDEF]
+        )
+        result = await q.execute()
+        if len(q.fields_to_return) > 1:
+            for f, v in zip(q.fields_to_return, result):
+                f._value = v
+        elif len(q.fields_to_return) == 1:
+            q.fields_to_return[0]._value = result
 
     @classmethod
     async def fetch(cls: Type[_T], **values) -> _T:

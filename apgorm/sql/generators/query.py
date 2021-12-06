@@ -90,17 +90,16 @@ def insert(
     return_fields: Sequence[Field | Block] | Field | Block | None = None,
 ) -> Block[Any]:
     tablename = into if isinstance(into, Block) else r(into.tablename)
-    sql = Block[Any](
-        r("INSERT INTO"),
-        tablename,
-        r("("),
-        join(r(","), *fields),
-        r(")"),
-        r("VALUES"),
-        r("("),
-        join(r(","), *values),
-        r(")"),
-    )
+
+    sql = Block[Any](r("INSERT INTO"), tablename)
+    if len(fields) > 0:
+        sql += Block[Any](r("("), join(r(","), *fields), r(")"))
+
+    if len(values) > 0:
+        sql += Block[Any](r("VALUES ("), *values, r(")"))
+    else:
+        sql += Block[Any](r("DEFAULT VALUES"))
+
     if return_fields is not None:
         sql += r("RETURNING")
         if isinstance(return_fields, (Field, Block)):

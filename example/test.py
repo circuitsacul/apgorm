@@ -13,7 +13,10 @@ class User(apgorm.Model):
     some_id = Integer.field(default=5)
 
     def __repr__(self) -> str:
-        return f"User {self.some_id.value} ({self.uid.value})"
+        try:
+            return f"User {self.some_id.value} ({self.uid.value})"
+        except Exception:  # TODO: TableNotInitialized Exception
+            return f"User UNKOWN ({self.uid.value})"
 
 
 class Database(apgorm.Database):
@@ -24,7 +27,7 @@ async def single_row() -> None:
     print("#" * 25)
     print("SINGLE ROW:\n")
 
-    user_to_make = User(some_id=-1)
+    user_to_make = User()
     print(user_to_make)
 
     await user_to_make.create()
@@ -68,7 +71,7 @@ async def custom_queries(db: Database) -> None:
 
 async def main() -> None:
     db = Database()
-    await db.connect()
+    await db.connect(database=input("Database Name: "))
     await single_row()
     await many_rows()
     await custom_queries(db)

@@ -118,9 +118,14 @@ class InsertQuery(Query[_T]):
         super().__init__(model)
 
         self.set_values: dict[Block, SQL] = {}
+        self.fields_to_return: list[Block | Field] = []
 
     def set(self, **values: SQL) -> InsertQuery[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
+        return self
+
+    def return_fields(self, *fields: Block | Field) -> InsertQuery[_T]:
+        self.fields_to_return.extend(fields)
         return self
 
     async def execute(self) -> Any:
@@ -132,8 +137,7 @@ class InsertQuery(Query[_T]):
                 self.model,
                 value_names,
                 value_values,
-                return_fields=self.model.uid,
+                return_fields=self.fields_to_return or None,
             )
         )
-        uid = await self.model.database.fetchval(query, params)
-        return uid
+        return await self.model.database.fetchval(query, params)
