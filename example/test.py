@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 import asyncio
 
 import apgorm
-from apgorm.sql import Block, render
-from apgorm.sql.generators.comp import neq
-from apgorm.sql.generators.query import cast, r
+from apgorm.sql.generators.comp import lt
 from apgorm.types.boolean import Boolean
 from apgorm.types.numeric import Integer
 
@@ -28,58 +28,47 @@ class Database(apgorm.Database):
     user = User
 
 
-async def single_row() -> None:
-    print("#" * 25)
-    print("SINGLE ROW:\n")
+async def main():
+    def head():
+        print("#" * 50 + "\n")
 
-    user_to_make = User()
-    print(user_to_make)
+    db = Database()
+    await db.connect(database="apgorm")
 
-    await user_to_make.create()
-    print(user_to_make)
+    user = User(age=3, is_cool=True)
+    print(user)
+    await user.create()
+    print(user)
+    await user.delete()
 
-    user_to_make = await User.fetch(uid=user_to_make.uid.value)
-    print(user_to_make)
+    head()
+    ages = [3, 9, 2, 16]
+    is_cool = [True, True, False, True]
+    for age, is_cool in zip(ages, is_cool):
+        await User(age=age, is_cool=is_cool).create()
 
-    user_to_make.age.value = 0
-    await user_to_make.save()
-    print(user_to_make)
+    head()
+    all_users = await User.fetch_query().fetchmany()
+    print(all_users)
 
-    await user_to_make.delete()
+    head()
+    cool_users = await User.fetch_query().where(is_cool=True).fetchmany()
+    print(cool_users)
 
+    head()
+    young_users = await User.fetch_query().where(lt(User.age, 10)).fetchmany()
+    print(young_users)
 
-async def many_rows() -> None:
-    print("\n" + "#" * 25)
-    print("MANY ROWS:\n")
+    head()
+    for user in young_users:
+        user.age.value = 11
+        await user.save()
 
-    for i in range(0, 10):
-        await User(age=i).create()
-    await User(age=-1).create()
-
+    head()
     print(await User.fetch_query().fetchmany())
 
-    q = User.fetch_query()
-    q.where(age=-1)
-    print(await q.fetchone())
-
-    q = User.fetch_query()
-    q.where(neq(User.age, -1))
-    print(await q.fetchmany())
-
+    head()
     await User.delete_query().execute()
-
-
-async def custom_queries(db: Database) -> None:
-    sql = Block[Integer](r("SELECT"), cast(1, Integer))
-    print(await db.fetchval(*render(sql)))
-
-
-async def main() -> None:
-    db = Database()
-    await db.connect(database=input("Database Name: "))
-    await single_row()
-    await many_rows()
-    await custom_queries(db)
 
 
 if __name__ == "__main__":
