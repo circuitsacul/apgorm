@@ -4,19 +4,24 @@ import apgorm
 from apgorm.sql import Block, render
 from apgorm.sql.generators.comp import neq
 from apgorm.sql.generators.query import cast, r
+from apgorm.types.boolean import Boolean
 from apgorm.types.numeric import Integer
 
 
 class User(apgorm.Model):
     tablename = "users"
 
-    some_id = Integer.field(default=5)
+    age = Integer.field(default=0)
+    is_cool = Boolean.field(default=False)
 
     def __repr__(self) -> str:
         try:
-            return f"User {self.some_id.value} ({self.uid.value})"
+            return (
+                f"User AGE:{self.age.value} "
+                f"IS_COOL:{self.is_cool.value} ({self.uid.value})"
+            )
         except Exception:  # TODO: TableNotInitialized Exception
-            return f"User UNKOWN ({self.uid.value})"
+            return f"User AGE:UNKOWN IS_COOL:UNKOWN ({self.uid.value})"
 
 
 class Database(apgorm.Database):
@@ -36,7 +41,7 @@ async def single_row() -> None:
     user_to_make = await User.fetch(uid=user_to_make.uid.value)
     print(user_to_make)
 
-    user_to_make.some_id.value = 0
+    user_to_make.age.value = 0
     await user_to_make.save()
     print(user_to_make)
 
@@ -48,17 +53,17 @@ async def many_rows() -> None:
     print("MANY ROWS:\n")
 
     for i in range(0, 10):
-        await User(some_id=i).create()
-    await User(some_id=-1).create()
+        await User(age=i).create()
+    await User(age=-1).create()
 
     print(await User.fetch_query().fetchmany())
 
     q = User.fetch_query()
-    q.where(some_id=-1)
+    q.where(age=-1)
     print(await q.fetchone())
 
     q = User.fetch_query()
-    q.where(neq(User.some_id, -1))
+    q.where(neq(User.age, -1))
     print(await q.fetchmany())
 
     await User.delete_query().execute()
