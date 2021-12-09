@@ -8,7 +8,7 @@ from .query_builder import (
     UpdateQueryBuilder,
 )
 from .render import Renderer, render
-from .sql import SQL, Block, Parameter, Raw
+from .sql import CASTED, SQL, Block, Parameter, Raw
 
 __all__ = (
     "generators",
@@ -24,4 +24,5 @@ __all__ = (
     "Block",
     "Raw",
     "SQL",
+    "CASTED",
 )
