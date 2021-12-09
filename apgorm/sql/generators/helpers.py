@@ -1,29 +1,24 @@
 from __future__ import annotations
 
-from typing import Callable, TypeVar, Union
+from typing import TypeVar, Union
 
 from apgorm.sql.sql import SQL, Block, Parameter, Raw
 
-_F = TypeVar("_F", bound=Callable[..., Block])
 _T = TypeVar("_T")
 NUM = Union[float, int]
 
 
-def parenthesis(function: _F) -> _F:
-    def wrapper(*args, **kwargs) -> Block:
-        sql = function(*args, **kwargs)
-        return Block(r("("), sql, r(")"))
-
-    return wrapper  # type: ignore
+def wrap(*pieces: SQL) -> Block:
+    return Block(*pieces, wrap=True)
 
 
-def join(joiner: SQL, *values: SQL) -> Block:
+def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
     new_values: list[SQL] = []
     for x, v in enumerate(values):
         new_values.append(v)
         if x != len(values) - 1:
             new_values.append(joiner)
-    return Block(*new_values)
+    return Block(*new_values, wrap=wrap)
 
 
 def r(string: str) -> Block:

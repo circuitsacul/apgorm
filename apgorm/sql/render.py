@@ -18,16 +18,12 @@ class Renderer:
         sql_pieces: list[str] = []
         params: list[Any] = []
 
-        for piece in sql.pieces:
+        for piece in sql.get_pieces(force_wrap=False):
             if isinstance(piece, Raw):
                 sql_pieces.append(str(piece))
-                continue
-            sql_pieces.append(f"${self.next_value_id}")
-            params.append(piece.value)
-
-        if sql_pieces[0] == "(" and sql_pieces[-1] == ")":
-            sql_pieces.pop(0)
-            sql_pieces.pop(-1)
+            else:
+                sql_pieces.append(f"${self.next_value_id}")
+                params.append(piece.value)
 
         return " ".join(sql_pieces), params
 

@@ -7,7 +7,7 @@ from apgorm.sql.sql import SQL, Block
 from apgorm.types.base_type import SqlType
 from apgorm.types.boolean import Bool
 
-from .helpers import join, parenthesis, r
+from .helpers import join, r, wrap
 
 if TYPE_CHECKING:
     from apgorm.model import Model
@@ -16,12 +16,11 @@ if TYPE_CHECKING:
 _SQLT = TypeVar("_SQLT", bound=SqlType)
 
 
-@parenthesis  # TODO: any difference between :: and CAST AS?
+# TODO: any difference between :: and CAST AS?
 def cast(param: SQL, type_: Type[_SQLT]) -> Block[_SQLT]:
-    return Block(param, r("::"), r(type_.sql_name))
+    return Block(param, r("::"), r(type_.sql_name), wrap=True)
 
 
-@parenthesis
 def select(
     from_: Model | Type[Model] | Block,
     fields: Sequence[Field | Block] | None = None,
@@ -34,7 +33,7 @@ def select(
     if fields is None:
         sql += Block(r("*"))
     else:
-        sql += Block(r("("), join(r(","), *fields), r(")"))
+        sql += join(r(","), *fields, wrap=True)
 
     tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
     sql += Block(r("FROM"), tablename)
@@ -46,10 +45,9 @@ def select(
         sql += Block(r("ORDER BY"), order_by)
         sql += r("ASC" if ascending else "DESC")
 
-    return sql
+    return wrap(sql)
 
 
-@parenthesis
 def delete(
     from_: Model | Type[Model] | Block,
     where: Block[Bool] | None = None,
@@ -58,10 +56,9 @@ def delete(
     sql = Block[Any](r("DELETE FROM"), tablename)
     if where is not None:
         sql += Block(r("WHERE"), where)
-    return sql
+    return wrap(sql)
 
 
-@parenthesis
 def update(
     table: Model | Type[Model] | Block,
     values: dict[SQL, SQL],
@@ -79,10 +76,9 @@ def update(
     if where is not None:
         sql += Block(r("WHERE"), where)
 
-    return sql
+    return wrap(sql)
 
 
-@parenthesis
 def insert(
     into: Model | Type[Model] | Block,
     fields: Sequence[Field | Block],
@@ -93,10 +89,10 @@ def insert(
 
     sql = Block[Any](r("INSERT INTO"), tablename)
     if len(fields) > 0:
-        sql += Block[Any](r("("), join(r(","), *fields), r(")"))
+        sql += join(r(","), *fields, wrap=True)
 
     if len(values) > 0:
-        sql += Block[Any](r("VALUES ("), join(r(","), *values), r(")"))
+        sql += Block[Any](r("VALUES"), join(r(","), *values, wrap=True))
     else:
         sql += Block[Any](r("DEFAULT VALUES"))
 
@@ -105,6 +101,6 @@ def insert(
         if isinstance(return_fields, (Field, Block)):
             sql += return_fields
         else:
-            sql += Block(r("("), join(r(","), *return_fields), r(")"))
+            sql += join(r(","), *return_fields, wrap=True)
 
-    return sql
+    return wrap(sql)
