@@ -77,7 +77,7 @@ class Model:
     async def fetch(cls: Type[_T], **values) -> _T:
         res = await cls.fetch_query().where(**values).fetchone()
         if res is None:
-            raise Exception("Model not found.")
+            raise Exception("Model not found.")  # TODO better exceptions
         return res
 
     @classmethod
