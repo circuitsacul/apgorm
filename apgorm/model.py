@@ -3,7 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.field import Field
-from apgorm.sql import DeleteQuery, FetchQuery, InsertQuery, UpdateQuery
+from apgorm.sql import (
+    DeleteQueryBuilder,
+    FetchQueryBuilder,
+    InsertQueryBuilder,
+    UpdateQueryBuilder,
+)
 from apgorm.types.numeric import Serial
 from apgorm.undefined import UNDEF
 
@@ -76,20 +81,20 @@ class Model:
         return res
 
     @classmethod
-    def fetch_query(cls: Type[_T]) -> FetchQuery[_T]:
-        return FetchQuery(model=cls)
+    def fetch_query(cls: Type[_T]) -> FetchQueryBuilder[_T]:
+        return FetchQueryBuilder(model=cls)
 
     @classmethod
-    def delete_query(cls: Type[_T]) -> DeleteQuery[_T]:
-        return DeleteQuery(model=cls)
+    def delete_query(cls: Type[_T]) -> DeleteQueryBuilder[_T]:
+        return DeleteQueryBuilder(model=cls)
 
     @classmethod
-    def update_query(cls: Type[_T]) -> UpdateQuery[_T]:
-        return UpdateQuery(model=cls)
+    def update_query(cls: Type[_T]) -> UpdateQueryBuilder[_T]:
+        return UpdateQueryBuilder(model=cls)
 
     @classmethod
-    def insert_query(cls: Type[_T]) -> InsertQuery[_T]:
-        return InsertQuery(model=cls)
+    def insert_query(cls: Type[_T]) -> InsertQueryBuilder[_T]:
+        return InsertQueryBuilder(model=cls)
 
     def _set_saved(self):
         for f in self.fields.values():

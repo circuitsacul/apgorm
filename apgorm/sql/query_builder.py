@@ -22,10 +22,10 @@ class Query(Generic[_T]):
         self.model = model
 
 
-_S = TypeVar("_S", bound="FilterQuery")
+_S = TypeVar("_S", bound="FilterQueryBuilder")
 
 
-class FilterQuery(Query[_T]):
+class FilterQueryBuilder(Query[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
@@ -47,7 +47,7 @@ class FilterQuery(Query[_T]):
         return self
 
 
-class FetchQuery(FilterQuery[_T]):
+class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
@@ -58,7 +58,7 @@ class FetchQuery(FilterQuery[_T]):
         self,
         field: Block | Field,
         ascending: bool = True,
-    ) -> FetchQuery[_T]:
+    ) -> FetchQueryBuilder[_T]:
         self.order_by_field = field
         self.ascending = ascending
         return self
@@ -86,19 +86,19 @@ class FetchQuery(FilterQuery[_T]):
         return self.model(**res)
 
 
-class DeleteQuery(FilterQuery[_T]):
+class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     async def execute(self):
         query, params = render(delete(self.model, self.where_logic()))
         await self.model.database.execute(query, params)
 
 
-class UpdateQuery(FilterQuery[_T]):
+class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
         self.set_values: dict[Block, SQL] = {}
 
-    def set(self, **values: SQL) -> UpdateQuery[_T]:
+    def set(self, **values: SQL) -> UpdateQueryBuilder[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
@@ -113,18 +113,18 @@ class UpdateQuery(FilterQuery[_T]):
         await self.model.database.execute(query, params)
 
 
-class InsertQuery(Query[_T]):
+class InsertQueryBuilder(Query[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
         self.set_values: dict[Block, SQL] = {}
         self.fields_to_return: list[Block | Field] = []
 
-    def set(self, **values: SQL) -> InsertQuery[_T]:
+    def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    def return_fields(self, *fields: Block | Field) -> InsertQuery[_T]:
+    def return_fields(self, *fields: Block | Field) -> InsertQueryBuilder[_T]:
         self.fields_to_return.extend(fields)
         return self
 

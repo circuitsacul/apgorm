@@ -1,11 +1,11 @@
 from . import generators
 from .query_builder import (
-    DeleteQuery,
-    FetchQuery,
-    FilterQuery,
-    InsertQuery,
+    DeleteQueryBuilder,
+    FetchQueryBuilder,
+    FilterQueryBuilder,
+    InsertQueryBuilder,
     Query,
-    UpdateQuery,
+    UpdateQueryBuilder,
 )
 from .render import Renderer, render
 from .sql import SQL, Block, Parameter, Raw
@@ -13,11 +13,11 @@ from .sql import SQL, Block, Parameter, Raw
 __all__ = (
     "generators",
     "Query",
-    "FilterQuery",
-    "FetchQuery",
-    "InsertQuery",
-    "UpdateQuery",
-    "DeleteQuery",
+    "FilterQueryBuilder",
+    "FetchQueryBuilder",
+    "InsertQueryBuilder",
+    "UpdateQueryBuilder",
+    "DeleteQueryBuilder",
     "render",
     "Renderer",
     "Parameter",
