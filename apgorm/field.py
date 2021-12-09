@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, Union
 
+from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
 from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
@@ -53,14 +54,13 @@ class Field(Generic[_F, _T]):
     @property
     def value(self) -> _T:
         if self._value is UNDEF.UNDEF:
-            raise Exception("Table not initialized.")  # TODO
+            raise UndefinedFieldValue(self)
         return self._value
 
     @value.setter
     def value(self, other: _T):
         if self.read_only:
-            # TODO
-            raise Exception(f"Field {self.full_name} is read-only.")
+            raise ReadOnlyField(self)
         self._value = other
         self.changed = True
 

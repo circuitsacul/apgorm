@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import apgorm
+from apgorm.exceptions import UndefinedFieldValue
 from apgorm.sql.generators.comp import lt
 from apgorm.types.boolean import Boolean
 from apgorm.types.numeric import Integer
@@ -20,7 +21,7 @@ class User(apgorm.Model):
                 f"User AGE:{self.age.value} "
                 f"IS_COOL:{self.is_cool.value} ({self.uid.value})"
             )
-        except Exception:  # TODO: TableNotInitialized Exception
+        except UndefinedFieldValue:
             return f"User AGE:UNKOWN IS_COOL:UNKOWN ({self.uid.value})"
 
 

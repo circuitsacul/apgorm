@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
+from apgorm.exceptions import ModelNotFound
 from apgorm.field import Field
 from apgorm.sql import (
     DeleteQueryBuilder,
@@ -77,7 +78,7 @@ class Model:
     async def fetch(cls: Type[_T], **values) -> _T:
         res = await cls.fetch_query().where(**values).fetchone()
         if res is None:
-            raise Exception("Model not found.")  # TODO better exceptions
+            raise ModelNotFound(cls, values)
         return res
 
     @classmethod
