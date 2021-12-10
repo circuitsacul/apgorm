@@ -102,11 +102,7 @@ class Model:
             f.changed = False
 
     def _get_changed_fields(self) -> list[Field]:
-        fields: list[Field] = []
-        for f in self.fields.values():
-            if f.changed:
-                fields.append(f)
-        return fields
+        return [f for f in self.fields.values() if f.changed]
 
     @classmethod
     def _special_attrs(cls) -> tuple[dict[str, Field], dict[str, Constraint]]:
