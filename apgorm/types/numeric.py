@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Type, TypeVar, Union
+from decimal import Decimal
+from typing import TypeVar, Union
 
 from apgorm.field import Field
 from apgorm.sql.sql import Block
@@ -30,11 +31,8 @@ class BigInt(SqlType[int]):
     sql_name = "BIGINT"
 
 
-class Numeric(SqlType[int]):
+class Numeric(SqlType[Decimal]):
     sql_name = "NUMERIC"
-
-
-Decimal = Numeric
 
 
 class Real(SqlType[float]):
