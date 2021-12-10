@@ -62,16 +62,15 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 
 
 class _BaseSerial(SqlType[int]):
-    @classmethod
     def field(  # type: ignore
-        cls: Type[_S],
+        self: _S,
         pk: bool = False,
         unique: bool = False,
         references: Block | Field | None = None,
         read_only: bool = False,
     ) -> SerialField:
         return SerialField(
-            sql_type=cls(),
+            sql_type=self,
             not_null=True,
             pk=pk,
             unique=unique,
@@ -79,16 +78,15 @@ class _BaseSerial(SqlType[int]):
             references=references,
         )
 
-    @classmethod
     def nullfield(  # type: ignore
-        cls: Type[_S],
+        self: _S,
         pk: bool = False,
         unique: bool = False,
         references: Block | Field | None = None,
         read_only: bool = False,
     ) -> SerialField:
         return SerialField(
-            sql_type=cls(),
+            sql_type=self,
             not_null=False,
             pk=pk,
             unique=unique,

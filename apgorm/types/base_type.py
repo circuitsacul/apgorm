@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic, Type, TypeVar
+from typing import Generic, TypeVar
 
 from apgorm.field import Field
 from apgorm.sql.sql import SQL, Block
@@ -13,9 +13,8 @@ _S = TypeVar("_S", bound="SqlType", covariant=True)
 class SqlType(Generic[_T]):
     sql_name: str
 
-    @classmethod
     def field(
-        cls: Type[_S],
+        self: _S,
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
@@ -23,7 +22,7 @@ class SqlType(Generic[_T]):
         read_only: bool = False,
     ) -> Field[_S, _T]:
         return Field(
-            sql_type=cls(),
+            sql_type=self,
             default=default,
             not_null=True,
             pk=pk,
@@ -32,9 +31,8 @@ class SqlType(Generic[_T]):
             references=references,
         )
 
-    @classmethod
     def nullfield(
-        cls: Type[_S],
+        self: _S,
         default: SQL[_T | None] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
@@ -42,7 +40,7 @@ class SqlType(Generic[_T]):
         read_only: bool = False,
     ) -> Field[_S, _T | None]:
         return Field(
-            sql_type=cls(),
+            sql_type=self,
             default=default,
             not_null=False,
             pk=pk,

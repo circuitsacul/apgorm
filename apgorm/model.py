@@ -26,7 +26,7 @@ class Model:
     tablename: str
     database: Database  # populated by Database
 
-    uid = Serial.field(pk=True, read_only=True)
+    uid = Serial().field(pk=True, read_only=True)
 
     def __init__(self, **values):
         if "uid" in values:

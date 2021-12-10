@@ -12,8 +12,8 @@ from apgorm.types.numeric import Integer
 class User(apgorm.Model):
     tablename = "users"
 
-    age = Integer.field(default=0)
-    is_cool = Boolean.field(default=False)
+    age = Integer().field(default=0)
+    is_cool = Boolean().field(default=False)
 
     def __repr__(self) -> str:
         try:
