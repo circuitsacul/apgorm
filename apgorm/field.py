@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
 from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
 from apgorm.undefined import UNDEF
@@ -14,9 +14,6 @@ if TYPE_CHECKING:
 
 _T = TypeVar("_T")
 _F = TypeVar("_F", bound="SqlType")
-
-_MI = TypeVar("_MI")
-MAYBEINST = Union[Type[_MI], _MI]
 
 
 class Field(Generic[_F, _T]):
