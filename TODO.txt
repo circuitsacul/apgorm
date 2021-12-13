@@ -1,0 +1,15 @@
+TYPES:
+ - range types
+ - text search types
+ - domain types
+ - enum types
+ - composite types
+ - oid types https://www.postgresql.org/docs/14/datatype-oid.html
+ - psuedo types
+
+UPPER
+ - indexes
+ - functions
+ - domain types
+ - enums
+ - composite types
