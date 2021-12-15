@@ -30,7 +30,7 @@ from .base_type import SqlType
 class Bit(SqlType[asyncpg.BitString]):
     def __init__(self, n: int):
         self._n = n
-        self.sql = f"BIT[{n}]"
+        self.sql = f"BIT({n})"
 
     @property
     def n(self) -> int:
@@ -40,7 +40,7 @@ class Bit(SqlType[asyncpg.BitString]):
 class VarBit(SqlType[asyncpg.BitString]):
     def __init__(self, n: int):
         self._n = n
-        self.sql = f"BIT VARYING[{n}]"
+        self.sql = f"BIT VARYING({n})"
 
     @property
     def n(self) -> int:

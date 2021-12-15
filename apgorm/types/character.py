@@ -28,7 +28,7 @@ from .base_type import SqlType
 class VarChar(SqlType[str]):
     def __init__(self, n: int):
         self._n = n
-        self.sql = f"VARCHAR[{n}]"
+        self.sql = f"VARCHAR({n})"
 
     @property
     def n(self) -> int:
@@ -38,7 +38,7 @@ class VarChar(SqlType[str]):
 class Char(SqlType[str]):
     def __init__(self, n: int):
         self._n = n
-        self.sql = f"CHAR[{n}]"
+        self.sql = f"CHAR({n})"
 
     @property
     def n(self) -> int:
