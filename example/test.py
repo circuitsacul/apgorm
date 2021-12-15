@@ -66,8 +66,8 @@ async def main():
 
     head()
     ages = [3, 9, 2, 16]
-    is_cool = [True, True, False, True]
-    for age, is_cool in zip(ages, is_cool):
+    is_cools = [True, True, False, True]
+    for age, is_cool in zip(ages, is_cools):
         await User(age=age, is_cool=is_cool).create()
 
     head()
