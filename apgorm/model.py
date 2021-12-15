@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
+from apgorm.describe import ModelDesc
 from apgorm.exceptions import ModelNotFound
 from apgorm.field import Field
 from apgorm.sql import (
@@ -55,8 +56,9 @@ class Model:
             self.uid._value = values["uid"]
 
         self.fields: dict[str, Field[Any, Any]] = {}
+        self.constraints: dict[str, Constraint] = {}
 
-        all_fields, _ = self._special_attrs()
+        all_fields, all_constraints = self._special_attrs()
         for f in all_fields.values():
             f = f.copy()
             self.fields[f.name] = f
@@ -66,6 +68,9 @@ class Model:
             if value is UNDEF.UNDEF:
                 continue
             f._value = value
+
+        for c in all_constraints.values():
+            self.constraints[c.name] = c
 
     async def delete(self):
         await self.delete_query().where(uid=self.uid.value).execute()
