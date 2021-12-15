@@ -67,13 +67,13 @@ class DoublePrecision(SqlType[float]):
 
 class SerialField(Field["_BaseSerial", Union[int, None]]):
     @property
-    def value(self) -> int | None:
+    def v(self) -> int | None:
         if self._value is UNDEF.UNDEF:
             return None
         return self._value
 
-    @value.setter
-    def value(self, other: int):
+    @v.setter
+    def v(self, other: int):
         self._value = other
         self.changed = True
 

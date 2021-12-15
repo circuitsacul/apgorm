@@ -80,13 +80,13 @@ class Field(Generic[_F, _T]):
         return f"{self.model.tablename}.{self.name}"
 
     @property
-    def value(self) -> _T:
+    def v(self) -> _T:
         if self._value is UNDEF.UNDEF:
             raise UndefinedFieldValue(self)
         return self._value
 
-    @value.setter
-    def value(self, other: _T):
+    @v.setter
+    def v(self, other: _T):
         if self.read_only:
             raise ReadOnlyField(self)
         self._value = other

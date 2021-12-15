@@ -42,13 +42,12 @@ class User(apgorm.Model):
     def __repr__(self) -> str:
         try:
             return (
-                f"User NAME:{self.username.value} AGE:{self.age.value} "
-                f"IS_COOL:{self.is_cool.value} ({self.uid.value})"
+                f"User NAME:{self.username.v} AGE:{self.age.v} "
+                f"IS_COOL:{self.is_cool.v} ({self.uid.v})"
             )
         except UndefinedFieldValue:
             return (
-                "User NAME:UNKOWN AGE:UNKOWN IS_COOL:UNKOWN "
-                f"({self.uid.value})"
+                "User NAME:UNKOWN AGE:UNKOWN IS_COOL:UNKOWN " f"({self.uid.v})"
             )
 
 
@@ -76,7 +75,7 @@ async def _main(db: Database):
     print(user)
     await user.create()
     print(user)
-    user.username.value = "CircuitSacul"
+    user.username.v = "CircuitSacul"
     await user.save()
     print(user)
     await user.delete()
@@ -101,7 +100,7 @@ async def _main(db: Database):
 
     head()
     for user in young_users:
-        user.age.value = 11
+        user.age.v = 11
         await user.save()
 
     head()

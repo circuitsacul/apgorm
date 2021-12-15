@@ -82,12 +82,12 @@ class Model:
         )
 
     async def delete(self):
-        await self.delete_query().where(uid=self.uid.value).execute()
+        await self.delete_query().where(uid=self.uid.v).execute()
 
     async def save(self):
         changed_fields = self._get_changed_fields()
-        q = self.update_query().where(uid=self.uid.value)
-        q.set(**{f.name: f.value for f in changed_fields})
+        q = self.update_query().where(uid=self.uid.v)
+        q.set(**{f.name: f.v for f in changed_fields})
         await q.execute()
         self._set_saved()
 
@@ -95,7 +95,7 @@ class Model:
         q = self.insert_query()
         q.set(
             **{
-                f.name: f.value
+                f.name: f.v
                 for f in self.fields.values()
                 if f._value is not UNDEF.UNDEF
             }
