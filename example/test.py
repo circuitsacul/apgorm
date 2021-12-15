@@ -27,7 +27,9 @@ import asyncio
 import apgorm
 from apgorm.exceptions import UndefinedFieldValue
 from apgorm.sql.generators.comp import lt
+from apgorm.sql.generators.query import cast
 from apgorm.types.boolean import Boolean
+from apgorm.types.character import VarChar
 from apgorm.types.numeric import Integer
 
 
@@ -36,15 +38,19 @@ class User(apgorm.Model):
 
     age = Integer().field(default=0)
     is_cool = Boolean().field(default=False)
+    username = VarChar(32).field(default="unamed")
 
     def __repr__(self) -> str:
         try:
             return (
-                f"User AGE:{self.age.value} "
+                f"User NAME:{self.username.value} AGE:{self.age.value} "
                 f"IS_COOL:{self.is_cool.value} ({self.uid.value})"
             )
         except UndefinedFieldValue:
-            return f"User AGE:UNKOWN IS_COOL:UNKOWN ({self.uid.value})"
+            return (
+                "User NAME:UNKOWN AGE:UNKOWN IS_COOL:UNKOWN "
+                f"({self.uid.value})"
+            )
 
 
 class Database(apgorm.Database):
@@ -70,6 +76,9 @@ async def _main(db: Database):
     user = User(age=3, is_cool=True)
     print(user)
     await user.create()
+    print(user)
+    user.username.value = "CircuitSacul"
+    await user.save()
     print(user)
     await user.delete()
 
