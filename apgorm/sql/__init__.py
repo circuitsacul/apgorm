@@ -29,8 +29,7 @@ from .query_builder import (
     Query,
     UpdateQueryBuilder,
 )
-from .render import Renderer, render
-from .sql import CASTED, SQL, Block, Parameter, Raw
+from .sql import CASTED, SQL, Block, Parameter, Raw, Renderer
 
 __all__ = (
     "generators",
@@ -40,7 +39,6 @@ __all__ = (
     "InsertQueryBuilder",
     "UpdateQueryBuilder",
     "DeleteQueryBuilder",
-    "render",
     "Renderer",
     "Parameter",
     "Block",
