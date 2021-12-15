@@ -27,7 +27,6 @@ import asyncio
 import apgorm
 from apgorm.exceptions import UndefinedFieldValue
 from apgorm.sql.generators.comp import lt
-from apgorm.sql.generators.query import cast
 from apgorm.types.boolean import Boolean
 from apgorm.types.character import VarChar
 from apgorm.types.numeric import Integer
