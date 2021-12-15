@@ -28,4 +28,4 @@ from .base_type import SqlType
 
 
 class UUID(SqlType[uuid.UUID]):
-    sql_name = "UUID"
+    sql = "UUID"

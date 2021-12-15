@@ -40,7 +40,7 @@ _SQLT = TypeVar("_SQLT", bound=SqlType)
 
 # TODO: any difference between :: and CAST AS?
 def cast(param: SQL, type_: Type[_SQLT]) -> Block[_SQLT]:
-    return Block(param, r("::"), r(type_.sql_name), wrap=True)
+    return Block(param, r("::"), r(type_.sql), wrap=True)
 
 
 def select(

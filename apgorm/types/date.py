@@ -28,20 +28,20 @@ from .base_type import SqlType
 
 
 class Timestamp(SqlType[datetime.datetime]):
-    sql_name = "TIMESTAMP"
+    sql = "TIMESTAMP"
 
 
 class TimestampZ(SqlType[datetime.datetime]):
-    sql_name = "TIMESTAMP WITH TIME ZONE"
+    sql = "TIMESTAMP WITH TIME ZONE"
 
 
 class Time(SqlType[datetime.time]):
-    sql_name = "TIME"
+    sql = "TIME"
 
 
 class TimeZ(SqlType[datetime.time]):
-    sql_name = "TIME WITH TIME ZONE"
+    sql = "TIME WITH TIME ZONE"
 
 
 class Interval(SqlType[datetime.timedelta]):
-    sql_name = "TIMEDELTA"
+    sql = "TIMEDELTA"  # TODO: parameters?

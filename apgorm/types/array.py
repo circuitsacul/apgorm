@@ -30,24 +30,33 @@ _T = TypeVar("_T", bound=SqlType)
 
 
 class Array(SqlType["list[_T]"]):
-    # NOTE: must initialize Array to get sql_name
-
     def __init__(self, type_: _T, size: int | None = None):
-        self.type_ = type_
-        self.size = size
+        self._type_ = type_
+        self._size = size
 
         def _get_arrays(
-            t: SqlType, depth: int = 1, arrays: list[Array] | None = None
-        ) -> tuple[int, list[Array], SqlType]:
+            t: SqlType, arrays: list[Array] | None = None
+        ) -> tuple[list[Array], SqlType]:
             arrays = arrays or []
             if isinstance(t, Array):
                 arrays.append(t)
-                return _get_arrays(t.type_, depth=depth + 1, arrays=arrays)
+                return _get_arrays(t.type_, arrays=arrays)
             else:
-                return depth, arrays, t
+                return arrays, t
 
-        dimensions, arrays, final = _get_arrays(self.type_)
+        arrays, final = _get_arrays(self)
 
-        self.sql_name = (
-            final.sql_name + "[]" * dimensions
-        )  # FIXME: include size
+        self.sql = final.sql + "".join(
+            [
+                ("[]" if a.size is None else f"[{a.size}]")
+                for a in reversed(arrays)
+            ]
+        )
+
+    @property
+    def size(self) -> int | None:
+        return self._size
+
+    @property
+    def type_(self) -> _T:
+        return self._type_

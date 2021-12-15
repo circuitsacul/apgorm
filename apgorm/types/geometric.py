@@ -28,28 +28,28 @@ from .base_type import SqlType
 
 
 class Point(SqlType[asyncpg.Point]):
-    sql_name = "POINT"
+    sql = "POINT"
 
 
 class Line(SqlType[asyncpg.Line]):
-    sql_name = "LINE"
+    sql = "LINE"
 
 
 class LineSegment(SqlType[asyncpg.LineSegment]):
-    sql_name = "LSEG"
+    sql = "LSEG"
 
 
 class Box(SqlType[asyncpg.Box]):
-    sql_name = "BOX"
+    sql = "BOX"
 
 
 class Path(SqlType[asyncpg.Path]):
-    sql_name = "PATH"
+    sql = "PATH"
 
 
 class Polygon(SqlType[asyncpg.Polygon]):
-    sql_name = "POLYGON"
+    sql = "POLYGON"
 
 
 class Circle(SqlType[asyncpg.Circle]):
-    sql_name = "CIRCLE"
+    sql = "CIRCLE"

@@ -29,7 +29,7 @@ from .base_type import SqlType
 
 
 class CIDR(SqlType[Union[ipaddr.IPv4Network, ipaddr.IPv6Network]]):
-    sql_name = "CIDR"
+    sql = "CIDR"
 
 
 class INET(
@@ -42,12 +42,12 @@ class INET(
         ]
     ]
 ):
-    sql_name = "INET"
+    sql = "INET"
 
 
 class MacAddr(SqlType[str]):
-    sql_name = "MACADDR"
+    sql = "MACADDR"
 
 
 class MacAddr8(SqlType[str]):
-    sql_name = "MACADDR8"
+    sql = "MACADDR8"
