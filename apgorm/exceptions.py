@@ -44,9 +44,9 @@ class ApgormException(ApgormBaseException):
 
 
 class UndefinedFieldValue(ApgormException):
-    """Raised when try to get the value for a field that is undefined.
+    """Raised if you try to get the value for a field that is undefined.
 
-    Usually means that the model has not been fetched, saved, or created."""
+    Usually means that the model has not been created."""
 
     def __init__(self, field: Field):
         self.field = field
