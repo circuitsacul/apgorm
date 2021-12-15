@@ -1,6 +1,9 @@
 [tool.black]
 line-length=79
 
+[tool.flake8]
+extend-ignore="E203"
+
 [tool.poetry]
 name = "apgorm"
 version = "0.1.0"
