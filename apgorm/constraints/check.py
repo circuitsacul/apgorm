@@ -24,6 +24,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from apgorm.sql.generators.helpers import r
+
 from .constraint import Constraint
 
 if TYPE_CHECKING:
@@ -34,3 +36,6 @@ if TYPE_CHECKING:
 class Check(Constraint):
     def __init__(self, check: Block[Bool]):
         self.check = check
+
+    def creation_sql(self) -> Block:
+        return Block(r("CHECK"), self.check)

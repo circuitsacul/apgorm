@@ -75,6 +75,9 @@ class Block(Generic[_SQLT]):
                 else:
                     self._pieces.append(Parameter(p))
 
+    def render(self) -> tuple[str, list[Any]]:
+        return Renderer().render(self)
+
     def get_pieces(
         self, force_wrap: bool | None = None
     ) -> list[Raw | Parameter]:
@@ -94,3 +97,26 @@ class Block(Generic[_SQLT]):
             raise TypeError
 
         return self
+
+
+class Renderer:
+    def __init__(self):
+        self._curr_value_id: int = 0
+
+    @property
+    def next_value_id(self) -> int:
+        self._curr_value_id += 1
+        return self._curr_value_id
+
+    def render(self, sql: Block) -> tuple[str, list[Any]]:
+        sql_pieces: list[str] = []
+        params: list[Any] = []
+
+        for piece in sql.get_pieces(force_wrap=False):
+            if isinstance(piece, Raw):
+                sql_pieces.append(str(piece))
+            else:
+                sql_pieces.append(f"${self.next_value_id}")
+                params.append(piece.value)
+
+        return " ".join(sql_pieces), params

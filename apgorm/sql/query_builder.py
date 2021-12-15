@@ -29,7 +29,6 @@ from apgorm.field import Field
 from .generators.comp import and_, eq
 from .generators.helpers import r
 from .generators.query import delete, insert, select, update
-from .render import render
 from .sql import SQL, Block
 
 if TYPE_CHECKING:
@@ -86,14 +85,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         return self
 
     def _fetch_query(self) -> tuple[str, list[Any]]:
-        return render(
-            select(
-                from_=self.model,
-                where=self.where_logic(),
-                order_by=self.order_by_field,
-                ascending=self.ascending,
-            )
-        )
+        return select(
+            from_=self.model,
+            where=self.where_logic(),
+            order_by=self.order_by_field,
+            ascending=self.ascending,
+        ).render()
 
     async def fetchmany(self) -> list[_T]:
         query, params = self._fetch_query()
@@ -110,7 +107,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     async def execute(self):
-        query, params = render(delete(self.model, self.where_logic()))
+        query, params = delete(self.model, self.where_logic()).render()
         await self.model.database.execute(query, params)
 
 
@@ -125,13 +122,11 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         return self
 
     async def execute(self):
-        query, params = render(
-            update(
-                self.model,
-                {k: v for k, v in self.set_values.items()},
-                where=self.where_logic(),
-            )
-        )
+        query, params = update(
+            self.model,
+            {k: v for k, v in self.set_values.items()},
+            where=self.where_logic(),
+        ).render()
         await self.model.database.execute(query, params)
 
 
@@ -154,12 +149,10 @@ class InsertQueryBuilder(Query[_T]):
         value_names = [n for n in self.set_values.keys()]
         value_values = [v for v in self.set_values.values()]
 
-        query, params = render(
-            insert(
-                self.model,
-                value_names,
-                value_values,
-                return_fields=self.fields_to_return or None,
-            )
-        )
+        query, params = insert(
+            self.model,
+            value_names,
+            value_values,
+            return_fields=self.fields_to_return or None,
+        ).render()
         return await self.model.database.fetchval(query, params)

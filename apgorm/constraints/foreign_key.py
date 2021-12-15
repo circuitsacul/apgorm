@@ -25,6 +25,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Sequence
 
+from apgorm.sql.generators.helpers import join, r
 from apgorm.sql.sql import Block
 
 from .constraint import Constraint
@@ -53,3 +54,11 @@ class ForeignKey(Constraint):
         self.match_full = match_full
         self.on_delete = on_delete
         self.on_update = on_update
+
+    def creation_sql(self) -> Block:
+        return Block(
+            r("FOREIGN KEY ("),
+            join(r(","), self.fields),
+            r(") REFERENCES ("),
+            join(r(","), self.ref_fields),
+        )

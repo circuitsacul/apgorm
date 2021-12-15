@@ -64,6 +64,9 @@ async def _main(db: Database):
     def head():
         print("#" * 50 + "\n")
 
+    print(db.describe())
+
+    head()
     user = User(age=3, is_cool=True)
     print(user)
     await user.create()
