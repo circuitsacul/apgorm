@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Type
 
 import asyncpg
@@ -59,6 +60,10 @@ class Database:
 
     async def connect(self, **connect_kwargs):
         self.pool = await asyncpg.create_pool(**connect_kwargs)
+
+    async def cleanup(self, timeout: float = 30):
+        if self.pool is not None:
+            await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
     async def execute(self, query: str, args: list[Any]):
         print(query, args)

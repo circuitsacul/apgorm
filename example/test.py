@@ -52,11 +52,17 @@ class Database(apgorm.Database):
 
 
 async def main():
-    def head():
-        print("#" * 50 + "\n")
-
     db = Database()
     await db.connect(database="apgorm")
+    try:
+        await _main(db)
+    finally:
+        await db.cleanup()
+
+
+async def _main(db: Database):
+    def head():
+        print("#" * 50 + "\n")
 
     user = User(age=3, is_cool=True)
     print(user)
