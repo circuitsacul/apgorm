@@ -24,6 +24,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Sequence
 
+from apgorm.sql.generators.helpers import join, r
+
 from .constraint import Constraint
 
 if TYPE_CHECKING:
@@ -34,3 +36,6 @@ if TYPE_CHECKING:
 class PrimaryKey(Constraint):
     def __init__(self, fields: Sequence[Field | Block]):
         self.fields = fields
+
+    def creation_sql(self) -> Block:
+        return Block(r("PRIMARY KEY ("), join(r(","), self.fields), r(")"))

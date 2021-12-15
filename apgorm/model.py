@@ -72,6 +72,15 @@ class Model:
         for c in all_constraints.values():
             self.constraints[c.name] = c
 
+    @classmethod
+    def describe(cls) -> ModelDesc:
+        fields, constraints = cls._special_attrs()
+        return ModelDesc(
+            cls.tablename,
+            {f.name: f.describe() for f in fields.values()},
+            {c.name: c.describe() for c in constraints.values()},
+        )
+
     async def delete(self):
         await self.delete_query().where(uid=self.uid.value).execute()
 

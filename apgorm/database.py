@@ -27,6 +27,8 @@ from typing import Any, Type
 
 import asyncpg
 
+from apgorm.describe import DatabaseDesc
+
 from .model import Model
 
 
@@ -57,6 +59,9 @@ class Database:
                 constraint.name = name
 
         self.pool: asyncpg.Pool | None = None
+
+    def describe(self) -> DatabaseDesc:
+        return DatabaseDesc({m.tablename: m.describe() for m in self.models})
 
     async def connect(self, **connect_kwargs):
         self.pool = await asyncpg.create_pool(**connect_kwargs)
