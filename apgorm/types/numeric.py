@@ -39,30 +39,30 @@ NUMBER = Union[INT, FLOAT, SERIAL]
 
 
 class SmallInt(SqlType[int]):
-    sql_name = "SMALLINT"
+    sql = "SMALLINT"
 
 
 class Int(SqlType[int]):
-    sql_name = "INTEGER"
+    sql = "INTEGER"
 
 
 Integer = Int
 
 
 class BigInt(SqlType[int]):
-    sql_name = "BIGINT"
+    sql = "BIGINT"
 
 
 class Numeric(SqlType[Decimal]):
-    sql_name = "NUMERIC"
+    sql = "NUMERIC"
 
 
 class Real(SqlType[float]):
-    sql_name = "REAL"
+    sql = "REAL"
 
 
 class DoublePrecision(SqlType[float]):
-    sql_name = "DOUBLE PRECISION"
+    sql = "DOUBLE PRECISION"
 
 
 class SerialField(Field["_BaseSerial", Union[int, None]]):
@@ -116,12 +116,12 @@ class _BaseSerial(SqlType[int]):
 
 
 class SmallSerial(_BaseSerial):
-    sql_name = "SMALLSERIAL"
+    sql = "SMALLSERIAL"
 
 
 class Serial(_BaseSerial):
-    sql_name = "SERIAL"
+    sql = "SERIAL"
 
 
 class BigSerial(_BaseSerial):
-    sql_name = "BIGSERIAL"
+    sql = "BIGSERIAL"

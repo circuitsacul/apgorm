@@ -35,7 +35,7 @@ _S = TypeVar("_S", bound="SqlType", covariant=True)
 
 
 class SqlType(Generic[_T]):
-    sql_name: str
+    sql: str
 
     def field(
         self: _S,
@@ -74,4 +74,4 @@ class SqlType(Generic[_T]):
         )
 
     def describe(self) -> TypeDesc:
-        return TypeDesc(r(self.sql_name))
+        return TypeDesc(r(self.sql))

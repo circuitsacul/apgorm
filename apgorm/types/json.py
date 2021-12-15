@@ -26,8 +26,8 @@ from .base_type import SqlType
 
 
 class Json(SqlType[str]):
-    sql_name = "JSON"
+    sql = "JSON"
 
 
 class JsonB(SqlType[str]):
-    sql_name = "JSON"
+    sql = "JSONB"

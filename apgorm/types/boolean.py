@@ -26,7 +26,7 @@ from .base_type import SqlType
 
 
 class Boolean(SqlType[bool]):
-    sql_name = "BOOLEAN"
+    sql = "BOOLEAN"
 
 
 Bool = Boolean
