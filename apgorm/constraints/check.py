@@ -38,4 +38,10 @@ class Check(Constraint):
         self.check = check
 
     def creation_sql(self) -> Block:
-        return Block(r("CHECK"), self.check)
+        return Block(
+            r("CONSTRAINT"),
+            r(self.name),
+            r("CHECK"),
+            self.check,
+            wrap=True,
+        )

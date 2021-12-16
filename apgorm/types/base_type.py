@@ -24,9 +24,7 @@ from __future__ import annotations
 
 from typing import Generic, TypeVar
 
-from apgorm.describe import TypeDesc
 from apgorm.field import Field
-from apgorm.sql.generators.helpers import r
 from apgorm.sql.sql import SQL
 from apgorm.undefined import UNDEF
 
@@ -72,6 +70,3 @@ class SqlType(Generic[_T]):
             read_only=read_only,
             references=references,
         )
-
-    def describe(self) -> TypeDesc:
-        return TypeDesc(r(self.sql))

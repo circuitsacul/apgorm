@@ -20,22 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from apgorm.describe import ConstraintDesc
 from apgorm.sql import Block
-from apgorm.sql.generators.helpers import r
 
 
 class Constraint:
     name: str  # populated by database
-
-    def describe(self) -> ConstraintDesc:
-        return ConstraintDesc(
-            Block(
-                r(f"CONSTRAINT {self.name}"),
-                self.creation_sql(),
-                wrap=True,
-            )
-        )
 
     def creation_sql(self) -> Block:
         raise NotImplementedError

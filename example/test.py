@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import asyncio
+from pprint import pprint
 
 import apgorm
 from apgorm.exceptions import UndefinedFieldValue
@@ -66,7 +67,7 @@ async def _main(db: Database):
     def head():
         print("#" * 50 + "\n")
 
-    print(db.describe())
+    pprint(db.describe())
 
     head()
     user = User(age=3, is_cool=True)

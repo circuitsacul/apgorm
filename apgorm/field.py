@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
-from apgorm.describe import FieldDesc
 from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
 from apgorm.undefined import UNDEF
 
@@ -67,13 +66,19 @@ class Field(Generic[_F, _T]):
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
 
-    def describe(self) -> FieldDesc:
-        return FieldDesc(
-            self.name,
-            self.default,
-            self.not_null,
-            self.sql_type.describe(),
-        )
+    def describe(self) -> dict[str, Any]:
+        ret: dict[str, Any] = {
+            "not_null": self.not_null,
+            "pk": self.pk,
+            "unique": self.unique,
+            "type": self.sql_type.sql,
+        }
+        if self.default is not UNDEF.UNDEF:
+            ret["default"] = self.default
+        if self.references is not None:
+            ret["references"] = self.references
+
+        return ret
 
     @property
     def full_name(self) -> str:
