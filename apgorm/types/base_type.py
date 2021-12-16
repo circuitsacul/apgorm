@@ -51,7 +51,7 @@ class SqlType(Generic[_T]):
             read_only=read_only,
         )
 
-    def nullfield(
+    def nullablefield(
         self: _S,
         default: SQL[_T | None] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,

@@ -98,7 +98,7 @@ class _BaseSerial(SqlType[int]):
             read_only=read_only,
         )
 
-    def nullfield(  # type: ignore
+    def nullablefield(  # type: ignore
         self: _S,
         pk: bool = False,
         unique: bool = False,
