@@ -22,27 +22,33 @@
 
 from __future__ import annotations
 
+from apgorm.undefined import UNDEF
+
 from .base_type import SqlType
 
 
 class VarChar(SqlType[str]):
-    def __init__(self, n: int):
-        self._n = n
-        self.sql = f"VARCHAR({n})"
+    def __init__(self, max_length: int | UNDEF = UNDEF.UNDEF):
+        self._max_length = max_length
+        self.sql = "VARCHAR"
+        if max_length is not UNDEF.UNDEF:
+            self.sql += f"({max_length})"
 
     @property
-    def n(self) -> int:
-        return self._n
+    def max_length(self) -> int | UNDEF:
+        return self._max_length
 
 
 class Char(SqlType[str]):
-    def __init__(self, n: int):
-        self._n = n
-        self.sql = f"CHAR({n})"
+    def __init__(self, max_length: int | UNDEF = UNDEF.UNDEF):
+        self._max_length = max_length
+        self.sql = "CHAR"
+        if max_length is not UNDEF.UNDEF:
+            self.sql += f"({max_length})"
 
     @property
-    def n(self) -> int:
-        return self._n
+    def max_length(self) -> int | UNDEF:
+        return self._max_length
 
 
 class Text(SqlType[str]):
