@@ -27,7 +27,6 @@ from typing import TypeVar, Union
 
 from apgorm.field import Field
 from apgorm.sql.sql import Block
-from apgorm.undefined import UNDEF
 
 from .base_type import SqlType
 
@@ -65,19 +64,6 @@ class DoublePrecision(SqlType[float]):
     sql = "DOUBLE PRECISION"
 
 
-class SerialField(Field["_BaseSerial", Union[int, None]]):
-    @property
-    def v(self) -> int | None:
-        if self._value is UNDEF.UNDEF:
-            return None
-        return self._value
-
-    @v.setter
-    def v(self, other: int):
-        self._value = other
-        self.changed = True
-
-
 _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 
 
@@ -88,8 +74,8 @@ class _BaseSerial(SqlType[int]):
         unique: bool = False,
         references: Block | Field | None = None,
         read_only: bool = False,
-    ) -> SerialField:
-        return SerialField(
+    ) -> Field[_S, int]:
+        return Field(
             sql_type=self,
             not_null=True,
             pk=pk,
@@ -104,8 +90,8 @@ class _BaseSerial(SqlType[int]):
         unique: bool = False,
         references: Block | Field | None = None,
         read_only: bool = False,
-    ) -> SerialField:
-        return SerialField(
+    ) -> Field[_S, int]:
+        return Field(
             sql_type=self,
             not_null=False,
             pk=pk,

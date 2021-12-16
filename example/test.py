@@ -46,9 +46,7 @@ class User(apgorm.Model):
                 f"IS_COOL:{self.is_cool.v} ({self.uid.v})"
             )
         except UndefinedFieldValue:
-            return (
-                "User NAME:UNKOWN AGE:UNKOWN IS_COOL:UNKOWN " f"({self.uid.v})"
-            )
+            return "Unkown User"
 
 
 class Database(apgorm.Database):

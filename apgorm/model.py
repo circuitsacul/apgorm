@@ -52,9 +52,6 @@ class Model:
     uid = Serial().field(pk=True, read_only=True)
 
     def __init__(self, **values):
-        if "uid" in values:
-            self.uid._value = values["uid"]
-
         self.fields: dict[str, Field[Any, Any]] = {}
         self.constraints: dict[str, Constraint] = {}
 
