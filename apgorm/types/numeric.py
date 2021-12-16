@@ -25,6 +25,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TypeVar, Union
 
+from apgorm.exceptions import BadArgument
 from apgorm.field import Field
 from apgorm.sql.sql import Block
 from apgorm.undefined import UNDEF
@@ -69,7 +70,7 @@ class Numeric(SqlType[Decimal]):
         elif precision is not UNDEF.UNDEF:
             self.sql += f"({precision})"
         elif scale is not UNDEF.UNDEF:
-            raise Exception("Cannot specify scale without precision.")
+            raise BadArgument("Cannot specify scale without precision.")
 
 
 class Real(SqlType[float]):

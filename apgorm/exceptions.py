@@ -67,6 +67,15 @@ class ReadOnlyField(ApgormException):
         super().__init__(f"The field {field.full_name} is read-only.")
 
 
+class BadArgument(ApgormException):
+    """Bad arguments were passed."""
+
+    def __init__(self, message: str):
+        self.messages = message
+
+        super().__init__(message)
+
+
 # postgres-side exceptions
 class SqlException(ApgormBaseException):
     """Base class for all exceptions related to SQL."""
