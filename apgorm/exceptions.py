@@ -54,7 +54,7 @@ class UndefinedFieldValue(ApgormException):
         super().__init__(
             f"The field {field.full_name} is undefined. "
             "This usually means that the model has not been "
-            "fetched, created, or saved."
+            "created."
         )
 
 
