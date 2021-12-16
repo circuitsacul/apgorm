@@ -30,8 +30,8 @@ _T = TypeVar("_T", bound=SqlType)
 
 
 class Array(SqlType["list[_T]"]):
-    def __init__(self, type_: _T, size: int | None = None):
-        self._type_ = type_
+    def __init__(self, subtype: _T, size: int | None = None):
+        self._subtype = subtype
         self._size = size
 
         def _get_arrays(
@@ -40,7 +40,7 @@ class Array(SqlType["list[_T]"]):
             arrays = arrays or []
             if isinstance(t, Array):
                 arrays.append(t)
-                return _get_arrays(t.type_, arrays=arrays)
+                return _get_arrays(t.subtype, arrays=arrays)
             else:
                 return arrays, t
 
@@ -58,5 +58,5 @@ class Array(SqlType["list[_T]"]):
         return self._size
 
     @property
-    def type_(self) -> _T:
-        return self._type_
+    def subtype(self) -> _T:
+        return self._subtype
