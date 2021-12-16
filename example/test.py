@@ -44,7 +44,7 @@ class User(apgorm.Model):
         try:
             return (
                 f"User NAME:{self.username.v} AGE:{self.age.v} "
-                f"IS_COOL:{self.is_cool.v} ({self.uid.v})"
+                f"IS_COOL:{self.is_cool.v} ({self.id_.v})"
             )
         except UndefinedFieldValue:
             return "Unkown User"

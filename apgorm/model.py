@@ -48,7 +48,7 @@ class Model:
     tablename: str
     database: Database  # populated by Database
 
-    uid = Serial().field(pk=True, read_only=True)
+    id_ = Serial().field(pk=True, read_only=True)
 
     def __init__(self, **values):
         self.fields: dict[str, Field[Any, Any]] = {}
@@ -79,11 +79,11 @@ class Model:
         }
 
     async def delete(self):
-        await self.delete_query().where(uid=self.uid.v).execute()
+        await self.delete_query().where(id_=self.id_.v).execute()
 
     async def save(self):
         changed_fields = self._get_changed_fields()
-        q = self.update_query().where(uid=self.uid.v)
+        q = self.update_query().where(id_=self.id_.v)
         q.set(**{f.name: f.v for f in changed_fields})
         await q.execute()
         self._set_saved()
