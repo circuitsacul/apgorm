@@ -30,7 +30,7 @@ from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
     from apgorm.model import Model
-    from apgorm.sql.sql import SQL, Block
+    from apgorm.sql.sql import SQL
 
     from .types.base_type import SqlType
 
@@ -51,7 +51,7 @@ class Field(Generic[_F, _T]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
-        references: Block | Field | None = None,
+        references: Field | None = None,
     ):
         self.sql_type = sql_type
 

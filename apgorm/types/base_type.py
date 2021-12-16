@@ -27,7 +27,7 @@ from typing import Generic, TypeVar
 from apgorm.describe import TypeDesc
 from apgorm.field import Field
 from apgorm.sql.generators.helpers import r
-from apgorm.sql.sql import SQL, Block
+from apgorm.sql.sql import SQL
 from apgorm.undefined import UNDEF
 
 _T = TypeVar("_T", covariant=True)
@@ -42,7 +42,7 @@ class SqlType(Generic[_T]):
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
-        references: Block | Field | None = None,
+        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, _T]:
         return Field(
@@ -60,7 +60,7 @@ class SqlType(Generic[_T]):
         default: SQL[_T | None] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
-        references: Block | Field | None = None,
+        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, _T | None]:
         return Field(

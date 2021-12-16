@@ -27,7 +27,6 @@ from typing import TypeVar, Union
 
 from apgorm.exceptions import BadArgument
 from apgorm.field import Field
-from apgorm.sql.sql import Block
 from apgorm.undefined import UNDEF
 
 from .base_type import SqlType
@@ -89,7 +88,7 @@ class _BaseSerial(SqlType[int]):
         self: _S,
         pk: bool = False,
         unique: bool = False,
-        references: Block | Field | None = None,
+        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, int]:
         return Field(
@@ -105,7 +104,7 @@ class _BaseSerial(SqlType[int]):
         self: _S,
         pk: bool = False,
         unique: bool = False,
-        references: Block | Field | None = None,
+        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, int | None]:
         return Field(
