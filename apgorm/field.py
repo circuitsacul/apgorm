@@ -65,11 +65,17 @@ class Field(Generic[_F, _T]):
         self._value: _T | UNDEF = UNDEF.UNDEF
 
     def describe(self) -> dict[str, Any]:
+        constraints: list[str] = []
+        if self.not_null:
+            constraints.append("NOT NULL")
+        if self.unique:
+            constraints.append("UNIQUE")
+        if self.pk:
+            constraints.append("PRIMARY KEY")
+
         ret: dict[str, Any] = {
-            "not_null": self.not_null,
-            "pk": self.pk,
-            "unique": self.unique,
             "type": self.sql_type.sql,
+            "constraints": constraints,
         }
         if self.default is not UNDEF.UNDEF:
             ret["default"] = self.default
