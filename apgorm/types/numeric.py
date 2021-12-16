@@ -27,6 +27,7 @@ from typing import TypeVar, Union
 
 from apgorm.field import Field
 from apgorm.sql.sql import Block
+from apgorm.undefined import UNDEF
 
 from .base_type import SqlType
 
@@ -53,7 +54,22 @@ class BigInt(SqlType[int]):
 
 
 class Numeric(SqlType[Decimal]):
-    sql = "NUMERIC"
+    def __init__(
+        self,
+        precision: int | UNDEF = UNDEF.UNDEF,
+        scale: int | UNDEF = UNDEF.UNDEF,
+    ):
+        self._precision = precision
+        self._scale = scale
+
+        self.sql = "NUMERIC"
+
+        if precision is not UNDEF.UNDEF and scale is not UNDEF.UNDEF:
+            self.sql += f"({precision}, {scale})"
+        elif precision is not UNDEF.UNDEF:
+            self.sql += f"({precision})"
+        elif scale is not UNDEF.UNDEF:
+            raise Exception("Cannot specify scale without precision.")
 
 
 class Real(SqlType[float]):
