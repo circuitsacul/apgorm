@@ -90,7 +90,7 @@ class _BaseSerial(SqlType[int]):
         unique: bool = False,
         references: Block | Field | None = None,
         read_only: bool = False,
-    ) -> Field[_S, int]:
+    ) -> Field[_S, int | None]:
         return Field(
             sql_type=self,
             not_null=False,
