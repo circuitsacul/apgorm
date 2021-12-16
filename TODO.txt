@@ -13,3 +13,8 @@ UPPER
  - domain types
  - enums
  - composite types
+
+MIGRATIONS
+ - create initial database
+ - store database .describe()s in a table
+ - upgrade/downgrade scripts
