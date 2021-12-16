@@ -50,7 +50,6 @@ class Field(Generic[_F, _T]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
-        references: Field | None = None,
     ):
         self.sql_type = sql_type
 
@@ -59,7 +58,6 @@ class Field(Generic[_F, _T]):
         self.not_null = not_null
         self.pk = pk
         self.unique = unique
-        self.references = references
 
         self.read_only = read_only
 
@@ -75,8 +73,6 @@ class Field(Generic[_F, _T]):
         }
         if self.default is not UNDEF.UNDEF:
             ret["default"] = self.default
-        if self.references is not None:
-            ret["references"] = self.references
 
         return ret
 
@@ -105,7 +101,6 @@ class Field(Generic[_F, _T]):
             pk=self.pk,
             unique=self.unique,
             read_only=self.read_only,
-            references=self.references,
         )
 
     def copy(self) -> Field[_F, _T]:

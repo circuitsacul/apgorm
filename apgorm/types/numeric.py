@@ -88,7 +88,6 @@ class _BaseSerial(SqlType[int]):
         self: _S,
         pk: bool = False,
         unique: bool = False,
-        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, int]:
         return Field(
@@ -97,14 +96,12 @@ class _BaseSerial(SqlType[int]):
             pk=pk,
             unique=unique,
             read_only=read_only,
-            references=references,
         )
 
     def nullfield(  # type: ignore
         self: _S,
         pk: bool = False,
         unique: bool = False,
-        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, int | None]:
         return Field(
@@ -113,7 +110,6 @@ class _BaseSerial(SqlType[int]):
             pk=pk,
             unique=unique,
             read_only=read_only,
-            references=references,
         )
 
 

@@ -40,7 +40,6 @@ class SqlType(Generic[_T]):
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
-        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, _T]:
         return Field(
@@ -50,7 +49,6 @@ class SqlType(Generic[_T]):
             pk=pk,
             unique=unique,
             read_only=read_only,
-            references=references,
         )
 
     def nullfield(
@@ -58,7 +56,6 @@ class SqlType(Generic[_T]):
         default: SQL[_T | None] | UNDEF = UNDEF.UNDEF,
         pk: bool = False,
         unique: bool = False,
-        references: Field | None = None,
         read_only: bool = False,
     ) -> Field[_S, _T | None]:
         return Field(
@@ -68,5 +65,4 @@ class SqlType(Generic[_T]):
             pk=pk,
             unique=unique,
             read_only=read_only,
-            references=references,
         )
