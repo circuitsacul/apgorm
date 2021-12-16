@@ -38,4 +38,11 @@ class PrimaryKey(Constraint):
         self.fields = fields
 
     def creation_sql(self) -> Block:
-        return Block(r("PRIMARY KEY ("), join(r(","), self.fields), r(")"))
+        return Block(
+            r("CONSTRAINT"),
+            r(self.name),
+            r("PRIMARY KEY ("),
+            join(r(","), self.fields),
+            r(")"),
+            wrap=True,
+        )
