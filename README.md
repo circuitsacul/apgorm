@@ -1,5 +1,5 @@
 # asyncpg-orm
- An ORM wrapped around asyncpg.
+ An ORM wrapped around asyncpg. An advanced example can be found at `examples/example.py`.
 
 ## Features
  - Fully type-checked
