@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence, Type, TypeVar
 
-from apgorm.field import Field
+from apgorm.field import BaseField
 from apgorm.sql.sql import SQL, Block
 from apgorm.types.base_type import SqlType
 from apgorm.types.boolean import Bool
@@ -45,9 +45,9 @@ def cast(param: SQL, type_: _SQLT) -> Block[_SQLT]:
 
 def select(
     from_: Model | Type[Model] | Block,
-    fields: Sequence[Field | Block] | None = None,
+    fields: Sequence[BaseField | Block] | None = None,
     where: Block[Bool] | None = None,
-    order_by: Field | Block | None = None,
+    order_by: BaseField | Block | None = None,
     ascending: bool = True,
 ) -> Block[Any]:
     sql = Block[Any](r("SELECT"))
@@ -103,9 +103,12 @@ def update(
 
 def insert(
     into: Model | Type[Model] | Block,
-    fields: Sequence[Field | Block],
+    fields: Sequence[BaseField | Block],
     values: Sequence[SQL],
-    return_fields: Sequence[Field | Block] | Field | Block | None = None,
+    return_fields: Sequence[BaseField | Block]
+    | BaseField
+    | Block
+    | None = None,
 ) -> Block[Any]:
     tablename = into if isinstance(into, Block) else r(into.tablename)
 
@@ -120,7 +123,7 @@ def insert(
 
     if return_fields is not None:
         sql += r("RETURNING")
-        if isinstance(return_fields, (Field, Block)):
+        if isinstance(return_fields, (BaseField, Block)):
             sql += return_fields
         else:
             sql += join(r(","), *return_fields, wrap=True)

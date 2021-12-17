@@ -25,7 +25,7 @@ from __future__ import annotations
 from collections import UserString
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
 
-from apgorm.field import Field
+from apgorm.field import BaseField
 
 if TYPE_CHECKING:
     from apgorm.types.base_type import SqlType
@@ -33,13 +33,13 @@ if TYPE_CHECKING:
 _T = TypeVar("_T", covariant=True)
 _SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
 SQL = Union[
-    "Field[SqlType[_T], _T]",
+    "BaseField[SqlType[_T], _T, Any]",
     "Block[SqlType[_T]]",
     "Parameter[_T]",
     _T,
 ]
 CASTED = Union[
-    "Field[_SQLT, Any]",
+    "BaseField[_SQLT, Any, Any]",
     "Block[_SQLT]",
 ]
 
@@ -66,7 +66,7 @@ class Block(Generic[_SQLT]):
         else:
             self.wrap = wrap
             for p in pieces:
-                if isinstance(p, Field):
+                if isinstance(p, BaseField):
                     self._pieces.append(Raw(p.full_name))
                 elif isinstance(p, Block):
                     self._pieces.extend(p.get_pieces())
@@ -91,7 +91,7 @@ class Block(Generic[_SQLT]):
             self._pieces.extend(other.get_pieces())
         elif isinstance(other, Parameter):
             self._pieces.append(other)
-        elif isinstance(other, Field):
+        elif isinstance(other, BaseField):
             self._pieces.append(Raw(other.full_name))
         else:
             raise TypeError

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
 
-from apgorm.field import Field
+from apgorm.field import BaseField
 
 from .generators.comp import and_, eq
 from .generators.helpers import r
@@ -60,7 +60,7 @@ class FilterQueryBuilder(Query[_T]):
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
         for k, v in values.items():
-            if isinstance(v, Field):
+            if isinstance(v, BaseField):
                 v = r(v.full_name)
             key = r(f"{self.model.tablename}.{k}")
             self.filters.append(eq(key, v))
@@ -72,12 +72,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T]):
         super().__init__(model)
 
-        self.order_by_field: Field | Block | None = None
+        self.order_by_field: BaseField | Block | None = None
         self.ascending: bool = True
 
     def order_by(
         self,
-        field: Block | Field,
+        field: Block | BaseField,
         ascending: bool = True,
     ) -> FetchQueryBuilder[_T]:
         self.order_by_field = field
@@ -141,13 +141,15 @@ class InsertQueryBuilder(Query[_T]):
         super().__init__(model)
 
         self.set_values: dict[Block, SQL] = {}
-        self.fields_to_return: list[Block | Field] = []
+        self.fields_to_return: list[Block | BaseField] = []
 
     def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    def return_fields(self, *fields: Block | Field) -> InsertQueryBuilder[_T]:
+    def return_fields(
+        self, *fields: Block | BaseField
+    ) -> InsertQueryBuilder[_T]:
         self.fields_to_return.extend(fields)
         return self
 

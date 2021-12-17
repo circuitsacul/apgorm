@@ -22,13 +22,14 @@
 
 from . import constraints, sql, types
 from .database import Database
-from .field import Field
+from .field import BaseField, Field
 from .model import Model
 
 __all__ = (
     "Database",
     "Model",
     "Field",
+    "BaseField",
     "types",
     "sql",
     "constraints",

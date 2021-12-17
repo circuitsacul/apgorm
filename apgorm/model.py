@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.exceptions import ModelNotFound
-from apgorm.field import Field
+from apgorm.field import BaseField, ConvertedField
 from apgorm.sql import (
     DeleteQueryBuilder,
     FetchQueryBuilder,
@@ -51,7 +51,7 @@ class Model:
     id_ = Serial().field(pk=True, read_only=True)
 
     def __init__(self, **values):
-        self.fields: dict[str, Field[Any, Any]] = {}
+        self.fields: dict[str, BaseField] = {}
         self.constraints: dict[str, Constraint] = {}
 
         all_fields, all_constraints = self._special_attrs()
@@ -63,7 +63,10 @@ class Model:
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
                 continue
-            f._value = value
+            if isinstance(f, ConvertedField):
+                f._value = f.converter.to_stored(value)
+            else:
+                f._value = value
 
         for c in all_constraints.values():
             self.constraints[c.name] = c
@@ -84,7 +87,7 @@ class Model:
     async def save(self):
         changed_fields = self._get_changed_fields()
         q = self.update_query().where(id_=self.id_.v)
-        q.set(**{f.name: f.v for f in changed_fields})
+        q.set(**{f.name: f._value for f in changed_fields})
         await q.execute()
         self._set_saved()
 
@@ -92,7 +95,7 @@ class Model:
         q = self.insert_query()
         q.set(
             **{
-                f.name: f.v
+                f.name: f._value
                 for f in self.fields.values()
                 if f._value is not UNDEF.UNDEF
             }
@@ -134,12 +137,14 @@ class Model:
         for f in self.fields.values():
             f.changed = False
 
-    def _get_changed_fields(self) -> list[Field]:
+    def _get_changed_fields(self) -> list[BaseField]:
         return [f for f in self.fields.values() if f.changed]
 
     @classmethod
-    def _special_attrs(cls) -> tuple[dict[str, Field], dict[str, Constraint]]:
-        fields: dict[str, Field] = {}
+    def _special_attrs(
+        cls,
+    ) -> tuple[dict[str, BaseField], dict[str, Constraint]]:
+        fields: dict[str, BaseField] = {}
         constraints: dict[str, Constraint] = {}
 
         for attr_name in dir(cls):
@@ -148,7 +153,7 @@ class Model:
             except AttributeError:
                 continue
 
-            if isinstance(attr, Field):
+            if isinstance(attr, BaseField):
                 fields[attr_name] = attr
 
             elif isinstance(attr, Constraint):
