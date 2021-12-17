@@ -43,8 +43,8 @@ class Action(Enum):
 class ForeignKey(Constraint):
     def __init__(
         self,
-        fields: Sequence[BaseField],
-        ref_fields: Sequence[BaseField],
+        fields: Sequence[Block | BaseField],
+        ref_fields: Sequence[Block | BaseField],
         match_full: bool = False,
         on_delete: Action = Action.CASCADE,
         on_update: Action = Action.CASCADE,
