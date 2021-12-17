@@ -24,30 +24,28 @@ from __future__ import annotations
 
 import asyncpg
 
-from apgorm.undefined import UNDEF
-
 from .base_type import SqlType
 
 
 class Bit(SqlType[asyncpg.BitString]):
-    def __init__(self, length: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, length: int | None = None):
         self._length = length
         self.sql = "BIT"
-        if length is not UNDEF.UNDEF:
+        if length is not None:
             self.sql += f"({length})"
 
     @property
-    def length(self) -> int | UNDEF:
+    def length(self) -> int | None:
         return self._length
 
 
 class VarBit(SqlType[asyncpg.BitString]):
-    def __init__(self, max_length: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, max_length: int | None = None):
         self._max_length = max_length
         self.sql = "VARBIT"
-        if max_length is not UNDEF.UNDEF:
+        if max_length is not None:
             self.sql += f"({max_length})"
 
     @property
-    def max_length(self) -> int | UNDEF:
+    def max_length(self) -> int | None:
         return self._max_length

@@ -25,56 +25,54 @@ from __future__ import annotations
 import datetime
 from enum import Enum
 
-from apgorm.undefined import UNDEF
-
 from .base_type import SqlType
 
 
 class Timestamp(SqlType[datetime.datetime]):
-    def __init__(self, precision: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, precision: int | None = None):
         self._precision = precision
         self.sql = "TIMESTAMP"
-        if precision is not UNDEF.UNDEF:
+        if precision is not None:
             self.sql += f"({precision})"
 
     @property
-    def precision(self) -> int | UNDEF:
+    def precision(self) -> int | None:
         return self._precision
 
 
 class TimestampTZ(SqlType[datetime.datetime]):
-    def __init__(self, precision: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, precision: int | None = None):
         self._precision = precision
         self.sql = "TIMESTAMPTZ"
-        if precision is not UNDEF.UNDEF:
+        if precision is not None:
             self.sql += f"({precision})"
 
     @property
-    def precision(self) -> int | UNDEF:
+    def precision(self) -> int | None:
         return self._precision
 
 
 class Time(SqlType[datetime.time]):
-    def __init__(self, precision: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, precision: int | None = None):
         self._precision = precision
         self.sql = "TIME"
-        if precision is not UNDEF.UNDEF:
+        if precision is not None:
             self.sql += f"({precision})"
 
     @property
-    def precision(self) -> int | UNDEF:
+    def precision(self) -> int | None:
         return self._precision
 
 
 class TimeTZ(SqlType[datetime.time]):
-    def __init__(self, precision: int | UNDEF = UNDEF.UNDEF):
+    def __init__(self, precision: int | None = None):
         self._precision = precision
         self.sql = "TIMETZ"
-        if precision is not UNDEF.UNDEF:
+        if precision is not None:
             self.sql += f"({precision})"
 
     @property
-    def precision(self) -> int | UNDEF:
+    def precision(self) -> int | None:
         return self._precision
 
 
@@ -100,22 +98,22 @@ class IntervalField(Enum):
 class Interval(SqlType[datetime.timedelta]):
     def __init__(
         self,
-        interval_field: IntervalField | UNDEF = UNDEF.UNDEF,
-        precision: int | UNDEF = UNDEF.UNDEF,
+        interval_field: IntervalField | None = None,
+        precision: int | None = None,
     ):
         self._interval_field = interval_field
         self._precision = precision
 
         self.sql = "INTERVAL"
-        if interval_field is not UNDEF.UNDEF:
+        if interval_field is not None:
             self.sql += " " + interval_field.value
-        if precision is not UNDEF.UNDEF:
+        if precision is not None:
             self.sql += f"({precision})"
 
     @property
-    def interval_field(self) -> IntervalField | UNDEF:
+    def interval_field(self) -> IntervalField | None:
         return self._interval_field
 
     @property
-    def precision(self) -> int | UNDEF:
+    def precision(self) -> int | None:
         return self._precision
