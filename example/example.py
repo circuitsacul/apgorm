@@ -23,8 +23,9 @@
 from __future__ import annotations
 
 from enum import IntEnum, IntFlag
+from pprint import pprint
 
-from apgorm import Converter, Model
+import apgorm
 from apgorm.constraints import ForeignKey
 from apgorm.types.character import VarChar
 from apgorm.types.numeric import Int, Serial
@@ -42,7 +43,7 @@ class PlayerStatus(IntEnum):
     DROPPED = 3
 
 
-class UserFlagsConverter(Converter[int, UserFlags]):
+class UserFlagsConverter(apgorm.Converter[int, UserFlags]):
     def to_stored(self, value: UserFlags) -> int:
         return int(value)
 
@@ -50,7 +51,7 @@ class UserFlagsConverter(Converter[int, UserFlags]):
         return UserFlags(value)
 
 
-class PlayerStatusConverter(Converter[int, PlayerStatus]):
+class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
     def to_stored(self, value: PlayerStatus) -> int:
         return int(value)
 
@@ -58,26 +59,31 @@ class PlayerStatusConverter(Converter[int, PlayerStatus]):
         return PlayerStatus(value)
 
 
-class User(Model):
-    tablename = "users"
-
+class User(apgorm.Model):
     username = VarChar(32).field(unique=True)
     nickname = VarChar(32).nullablefield(default=None)
     user_flags = Int().field(default=0).with_converter(UserFlagsConverter)
 
 
-class Game(Model):
-    tablename = "games"
-
+class Game(apgorm.Model):
     name = VarChar(32).field()
 
 
-class Player(Model):
-    tablename = "players"
-
+class Player(apgorm.Model):
     user_id = Serial().field()
     game_id = Serial().field()
     status = Int().field(default=0).with_converter(PlayerStatusConverter)
 
     user_id_fk = ForeignKey([user_id], [User.id_])
     game_id_fk = ForeignKey([game_id], [Game.id_])
+
+
+class Database(apgorm.Database):
+    users = User
+    games = Game
+    players = Player
+
+
+if __name__ == "__main__":
+    db = Database()
+    pprint(db.describe())
