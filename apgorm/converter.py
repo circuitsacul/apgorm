@@ -29,10 +29,8 @@ _CONV = TypeVar("_CONV")
 
 
 class Converter(Generic[_ORIG, _CONV]):
-    @staticmethod
-    def from_stored(value: _ORIG) -> _CONV:
+    def from_stored(self, value: _ORIG) -> _CONV:
         raise NotImplementedError
 
-    @staticmethod
-    def to_stored(value: _CONV) -> _ORIG:
+    def to_stored(self, value: _CONV) -> _ORIG:
         raise NotImplementedError
