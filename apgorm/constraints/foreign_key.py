@@ -63,5 +63,7 @@ class ForeignKey(Constraint):
             join(r(","), *self.fields),
             r(") REFERENCES ("),
             join(r(","), *self.ref_fields),
+            r(f") ON DELETE {self.on_delete.value}"),
+            r(f"ON UPDATE {self.on_update.value}"),
             wrap=True,
         )
