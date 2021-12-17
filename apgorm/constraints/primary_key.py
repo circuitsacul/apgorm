@@ -29,12 +29,12 @@ from apgorm.sql.generators.helpers import join, r
 from .constraint import Constraint
 
 if TYPE_CHECKING:
-    from apgorm.field import Field
+    from apgorm.field import BaseField
     from apgorm.sql import Block
 
 
 class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[Field | Block]):
+    def __init__(self, fields: Sequence[BaseField | Block]):
         self.fields = fields
 
     def creation_sql(self) -> Block:

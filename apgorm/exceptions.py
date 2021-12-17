@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type
 
 if TYPE_CHECKING:
-    from .field import Field
+    from .field import BaseField
     from .model import Model
 
 
@@ -48,7 +48,7 @@ class UndefinedFieldValue(ApgormException):
 
     Usually means that the model has not been created."""
 
-    def __init__(self, field: Field):
+    def __init__(self, field: BaseField):
         self.field = field
 
         super().__init__(
@@ -61,7 +61,7 @@ class UndefinedFieldValue(ApgormException):
 class ReadOnlyField(ApgormException):
     """The field is read-only (you can't change its value)."""
 
-    def __init__(self, field: Field):
+    def __init__(self, field: BaseField):
         self.field = field
 
         super().__init__(f"The field {field.full_name} is read-only.")

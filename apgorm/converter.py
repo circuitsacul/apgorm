@@ -22,27 +22,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import Generic, TypeVar
 
-from apgorm.sql.generators.helpers import join, r
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
-    from apgorm.sql import Block
+_ORIG = TypeVar("_ORIG")
+_CONV = TypeVar("_CONV")
 
 
-class Unique(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
-        self.fields = fields
+class Converter(Generic[_ORIG, _CONV]):
+    @staticmethod
+    def from_stored(value: _ORIG) -> _CONV:
+        raise NotImplementedError
 
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("UNIQUE ("),
-            join(r(","), self.fields),
-            r(")"),
-            wrap=True,
-        )
+    @staticmethod
+    def to_stored(value: _CONV) -> _ORIG:
+        raise NotImplementedError

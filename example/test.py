@@ -26,6 +26,7 @@ import asyncio
 from pprint import pprint
 
 import apgorm
+from apgorm.converter import Converter
 from apgorm.exceptions import UndefinedFieldValue
 from apgorm.sql.generators.comp import lt
 from apgorm.types.boolean import Boolean
@@ -33,10 +34,20 @@ from apgorm.types.character import VarChar
 from apgorm.types.numeric import Integer
 
 
+class IntStr(Converter[int, str]):
+    @staticmethod
+    def from_stored(value: int) -> str:
+        return str(value)
+
+    @staticmethod
+    def to_stored(value: str) -> int:
+        return int(value)
+
+
 class User(apgorm.Model):
     tablename = "users"
 
-    age = Integer().field(default=0)
+    age = Integer().field(default=0).with_converter(IntStr)
     is_cool = Boolean().field(default=False)
     username = VarChar(32).field(default="unamed")
 
@@ -80,7 +91,7 @@ async def _main(db: Database):
     await user.delete()
 
     head()
-    ages = [3, 9, 2, 16]
+    ages = ["3", "9", "2", "16"]
     is_cools = [True, True, False, True]
     for age, is_cool in zip(ages, is_cools):
         await User(age=age, is_cool=is_cool).create()
@@ -95,7 +106,7 @@ async def _main(db: Database):
 
     head()
     async for user in User.fetch_query().where(lt(User.age, 10)).cursor():
-        user.age.v = 11
+        user.age.v = "11"
         await user.save()
 
     head()

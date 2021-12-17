@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
+from apgorm.converter import Converter
 from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
 from apgorm.undefined import UNDEF
 
@@ -35,16 +36,18 @@ if TYPE_CHECKING:
 
 
 _T = TypeVar("_T")
+_C = TypeVar("_C")
 _F = TypeVar("_F", bound="SqlType")
 
 
-class Field(Generic[_F, _T]):
+class BaseField(Generic[_F, _T, _C]):
     name: str  # populated by Database
     model: Type[Model]  # populated by Database
 
     def __init__(
         self,
         sql_type: _F,
+        *,
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         not_null: bool = False,
         pk: bool = False,
@@ -87,6 +90,34 @@ class Field(Generic[_F, _T]):
         return f"{self.model.tablename}.{self.name}"
 
     @property
+    def v(self) -> _C:
+        raise NotImplementedError
+
+    @v.setter
+    def v(self, other: _C):
+        raise NotImplementedError
+
+    def _copy_kwargs(self) -> dict[str, Any]:
+        return dict(
+            sql_type=self.sql_type,
+            default=self.default,
+            not_null=self.not_null,
+            pk=self.pk,
+            unique=self.unique,
+            read_only=self.read_only,
+        )
+
+    def copy(self) -> BaseField[_F, _T, _C]:
+        n = self.__class__(**self._copy_kwargs())
+        if hasattr(self, "name"):
+            n.name = self.name
+        if hasattr(self, "model"):
+            n.model = self.model
+        return n
+
+
+class Field(BaseField[_F, _T, _T]):
+    @property
     def v(self) -> _T:
         if self._value is UNDEF.UNDEF:
             raise UndefinedFieldValue(self)
@@ -99,18 +130,40 @@ class Field(Generic[_F, _T]):
         self._value = other
         self.changed = True
 
-    def _copy_kwargs(self) -> dict[str, Any]:
-        return dict(
-            sql_type=self.sql_type,
-            default=self.default,
-            not_null=self.not_null,
-            pk=self.pk,
-            unique=self.unique,
-            read_only=self.read_only,
+    def with_converter(
+        self, converter: Converter[_T, _C] | Type[Converter[_T, _C]]
+    ) -> ConvertedField[_F, _T, _C]:
+        if isinstance(converter, type) and issubclass(converter, Converter):
+            converter = converter()
+        f: ConvertedField[_F, _T, _C] = ConvertedField(
+            **self._copy_kwargs(), converter=converter
         )
+        if hasattr(self, "name"):
+            f.name = self.name
+        if hasattr(self, "model"):
+            f.model = self.model
+        return f
 
-    def copy(self) -> Field[_F, _T]:
-        n = self.__class__(**self._copy_kwargs())
-        n.name = self.name
-        n.model = self.model
-        return n
+
+class ConvertedField(BaseField[_F, _T, _C]):
+    def __init__(self, *args, **kwargs):
+        self.converter: Converter[_T, _C] = kwargs.pop("converter")
+        super().__init__(*args, **kwargs)
+
+    @property
+    def v(self) -> _C:
+        if self._value is UNDEF.UNDEF:
+            raise UndefinedFieldValue(self)
+        return self.converter.from_stored(self._value)
+
+    @v.setter
+    def v(self, other: _C):
+        if self.read_only:
+            raise ReadOnlyField(self)
+        self._value = self.converter.to_stored(other)
+        self.changed = True
+
+    def _copy_kwargs(self) -> dict[str, Any]:
+        dct = super()._copy_kwargs()
+        dct["converter"] = self.converter
+        return dct

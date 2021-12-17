@@ -31,7 +31,7 @@ from apgorm.sql.sql import Block
 from .constraint import Constraint
 
 if TYPE_CHECKING:
-    from apgorm.field import Field
+    from apgorm.field import BaseField
 
 
 class Action(Enum):
@@ -43,8 +43,8 @@ class Action(Enum):
 class ForeignKey(Constraint):
     def __init__(
         self,
-        fields: Sequence[Field],
-        ref_fields: Sequence[Field],
+        fields: Sequence[BaseField],
+        ref_fields: Sequence[BaseField],
         match_full: bool = False,
         on_delete: Action = Action.CASCADE,
         on_update: Action = Action.CASCADE,
