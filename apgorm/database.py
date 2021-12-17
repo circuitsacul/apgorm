@@ -48,6 +48,7 @@ class Database:
                 continue
 
             attr.database = self
+            attr.tablename = attr_name
             self.models.append(attr)
 
             fields, constraints = attr._special_attrs()

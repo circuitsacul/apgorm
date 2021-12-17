@@ -45,7 +45,7 @@ _T = TypeVar("_T", bound="Model")
 
 
 class Model:
-    tablename: str
+    tablename: str  # populated by Database
     database: Database  # populated by Database
 
     id_ = Serial().field(pk=True, read_only=True)
