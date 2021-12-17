@@ -60,8 +60,8 @@ class ForeignKey(Constraint):
             r("CONSTRAINT"),
             r(self.name),
             r("FOREIGN KEY ("),
-            join(r(","), self.fields),
+            join(r(","), *self.fields),
             r(") REFERENCES ("),
-            join(r(","), self.ref_fields),
+            join(r(","), *self.ref_fields),
             wrap=True,
         )
