@@ -2,7 +2,9 @@
  An ORM wrapped around asyncpg. An advanced example can be found at `examples/example.py`.
 
 ## Features
+These are features that will exist by the first release of apgorm:
  - Fully type-checked
+ - 100% code coverage
  - Easy-to-use
  - Migration support
 
