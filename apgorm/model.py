@@ -77,7 +77,7 @@ class Model:
         return {
             "fields": {f.name: f.describe() for f in fields.values()},
             "constraints": {
-                c.name: c.creation_sql() for c in constraints.values()
+                c.name: c.creation_sql().render() for c in constraints.values()
             },
         }
 
