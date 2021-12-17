@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
 
 from apgorm.field import Field
 
@@ -103,6 +103,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         if res is None:
             return None
         return self.model(**res)
+
+    async def cursor(self) -> AsyncGenerator[_T, None]:
+        query, params = self._fetch_query()
+        async with self.model.database.cursor(query, params) as cursor:
+            async for res in cursor:
+                yield self.model(**res)
 
 
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):

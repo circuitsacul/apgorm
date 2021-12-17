@@ -94,11 +94,7 @@ async def _main(db: Database):
     print(cool_users)
 
     head()
-    young_users = await User.fetch_query().where(lt(User.age, 10)).fetchmany()
-    print(young_users)
-
-    head()
-    for user in young_users:
+    async for user in User.fetch_query().where(lt(User.age, 10)).cursor():
         user.age.v = 11
         await user.save()
 

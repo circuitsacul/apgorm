@@ -23,9 +23,11 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Type
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, Type
 
 import asyncpg
+from asyncpg.cursor import CursorFactory
 
 from .model import Model
 
@@ -96,3 +98,14 @@ class Database:
         print(query, args)
         assert self.pool is not None
         return await self.pool.fetchval(query, *args)
+
+    @asynccontextmanager
+    async def cursor(
+        self, query: str, args: list[Any]
+    ) -> AsyncGenerator[CursorFactory, None]:
+        print(query, args)
+        assert self.pool is not None
+        async with self.pool.acquire() as con:
+            async with con.transaction():
+                cursor: CursorFactory = con.cursor(query, *args)
+                yield cursor
