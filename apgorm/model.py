@@ -170,7 +170,11 @@ class Model:
         return (
             f"<{self.__class__.__name__} "
             + " ".join(
-                [f"{f.name}:{f.v}" for f in self.fields.values() if f.use_repr]
+                [
+                    f"{f.name}:{f.v!r}"
+                    for f in self.fields.values()
+                    if f.use_repr
+                ]
             )
             + ">"
         )
