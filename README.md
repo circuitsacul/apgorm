@@ -1,5 +1,5 @@
 # asyncpg-orm
- An ORM wrapped around asyncpg. An advanced example can be found at `examples/example.py`.
+An ORM wrapped around asyncpg. Examples can be found under `examples/`. Run examples with `python -m examples.<example_name>` (`python -m examples.advanced`).
 
 ## Features
 These are features that will exist by the first release of apgorm:
