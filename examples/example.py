@@ -23,17 +23,14 @@
 from __future__ import annotations
 
 import asyncio
-from enum import IntEnum, IntFlag
+import random
+from enum import IntEnum
 
 import apgorm
 from apgorm.constraints import ForeignKey
+from apgorm.sql.generators.comp import neq
 from apgorm.types.character import VarChar
 from apgorm.types.numeric import Int, Serial
-
-
-class UserFlags(IntFlag):
-    PRO_USER = 1 << 0
-    BANNED = 1 << 1
 
 
 class PlayerStatus(IntEnum):
@@ -41,14 +38,6 @@ class PlayerStatus(IntEnum):
     WINNER = 1
     LOSER = 2
     DROPPED = 3
-
-
-class UserFlagsConverter(apgorm.Converter[int, UserFlags]):
-    def to_stored(self, value: UserFlags) -> int:
-        return int(value)
-
-    def from_stored(self, value: int) -> UserFlags:
-        return UserFlags(value)
 
 
 class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
@@ -63,7 +52,6 @@ class User(apgorm.Model):
     id_ = Serial().field(pk=True, read_only=True, use_eq=True)
     username = VarChar(32).field(unique=True)
     nickname = VarChar(32).nullablefield(default=None)
-    user_flags = Int().field(default=0).with_converter(UserFlagsConverter)
 
 
 class Game(apgorm.Model):
@@ -88,11 +76,49 @@ class Database(apgorm.Database):
 
 
 async def _main(db: Database):
+    # delete stuff to ensure we don't violate any unique constraints
     await User.delete_query().execute()
-    user = User(username="Username 1")
-    await user.create()
-    print(user)
-    print(user.user_flags.v)
+    await Game.delete_query().execute()
+    # technically this is unecessary because ON DELETE is set to cascade
+    await Player.delete_query().execute()
+
+    # create some users:
+    usernames = ["Circuit", "James", "Unamed"]
+    for un in usernames:
+        await User(username=un).create()
+
+    # create some games:
+    game_names = ["Game 1", "Game 2"]
+    for gn in game_names:
+        await Game(name=gn).create()
+
+    # get all users except the one named "Unamed"
+    all_users = (
+        await User.fetch_query()
+        .where(neq(User.username, "Unamed"))
+        .fetchmany()
+    )
+
+    # get all games
+    all_games = await Game.fetch_query().fetchmany()
+
+    # add some players (or, attach some users to games)
+    for user in all_users:
+        for game in all_games:
+            await Player(user_id=user.id_.v, game_id=game.id_.v).create()
+
+    # print the players
+    print(await Player.fetch_query().fetchmany())
+
+    # set a random winner for each game
+    for game in all_games:
+        players = (
+            await Player.fetch_query().where(game_id=game.id_.v).fetchmany()
+        )
+
+        winner = random.choice(players)
+        winner.status.v = PlayerStatus.WINNER
+        await winner.save()
 
 
 async def main():
