@@ -41,6 +41,8 @@ class SqlType(Generic[_T]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
+        use_repr: bool = True,
+        use_eq: bool = False,
     ) -> Field[_S, _T]:
         return Field(
             sql_type=self,
@@ -49,6 +51,8 @@ class SqlType(Generic[_T]):
             pk=pk,
             unique=unique,
             read_only=read_only,
+            use_repr=use_repr,
+            use_eq=use_eq,
         )
 
     def nullablefield(
@@ -57,6 +61,8 @@ class SqlType(Generic[_T]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
+        use_repr: bool = True,
+        use_eq: bool = False,
     ) -> Field[_S, _T | None]:
         return Field(
             sql_type=self,
@@ -65,4 +71,6 @@ class SqlType(Generic[_T]):
             pk=pk,
             unique=unique,
             read_only=read_only,
+            use_repr=use_repr,
+            use_eq=use_eq,
         )

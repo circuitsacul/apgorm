@@ -48,7 +48,7 @@ class Model:
     tablename: str  # populated by Database
     database: Database  # populated by Database
 
-    id_ = Serial().field(pk=True, read_only=True)
+    id_ = Serial().field(pk=True, read_only=True, use_eq=True)
 
     def __init__(self, **values):
         self.fields: dict[str, BaseField] = {}
@@ -160,3 +160,22 @@ class Model:
                 constraints[attr_name] = attr
 
         return fields, constraints
+
+    # magic methods
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} "
+            + " ".join(
+                [f"{f.name}:{f.v}" for f in self.fields.values() if f.use_repr]
+            )
+            + ">"
+        )
+
+    def _eq_fields(self) -> dict[str, Any]:
+        return {f.name: f.v for f in self.fields.values() if f.use_eq}
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(f"Unsupported type {type(other)}.")
+
+        return self._eq_fields() == other._eq_fields()

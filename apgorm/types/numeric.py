@@ -88,6 +88,8 @@ class _BaseSerial(SqlType[int]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
+        use_repr: bool = True,
+        use_eq: bool = False,
     ) -> Field[_S, int]:
         return Field(
             sql_type=self,
@@ -95,6 +97,8 @@ class _BaseSerial(SqlType[int]):
             pk=pk,
             unique=unique,
             read_only=read_only,
+            use_repr=use_repr,
+            use_eq=use_eq,
         )
 
     def nullablefield(  # type: ignore
@@ -102,6 +106,8 @@ class _BaseSerial(SqlType[int]):
         pk: bool = False,
         unique: bool = False,
         read_only: bool = False,
+        use_repr: bool = True,
+        use_eq: bool = False,
     ) -> Field[_S, int | None]:
         return Field(
             sql_type=self,
@@ -109,6 +115,8 @@ class _BaseSerial(SqlType[int]):
             pk=pk,
             unique=unique,
             read_only=read_only,
+            use_repr=use_repr,
+            use_eq=use_eq,
         )
 
 
