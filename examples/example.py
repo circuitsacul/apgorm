@@ -28,7 +28,7 @@ from pprint import pprint
 import apgorm
 from apgorm.constraints import ForeignKey
 from apgorm.types.character import VarChar
-from apgorm.types.numeric import Int, Serial
+from apgorm.types.numeric import Int
 
 
 class UserFlags(IntFlag):
@@ -70,8 +70,8 @@ class Game(apgorm.Model):
 
 
 class Player(apgorm.Model):
-    user_id = Serial().field()
-    game_id = Serial().field()
+    user_id = Int().field()
+    game_id = Int().field()
     status = Int().field(default=0).with_converter(PlayerStatusConverter)
 
     user_id_fk = ForeignKey([user_id], [User.id_])
