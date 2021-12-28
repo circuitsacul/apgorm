@@ -23,15 +23,14 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Sequence
+from typing import List, Sequence
+from typing import cast as typingcast
 
+from apgorm.field import BaseField
 from apgorm.sql.generators.helpers import join, r
 from apgorm.sql.sql import Block
 
 from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
 
 
 class Action(Enum):
@@ -45,24 +44,75 @@ class ForeignKey(Constraint):
         self,
         fields: Sequence[Block | BaseField],
         ref_fields: Sequence[Block | BaseField],
+        ref_table: Block | None = None,
         match_full: bool = False,
         on_delete: Action = Action.CASCADE,
         on_update: Action = Action.CASCADE,
     ):
         self.fields = fields
         self.ref_fields = ref_fields
+        self.ref_table = ref_table
         self.match_full = match_full
         self.on_delete = on_delete
         self.on_update = on_update
 
+        if len(ref_fields) != len(fields):
+            # TODO: actual exception
+            raise Exception("Must have same number of fields and ref_fields.")
+
+        if len(fields) == 0:
+            # TODO: actual exception
+            raise Exception("Must specify at least on field and ref_field.")
+
     def creation_sql(self) -> Block:
+        ref_table: Block
+        ref_fields: list[Block] = []
+
+        if (
+            len(
+                {
+                    f.model.tablename
+                    for f in self.ref_fields
+                    if isinstance(f, BaseField)
+                }
+            )
+            > 1
+        ):
+            raise ValueError(
+                "All fields in ref_fields must be of the same table."
+            )
+
+        if self.ref_table is None:
+            _ref_fields = self.ref_fields
+            if not all([isinstance(f, BaseField) for f in _ref_fields]):
+                raise TypeError(
+                    "ref_fields must either all be BaseFields or "
+                    "ref_table must be specified."
+                )
+            _ref_fields = typingcast(List[BaseField], _ref_fields)
+
+            ref_table = r(_ref_fields[0].model.tablename)
+
+        else:
+            ref_table = self.ref_table
+
+        ref_fields = [
+            r(f.name) if isinstance(f, BaseField) else f
+            for f in self.ref_fields
+        ]
+        fields = [
+            r(f.name) if isinstance(f, BaseField) else f for f in self.fields
+        ]
+
         return Block(
             r("CONSTRAINT"),
             r(self.name),
             r("FOREIGN KEY ("),
-            join(r(","), *self.fields),
-            r(") REFERENCES ("),
-            join(r(","), *self.ref_fields),
+            join(r(","), *fields),
+            r(") REFERENCES"),
+            ref_table,
+            r("("),
+            join(r(","), *ref_fields),
             r(f") ON DELETE {self.on_delete.value}"),
             r(f"ON UPDATE {self.on_update.value}"),
             wrap=True,
