@@ -22,8 +22,8 @@
 
 from __future__ import annotations
 
+import asyncio
 from enum import IntEnum, IntFlag
-from pprint import pprint
 
 import apgorm
 from apgorm.constraints import ForeignKey
@@ -87,6 +87,22 @@ class Database(apgorm.Database):
     players = Player
 
 
-if __name__ == "__main__":
+async def _main(db: Database):
+    await User.delete_query().execute()
+    user = User(username="Username 1")
+    await user.create()
+    print(user)
+    print(user.user_flags.v)
+
+
+async def main():
     db = Database()
-    pprint(db.describe())
+    await db.connect(database="apgorm")
+    try:
+        await _main(db)
+    finally:
+        await db.cleanup()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
