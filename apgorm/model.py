@@ -32,12 +32,13 @@ from apgorm.sql import (
     InsertQueryBuilder,
     UpdateQueryBuilder,
 )
-from apgorm.types.numeric import Serial
 from apgorm.undefined import UNDEF
 
 from .constraints import Constraint
 
 if TYPE_CHECKING:
+    from apgorm.field import Field
+
     from .database import Database
 
 
@@ -48,7 +49,10 @@ class Model:
     tablename: str  # populated by Database
     database: Database  # populated by Database
 
-    id_ = Serial().field(pk=True, read_only=True, use_eq=True)
+    id_: Field
+    """
+    Hint: `id_ = Serial().field(pk=True, read_only=True, use_eq=True)`
+    """
 
     def __init__(self, **values):
         self.fields: dict[str, BaseField] = {}
