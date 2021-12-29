@@ -69,11 +69,11 @@ class Migration:
     def load_last_migration(
         cls: Type[Migration], folder: Path
     ) -> Migration | None:
-        paths = [cls(p) for p in folder.glob("*.json")]
-        if len(paths) == 0:
+        all_migrations = cls.load_all_migrations(folder)
+        if len(all_migrations) == 0:
             return None
-        paths.sort(key=lambda m: m.migration_id)
-        return paths[0]
+        all_migrations.sort(key=lambda m: m.migration_id)
+        return all_migrations[0]
 
     @classmethod
     def must_create_migrations(cls: Type[Migration], db: Database) -> bool:
