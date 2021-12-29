@@ -35,7 +35,10 @@ class Migration:
         self.path = path
         self._raw_data: dict | None = None
 
-    def raw_data(self, cache: bool = True) -> dict:
+    def raw_data(self, cache: bool = True) -> dict | None:
+        if not self.path.exists():
+            return None
+
         if cache and self._raw_data:
             return self._raw_data
 
@@ -46,8 +49,12 @@ class Migration:
         self._raw_data = res
         return res
 
-    def describe(self) -> dict:
-        desc = self.raw_data()["describe"]
+    def describe(self) -> dict | None:
+        desc = self.raw_data()
+        if desc is None:
+            return None
+
+        desc = desc["describe"]
         assert isinstance(desc, dict)
         return desc
 
