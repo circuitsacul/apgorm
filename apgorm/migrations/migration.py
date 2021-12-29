@@ -23,54 +23,94 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Any, Type
 
 if TYPE_CHECKING:
     from apgorm import Database
 
 
+@dataclass
+class TableRename:
+    original_name: str
+    new_name: str
+
+
+@dataclass
+class FieldAddDrop:
+    table: str
+    name: str
+
+
+@dataclass
+class FieldRename:
+    table: str
+    original_name: str
+    new_name: str
+
+
+@dataclass
+class FieldConstraintAddDrop:
+    table: str
+    field: str
+    constraint: str
+
+
+@dataclass
+class TableConstraintAdd:
+    table: str
+    name: str
+    raw_sql: str
+    params: list[Any]
+
+
+@dataclass
+class TableConstraintDrop:
+    table: str
+    name: str
+
+
+@dataclass
 class Migration:
-    def __init__(self, path: Path):
-        self.path = path
-        self._raw_data: dict | None = None
+    path: str
 
-    def raw_data(self, cache: bool = True) -> dict | None:
-        if not self.path.exists():
-            return None
+    describe: dict
 
-        if cache and self._raw_data:
-            return self._raw_data
+    new_tables: list[str]
+    dropped_tables: list[str]
+    renamed_tables: list[TableRename]
 
-        with open(self.path, "r") as f:
-            res = json.loads(f.read())
+    new_table_constraints: list[TableConstraintAdd]
+    dropped_table_constraints: list[TableConstraintDrop]
 
-        assert isinstance(res, dict)
-        self._raw_data = res
-        return res
+    new_fields: list[FieldAddDrop]
+    dropped_fields: list[FieldAddDrop]
+    renamed_fields: list[FieldRename]
 
-    def describe(self) -> dict | None:
-        desc = self.raw_data()
-        if desc is None:
-            return None
-
-        desc = desc["describe"]
-        assert isinstance(desc, dict)
-        return desc
+    new_field_constraints: list[FieldConstraintAddDrop]
+    dropped_field_constraints: list[FieldConstraintAddDrop]
 
     @property
     def migration_id(self) -> int:
-        return int(self.path.name.strip(".json"))
+        return int(Path(self.path).name.strip(".json"))
 
     @staticmethod
     def filename_from_id(migration_id: int) -> str:
         return f"{migration_id}.json"
 
     @classmethod
+    def from_path(cls: Type[Migration], path: Path) -> Migration:
+        with open(path, "r") as f:
+            data = json.loads(f.read())
+
+        return cls(path=str(path), **data)
+
+    @classmethod
     def load_all_migrations(
         cls: Type[Migration], folder: Path
     ) -> list[Migration]:
-        return [cls(path) for path in folder.glob("*json")]
+        return [cls.from_path(path) for path in folder.glob("*json")]
 
     @classmethod
     def load_last_migration(
@@ -88,4 +128,4 @@ class Migration:
         if last_migration is None:
             return True
 
-        return last_migration.describe() != db.describe()
+        return last_migration.describe != db.describe()
