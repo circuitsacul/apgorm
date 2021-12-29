@@ -26,7 +26,8 @@ from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.exceptions import ModelNotFound
 from apgorm.field import BaseField, ConvertedField
-from apgorm.sql import (
+from apgorm.migrations.describe import DescribeTable
+from apgorm.sql.query_builder import (
     DeleteQueryBuilder,
     FetchQueryBuilder,
     InsertQueryBuilder,
@@ -76,14 +77,13 @@ class Model:
             self.constraints[c.name] = c
 
     @classmethod
-    def describe(cls) -> dict[str, Any]:
+    def describe(cls) -> DescribeTable:
         fields, constraints = cls._special_attrs()
-        return {
-            "fields": {f.name: f.describe() for f in fields.values()},
-            "constraints": {
-                c.name: c.creation_sql().render() for c in constraints.values()
-            },
-        }
+        return DescribeTable(
+            cls.tablename,
+            [f.describe() for f in fields.values()],
+            [c.describe() for c in constraints.values()],
+        )
 
     async def delete(self):
         await self.delete_query().where(id_=self.id_.v).execute()

@@ -20,18 +20,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import constraints, exceptions, migrations, sql, types
-from .converter import Converter
-from .database import Database
-from .model import Model
+from __future__ import annotations
 
-__all__ = (
-    "Converter",
-    "Model",
-    "Database",
-    "constraints",
-    "types",
-    "migrations",
-    "sql",
-    "exceptions",
-)
+from dataclasses import dataclass
+from typing import Any
+
+from apgorm.undefined import UNDEF
+
+
+@dataclass
+class DescribeField:
+    name: str
+    type_: str
+    constraints: list[str]
+    default: Any | UNDEF = UNDEF.UNDEF
+
+
+@dataclass
+class DescribeConstraint:
+    name: str
+    raw_sql: str
+    params: list[Any]
+
+
+@dataclass
+class DescribeTable:
+    name: str
+    fields: list[DescribeField]
+    constraints: list[DescribeConstraint]
+
+
+@dataclass
+class Describe:
+    tables: list[DescribeTable]

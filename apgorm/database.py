@@ -30,7 +30,9 @@ from typing import Any, AsyncGenerator, Type
 import asyncpg
 from asyncpg.cursor import CursorFactory
 
-from apgorm.migrations import AppliedMigration, Migration
+from apgorm.migrations import describe
+from apgorm.migrations.applied_migration import AppliedMigration
+from apgorm.migrations.migration import Migration
 
 from .model import Model
 
@@ -68,8 +70,8 @@ class Database:
         self.pool: asyncpg.Pool | None = None
 
     # migration functions
-    def describe(self) -> dict[str, Any]:
-        return {"tables": {m.tablename: m.describe() for m in self.models}}
+    def describe(self) -> describe.Describe:
+        return describe.Describe([m.describe() for m in self.models])
 
     def load_all_migrations(self) -> list[Migration]:
         return Migration.load_all_migrations(self.migrations_folder)
@@ -79,6 +81,9 @@ class Database:
 
     def must_create_migrations(self) -> bool:
         return Migration.must_create_migrations(self)
+
+    def create_migrations(self):
+        Migration.create_migrations(self).save()
 
     # database functions
     async def connect(self, **connect_kwargs):

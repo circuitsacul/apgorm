@@ -23,12 +23,20 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Type
 
+from apgorm.migrations.describe import Describe, DescribeField, DescribeTable
+from apgorm.undefined import UNDEF
+
 if TYPE_CHECKING:
     from apgorm import Database
+
+
+def _dict_factory(result: list[tuple[Any, Any]]) -> dict:
+    result = [r for r in result if r[1] is not UNDEF.UNDEF]
+    return dict(result)
 
 
 @dataclass
@@ -38,7 +46,14 @@ class TableRename:
 
 
 @dataclass
-class FieldAddDrop:
+class FieldAdd:
+    table: str
+    name: str
+    default: Any | UNDEF = UNDEF.UNDEF
+
+
+@dataclass
+class FieldDrop:
     table: str
     name: str
 
@@ -75,7 +90,7 @@ class TableConstraintDrop:
 class Migration:
     path: str
 
-    describe: dict
+    describe: Describe
 
     new_tables: list[str]
     dropped_tables: list[str]
@@ -84,12 +99,21 @@ class Migration:
     new_table_constraints: list[TableConstraintAdd]
     dropped_table_constraints: list[TableConstraintDrop]
 
-    new_fields: list[FieldAddDrop]
-    dropped_fields: list[FieldAddDrop]
+    new_fields: list[FieldAdd]
+    dropped_fields: list[FieldDrop]
     renamed_fields: list[FieldRename]
 
     new_field_constraints: list[FieldConstraintAddDrop]
     dropped_field_constraints: list[FieldConstraintAddDrop]
+
+    def save(self):
+        with open(self.path, "w+") as f:
+            f.write(json.dumps(self.todict()))
+
+    def todict(self):
+        d = asdict(self, dict_factory=_dict_factory)
+        del d["path"]
+        return d
 
     @property
     def migration_id(self) -> int:
@@ -129,3 +153,122 @@ class Migration:
             return True
 
         return last_migration.describe != db.describe()
+
+    @classmethod
+    def create_migrations(cls: Type[Migration], db: Database) -> Migration:
+        return _create_next_migration(cls, db)
+
+
+def _create_next_migration(
+    cls: Type[Migration],
+    db: Database,
+) -> Migration:  # TODO: handle renaming stuff
+    lm = cls.load_last_migration(db.migrations_folder)
+    cd = db.describe()
+
+    curr_tables_dict = {t.name: t for t in cd.tables}
+    last_tables_dict = {t.name: t for t in lm.describe.tables} if lm else {}
+
+    # tables TODO: renamed tables
+    new_tables = [
+        key for key in curr_tables_dict if key not in last_tables_dict
+    ]
+    dropped_tables = [
+        key for key in last_tables_dict if key not in curr_tables_dict
+    ]
+
+    # constraints
+    new_constraints: list[TableConstraintAdd] = []
+    dropped_constraints: list[TableConstraintDrop] = []
+
+    new_fields: list[FieldAdd] = []
+    dropped_fields: list[FieldDrop] = []
+    new_field_constraints: list[FieldConstraintAddDrop] = []
+    dropped_field_constraints: list[FieldConstraintAddDrop] = []
+
+    for tablename, currtable in curr_tables_dict.items():
+        curr_constraints = {c.name: c for c in currtable.constraints}
+
+        lasttable: DescribeTable | None = None
+        if tablename in last_tables_dict:
+            lasttable = last_tables_dict[tablename]
+            last_constraints = {c.name: c for c in lasttable.constraints}
+        else:
+            last_constraints = {}
+
+        new_constraints.extend(
+            [
+                TableConstraintAdd(tablename, key, c.raw_sql, c.params)
+                for key, c in curr_constraints.items()
+                if key not in last_constraints
+            ]
+        )
+        dropped_constraints.extend(
+            [
+                TableConstraintDrop(tablename, key)
+                for key in last_constraints
+                if key not in curr_constraints
+            ]
+        )
+
+        curr_fields = {f.name: f for f in currtable.fields}
+        if lasttable:
+            last_fields = {f.name: f for f in lasttable.fields}
+        else:
+            last_fields = {}
+
+        new_fields.extend(
+            [
+                FieldAdd(tablename, key, f.default)
+                for key, f in curr_fields.items()
+                if key not in last_fields
+            ]
+        )
+        dropped_fields.extend(
+            [
+                FieldDrop(tablename, key)
+                for key in last_fields
+                if key not in curr_fields
+            ]
+        )
+
+        for fieldname, currfield in curr_fields.items():
+
+            lastfield: DescribeField | None = None
+            if fieldname in last_fields:
+                lastfield = last_fields[fieldname]
+
+            lastfield_constraints = lastfield.constraints if lastfield else {}
+
+            new_field_constraints.extend(
+                [
+                    FieldConstraintAddDrop(tablename, fieldname, c)
+                    for c in currfield.constraints
+                    if c not in lastfield_constraints
+                ]
+            )
+            dropped_field_constraints.extend(
+                [
+                    FieldConstraintAddDrop(tablename, fieldname, c)
+                    for c in lastfield_constraints
+                    if c not in currfield.constraints
+                ]
+            )
+
+    # finalization
+    next_id = lm.migration_id + 1 if lm else 0
+    new_path = str(db.migrations_folder / cls.filename_from_id(next_id))
+    return cls(
+        path=new_path,
+        describe=cd,
+        new_tables=new_tables,
+        dropped_tables=dropped_tables,
+        renamed_tables=[],
+        new_table_constraints=new_constraints,
+        dropped_table_constraints=dropped_constraints,
+        new_fields=new_fields,
+        dropped_fields=dropped_fields,
+        renamed_fields=[],
+        new_field_constraints=new_field_constraints,
+        dropped_field_constraints=dropped_field_constraints,
+    )

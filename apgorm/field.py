@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
 from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
+from apgorm.migrations.describe import DescribeField
 from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
@@ -71,7 +72,7 @@ class BaseField(Generic[_F, _T, _C]):
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
 
-    def describe(self) -> dict[str, Any]:
+    def describe(self) -> DescribeField:
         constraints: list[str] = []
         if self.not_null:
             constraints.append("NOT NULL")
@@ -80,14 +81,12 @@ class BaseField(Generic[_F, _T, _C]):
         if self.pk:
             constraints.append("PRIMARY KEY")
 
-        ret: dict[str, Any] = {
-            "type": self.sql_type.sql,
-            "constraints": constraints,
-        }
-        if self.default is not UNDEF.UNDEF:
-            ret["default"] = self.default
-
-        return ret
+        return DescribeField(
+            self.name,
+            self.sql_type.sql,
+            constraints,
+            self.default,
+        )
 
     @property
     def full_name(self) -> str:

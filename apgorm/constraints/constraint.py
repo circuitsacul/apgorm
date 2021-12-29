@@ -20,7 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from apgorm.sql import Block
+from apgorm.migrations.describe import DescribeConstraint
+from apgorm.sql.sql import Block
 
 
 class Constraint:
@@ -28,3 +29,9 @@ class Constraint:
 
     def creation_sql(self) -> Block:
         raise NotImplementedError
+
+    def describe(self) -> DescribeConstraint:
+        return DescribeConstraint(
+            self.name,
+            *self.creation_sql().render(),
+        )

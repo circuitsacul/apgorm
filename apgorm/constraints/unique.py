@@ -30,7 +30,7 @@ from .constraint import Constraint
 
 if TYPE_CHECKING:
     from apgorm.field import BaseField
-    from apgorm.sql import Block
+    from apgorm.sql.sql import Block
 
 
 class Unique(Constraint):
