@@ -33,19 +33,21 @@ if TYPE_CHECKING:
 class Migration:
     def __init__(self, path: Path):
         self.path = path
-        self.raw_data: dict | None = None
+        self._raw_data: dict | None = None
 
-    def load_data(self, force: bool = False):
-        if not force and self.raw_data:
-            return
+    def raw_data(self, cache: bool = True) -> dict:
+        if cache and self._raw_data:
+            return self._raw_data
+
         with open(self.path, "r") as f:
-            self.raw_data = json.loads(f.read())
+            res = json.loads(f.read())
+
+        assert isinstance(res, dict)
+        self._raw_data = res
+        return res
 
     def describe(self) -> dict:
-        self.load_data()
-        assert self.raw_data is not None
-
-        desc = self.raw_data["describe"]
+        desc = self.raw_data()["describe"]
         assert isinstance(desc, dict)
         return desc
 
