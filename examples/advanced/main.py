@@ -33,6 +33,7 @@ from .database import Database, Game, Player, PlayerStatus, User
 def _check_migration_status(db: Database):
     if db.must_create_migrations():
         print("Warning: Migrations need creating!")
+        db.create_migrations()
     else:
         print("Migrations up-to-date!")
 
@@ -88,7 +89,7 @@ async def _main(db: Database):
 
 
 async def main():
-    migrations_folder = Path(".migrations")
+    migrations_folder = Path("examples/advanced/migrations")
     db = Database(migrations_folder)
     await db.connect(database="apgorm")
     try:
