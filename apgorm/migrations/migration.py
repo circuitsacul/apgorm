@@ -145,7 +145,7 @@ class Migration:
         if len(all_migrations) == 0:
             return None
         all_migrations.sort(key=lambda m: m.migration_id)
-        return all_migrations[0]
+        return all_migrations[-1]
 
     @classmethod
     def must_create_migrations(cls: Type[Migration], db: Database) -> bool:
