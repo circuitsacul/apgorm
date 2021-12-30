@@ -116,6 +116,26 @@ class Migration:
         del d["path"]
         return d
 
+    def isempty(self) -> bool:
+        must_be_empty = [
+            "new_tables",
+            "dropped_tables",
+            "renamed_tables",
+            "new_table_constraints",
+            "dropped_table_constraints",
+            "new_fields",
+            "dropped_fields",
+            "renamed_fields",
+            "new_field_constraints",
+            "dropped_table_constraints",
+        ]
+        for attr in must_be_empty:
+            v = getattr(self, attr)
+            if isinstance(v, list) and len(v) > 0:
+                return False
+
+        return True
+
     @property
     def migration_id(self) -> int:
         return int(Path(self.path).name.strip(".json"))
@@ -149,11 +169,7 @@ class Migration:
 
     @classmethod
     def must_create_migrations(cls: Type[Migration], db: Database) -> bool:
-        last_migration = cls.load_last_migration(db.migrations_folder)
-        if last_migration is None:
-            return True
-
-        return last_migration.describe != db.describe()
+        return not cls.create_migrations(db).isempty()
 
     @classmethod
     def create_migrations(cls: Type[Migration], db: Database) -> Migration:

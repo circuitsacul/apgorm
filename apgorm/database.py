@@ -83,7 +83,10 @@ class Database:
         return Migration.must_create_migrations(self)
 
     def create_migrations(self):
-        Migration.create_migrations(self).save()
+        next = Migration.create_migrations(self)
+        if next.isempty():
+            raise Exception("No migrations to create.")
+        next.save()
 
     # database functions
     async def connect(self, **connect_kwargs):
