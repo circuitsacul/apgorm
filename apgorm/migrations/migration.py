@@ -23,12 +23,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, List, Type, Union
 
 from apgorm.migrations.describe import Describe, DescribeField, DescribeTable
 from apgorm.undefined import UNDEF
+from apgorm.utils import nested_dataclass
 
 if TYPE_CHECKING:
     from apgorm import Database
@@ -39,72 +40,72 @@ def _dict_factory(result: list[tuple[Any, Any]]) -> dict:
     return dict(result)
 
 
-@dataclass
+@nested_dataclass
 class TableRename:
     original_name: str
     new_name: str
 
 
-@dataclass
+@nested_dataclass
 class FieldAdd:
     table: str
     name: str
-    default: Any | UNDEF = UNDEF.UNDEF
+    default: Union[Any, UNDEF] = UNDEF.UNDEF
 
 
-@dataclass
+@nested_dataclass
 class FieldDrop:
     table: str
     name: str
 
 
-@dataclass
+@nested_dataclass
 class FieldRename:
     table: str
     original_name: str
     new_name: str
 
 
-@dataclass
+@nested_dataclass
 class FieldConstraintAddDrop:
     table: str
     field: str
     constraint: str
 
 
-@dataclass
+@nested_dataclass
 class TableConstraintAdd:
     table: str
     name: str
     raw_sql: str
-    params: list[Any]
+    params: List[Any]
 
 
-@dataclass
+@nested_dataclass
 class TableConstraintDrop:
     table: str
     name: str
 
 
-@dataclass
+@nested_dataclass
 class Migration:
     path: str
 
     describe: Describe
 
-    new_tables: list[str]
-    dropped_tables: list[str]
-    renamed_tables: list[TableRename]
+    new_tables: List[str]
+    dropped_tables: List[str]
+    renamed_tables: List[TableRename]
 
-    new_table_constraints: list[TableConstraintAdd]
-    dropped_table_constraints: list[TableConstraintDrop]
+    new_table_constraints: List[TableConstraintAdd]
+    dropped_table_constraints: List[TableConstraintDrop]
 
-    new_fields: list[FieldAdd]
-    dropped_fields: list[FieldDrop]
-    renamed_fields: list[FieldRename]
+    new_fields: List[FieldAdd]
+    dropped_fields: List[FieldDrop]
+    renamed_fields: List[FieldRename]
 
-    new_field_constraints: list[FieldConstraintAddDrop]
-    dropped_field_constraints: list[FieldConstraintAddDrop]
+    new_field_constraints: List[FieldConstraintAddDrop]
+    dropped_field_constraints: List[FieldConstraintAddDrop]
 
     def save(self):
         with open(self.path, "w+") as f:

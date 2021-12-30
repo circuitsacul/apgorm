@@ -22,34 +22,34 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from typing import Any, List, Union
 
 from apgorm.undefined import UNDEF
+from apgorm.utils import nested_dataclass
 
 
-@dataclass
+@nested_dataclass
 class DescribeField:
     name: str
     type_: str
-    constraints: list[str]
-    default: Any | UNDEF = UNDEF.UNDEF
+    constraints: List[str]
+    default: Union[Any, UNDEF] = UNDEF.UNDEF
 
 
-@dataclass
+@nested_dataclass
 class DescribeConstraint:
     name: str
     raw_sql: str
-    params: list[Any]
+    params: List[Any]
 
 
-@dataclass
+@nested_dataclass
 class DescribeTable:
     name: str
-    fields: list[DescribeField]
-    constraints: list[DescribeConstraint]
+    fields: List[DescribeField]
+    constraints: List[DescribeConstraint]
 
 
-@dataclass
+@nested_dataclass
 class Describe:
-    tables: list[DescribeTable]
+    tables: List[DescribeTable]
