@@ -194,7 +194,7 @@ def _create_next_migration(
         key for key in last_tables_dict if key not in curr_tables_dict
     ]
 
-    # constraints
+    # table constraints, fields, and field constraints
     new_constraints: list[TableConstraintAdd] = []
     dropped_constraints: list[TableConstraintDrop] = []
 
@@ -204,11 +204,13 @@ def _create_next_migration(
     dropped_field_constraints: list[FieldConstraintAddDrop] = []
 
     for tablename, currtable in curr_tables_dict.items():
-        curr_constraints = {c.name: c for c in currtable.constraints}
-
         lasttable: DescribeTable | None = None
         if tablename in last_tables_dict:
             lasttable = last_tables_dict[tablename]
+
+        # table constraints
+        curr_constraints = {c.name: c for c in currtable.constraints}
+        if lasttable:
             last_constraints = {c.name: c for c in lasttable.constraints}
         else:
             last_constraints = {}
@@ -228,6 +230,30 @@ def _create_next_migration(
             ]
         )
 
+        for constraint in curr_constraints.values():
+            last_constraint = last_constraints.get(constraint.name, None)
+            if not last_constraint:
+                continue
+
+            if (
+                constraint.raw_sql == last_constraint.raw_sql
+                and constraint.params == last_constraint.params
+            ):
+                continue
+
+            dropped_constraints.append(
+                TableConstraintDrop(tablename, constraint.name)
+            )
+            new_constraints.append(
+                TableConstraintAdd(
+                    tablename,
+                    constraint.name,
+                    constraint.raw_sql,
+                    constraint.params,
+                )
+            )
+
+        # fields
         curr_fields = {f.name: f for f in currtable.fields}
         if lasttable:
             last_fields = {f.name: f for f in lasttable.fields}
@@ -249,6 +275,7 @@ def _create_next_migration(
             ]
         )
 
+        # field constraints
         for fieldname, currfield in curr_fields.items():
 
             lastfield: DescribeField | None = None
