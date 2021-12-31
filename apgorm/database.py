@@ -25,20 +25,21 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Type
+from typing import Any, AsyncGenerator, Awaitable, Type
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
 
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
+from apgorm.migrations.apply_migration import apply_migration
 from apgorm.migrations.migration import Migration
 
 from .model import Model
 
 
 class Database:
-    _internal_applied_migrations = AppliedMigration
+    _migrations = AppliedMigration
 
     def __init__(self, migrations_folder: Path):
         self.migrations_folder = migrations_folder
@@ -87,6 +88,17 @@ class Database:
         if next.isempty():
             raise Exception("No migrations to create.")
         next.save(indent=indent)
+
+    def load_unapplied_migrations(self) -> Awaitable[list[Migration]]:
+        return Migration.load_unapplied_migrations(self)
+
+    async def must_apply_migrations(self) -> bool:
+        return len(await self.load_unapplied_migrations()) > 0
+
+    async def apply_migrations(self):
+        for m in await Migration.load_unapplied_migrations(self):
+            print(m.path)
+            await apply_migration(m, self)
 
     # database functions
     async def connect(self, **connect_kwargs):

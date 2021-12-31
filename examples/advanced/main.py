@@ -30,12 +30,18 @@ from apgorm.sql.generators.comp import neq
 from .database import Database, Game, Player, PlayerStatus, User
 
 
-def _check_migration_status(db: Database):
+async def _check_migration_status(db: Database):
     if db.must_create_migrations():
         print("Creating migrations...")
         db.create_migrations(indent=4)
     else:
         print("Migrations up-to-date!")
+
+    if await db.must_apply_migrations():
+        print("Applying migrations...")
+        await db.apply_migrations()
+    else:
+        print("Migrations applied!")
 
 
 async def _main(db: Database):
@@ -93,7 +99,7 @@ async def main():
     db = Database(migrations_folder)
     await db.connect(database="apgorm")
     try:
-        _check_migration_status(db)
+        await _check_migration_status(db)
         await _main(db)
     finally:
         await db.cleanup()

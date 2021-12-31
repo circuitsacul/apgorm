@@ -27,7 +27,9 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Type, Union
 
-from apgorm.migrations.describe import Describe, DescribeField, DescribeTable
+import asyncpg
+
+from apgorm.migrations.describe import Describe, DescribeTable
 from apgorm.undefined import UNDEF
 from apgorm.utils import nested_dataclass
 
@@ -50,6 +52,7 @@ class TableRename:
 class FieldAdd:
     table: str
     name: str
+    type_: str
     default: Union[Any, UNDEF] = UNDEF.UNDEF
 
 
@@ -64,13 +67,6 @@ class FieldRename:
     table: str
     original_name: str
     new_name: str
-
-
-@nested_dataclass
-class FieldConstraintAddDrop:
-    table: str
-    field: str
-    constraint: str
 
 
 @nested_dataclass
@@ -104,9 +100,6 @@ class Migration:
     dropped_fields: List[FieldDrop]
     renamed_fields: List[FieldRename]
 
-    new_field_constraints: List[FieldConstraintAddDrop]
-    dropped_field_constraints: List[FieldConstraintAddDrop]
-
     def save(self, indent: int | None = None):
         with open(self.path, "w+") as f:
             f.write(json.dumps(self.todict(), indent=indent))
@@ -126,8 +119,6 @@ class Migration:
             "new_fields",
             "dropped_fields",
             "renamed_fields",
-            "new_field_constraints",
-            "dropped_table_constraints",
         ]
         for attr in must_be_empty:
             v = getattr(self, attr)
@@ -175,6 +166,22 @@ class Migration:
     def create_migrations(cls: Type[Migration], db: Database) -> Migration:
         return _create_next_migration(cls, db)
 
+    @classmethod
+    async def load_unapplied_migrations(
+        cls: Type[Migration], db: Database
+    ) -> list[Migration]:
+        all_migrations = cls.load_all_migrations(db.migrations_folder)
+        by_id = {m.migration_id: m for m in all_migrations}
+        try:
+            async for applied_migration in (
+                db._migrations.fetch_query().cursor()
+            ):
+                del by_id[applied_migration.id_.v]
+        except asyncpg.exceptions.UndefinedTableError:
+            pass
+
+        return list(by_id.values())
+
 
 def _create_next_migration(
     cls: Type[Migration],
@@ -200,8 +207,6 @@ def _create_next_migration(
 
     new_fields: list[FieldAdd] = []
     dropped_fields: list[FieldDrop] = []
-    new_field_constraints: list[FieldConstraintAddDrop] = []
-    dropped_field_constraints: list[FieldConstraintAddDrop] = []
 
     for tablename, currtable in curr_tables_dict.items():
         lasttable: DescribeTable | None = None
@@ -262,7 +267,7 @@ def _create_next_migration(
 
         new_fields.extend(
             [
-                FieldAdd(tablename, key, f.default)
+                FieldAdd(tablename, key, f.type_, f.default)
                 for key, f in curr_fields.items()
                 if key not in last_fields
             ]
@@ -274,30 +279,6 @@ def _create_next_migration(
                 if key not in curr_fields
             ]
         )
-
-        # field constraints
-        for fieldname, currfield in curr_fields.items():
-
-            lastfield: DescribeField | None = None
-            if fieldname in last_fields:
-                lastfield = last_fields[fieldname]
-
-            lastfield_constraints = lastfield.constraints if lastfield else {}
-
-            new_field_constraints.extend(
-                [
-                    FieldConstraintAddDrop(tablename, fieldname, c)
-                    for c in currfield.constraints
-                    if c not in lastfield_constraints
-                ]
-            )
-            dropped_field_constraints.extend(
-                [
-                    FieldConstraintAddDrop(tablename, fieldname, c)
-                    for c in lastfield_constraints
-                    if c not in currfield.constraints
-                ]
-            )
 
     # finalization
     next_id = lm.migration_id + 1 if lm else 0
@@ -313,6 +294,4 @@ def _create_next_migration(
         new_fields=new_fields,
         dropped_fields=dropped_fields,
         renamed_fields=[],
-        new_field_constraints=new_field_constraints,
-        dropped_field_constraints=dropped_field_constraints,
     )
