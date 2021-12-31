@@ -41,7 +41,7 @@ def _alter_table(tablename: Block, sql: SQL) -> Block:
     return Block(r("ALTER TABLE"), tablename, sql)
 
 
-def add_table_constraint(
+def add_constraint(
     tablename: Block,
     constraint_raw_sql: str,
     constraint_params: list[Any],
@@ -54,7 +54,7 @@ def add_table_constraint(
     return f"{raw_sql} {constraint_raw_sql}", constraint_params + params
 
 
-def drop_table_constraint(tablename: Block, constraint_name: Block) -> Block:
+def drop_constraint(tablename: Block, constraint_name: Block) -> Block:
     return _alter_table(
         tablename, Block(r("DROP CONSTRAINT"), constraint_name)
     )

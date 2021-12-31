@@ -70,7 +70,7 @@ class FieldRename:
 
 
 @nested_dataclass
-class TableConstraintAdd:
+class ConstraintAdd:
     table: str
     name: str
     raw_sql: str
@@ -78,7 +78,7 @@ class TableConstraintAdd:
 
 
 @nested_dataclass
-class TableConstraintDrop:
+class ConstraintDrop:
     table: str
     name: str
 
@@ -93,8 +93,8 @@ class Migration:
     dropped_tables: List[str]
     renamed_tables: List[TableRename]
 
-    new_table_constraints: List[TableConstraintAdd]
-    dropped_table_constraints: List[TableConstraintDrop]
+    new_constraints: List[ConstraintAdd]
+    dropped_constraints: List[ConstraintDrop]
 
     new_fields: List[FieldAdd]
     dropped_fields: List[FieldDrop]
@@ -114,8 +114,8 @@ class Migration:
             "new_tables",
             "dropped_tables",
             "renamed_tables",
-            "new_table_constraints",
-            "dropped_table_constraints",
+            "new_constraints",
+            "dropped_constraints",
             "new_fields",
             "dropped_fields",
             "renamed_fields",
@@ -202,8 +202,8 @@ def _create_next_migration(
     ]
 
     # table constraints, fields, and field constraints
-    new_constraints: list[TableConstraintAdd] = []
-    dropped_constraints: list[TableConstraintDrop] = []
+    new_constraints: list[ConstraintAdd] = []
+    dropped_constraints: list[ConstraintDrop] = []
 
     new_fields: list[FieldAdd] = []
     dropped_fields: list[FieldDrop] = []
@@ -222,14 +222,14 @@ def _create_next_migration(
 
         new_constraints.extend(
             [
-                TableConstraintAdd(tablename, key, c.raw_sql, c.params)
+                ConstraintAdd(tablename, key, c.raw_sql, c.params)
                 for key, c in curr_constraints.items()
                 if key not in last_constraints
             ]
         )
         dropped_constraints.extend(
             [
-                TableConstraintDrop(tablename, key)
+                ConstraintDrop(tablename, key)
                 for key in last_constraints
                 if key not in curr_constraints
             ]
@@ -247,10 +247,10 @@ def _create_next_migration(
                 continue
 
             dropped_constraints.append(
-                TableConstraintDrop(tablename, constraint.name)
+                ConstraintDrop(tablename, constraint.name)
             )
             new_constraints.append(
-                TableConstraintAdd(
+                ConstraintAdd(
                     tablename,
                     constraint.name,
                     constraint.raw_sql,
@@ -289,8 +289,8 @@ def _create_next_migration(
         new_tables=new_tables,
         dropped_tables=dropped_tables,
         renamed_tables=[],
-        new_table_constraints=new_constraints,
-        dropped_table_constraints=dropped_constraints,
+        new_constraints=new_constraints,
+        dropped_constraints=dropped_constraints,
         new_fields=new_fields,
         dropped_fields=dropped_fields,
         renamed_fields=[],

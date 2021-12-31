@@ -121,7 +121,7 @@
     ],
     "dropped_tables": [],
     "renamed_tables": [],
-    "new_table_constraints": [
+    "new_constraints": [
         {
             "table": "players",
             "name": "game_id_fk",
@@ -135,7 +135,7 @@
             "params": []
         }
     ],
-    "dropped_table_constraints": [],
+    "dropped_constraints": [],
     "new_fields": [
         {
             "table": "_migrations",

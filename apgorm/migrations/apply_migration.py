@@ -70,20 +70,20 @@ async def apply_migration(migration: Migration, db: Database):
         )
 
     # table constraints
-    for new_table_constraint in migration.new_table_constraints:
+    for new_constraint in migration.new_constraints:
         await db.execute(
-            *alter.add_table_constraint(
-                r(new_table_constraint.table),
-                new_table_constraint.raw_sql,
-                new_table_constraint.params,
+            *alter.add_constraint(
+                r(new_constraint.table),
+                new_constraint.raw_sql,
+                new_constraint.params,
             )
         )
 
-    for drop_table_constraint in migration.dropped_table_constraints:
+    for drop_constraint in migration.dropped_constraints:
         await db.execute(
-            *alter.drop_table_constraint(
-                r(drop_table_constraint.table),
-                r(drop_table_constraint.name),
+            *alter.drop_constraint(
+                r(drop_constraint.table),
+                r(drop_constraint.name),
             ).render()
         )
 
