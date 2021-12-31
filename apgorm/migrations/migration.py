@@ -107,9 +107,9 @@ class Migration:
     new_field_constraints: List[FieldConstraintAddDrop]
     dropped_field_constraints: List[FieldConstraintAddDrop]
 
-    def save(self):
+    def save(self, indent: int | None = None):
         with open(self.path, "w+") as f:
-            f.write(json.dumps(self.todict()))
+            f.write(json.dumps(self.todict(), indent=indent))
 
     def todict(self):
         d = asdict(self, dict_factory=_dict_factory)

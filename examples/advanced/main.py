@@ -33,7 +33,7 @@ from .database import Database, Game, Player, PlayerStatus, User
 def _check_migration_status(db: Database):
     if db.must_create_migrations():
         print("Creating migrations...")
-        db.create_migrations()
+        db.create_migrations(indent=4)
     else:
         print("Migrations up-to-date!")
 

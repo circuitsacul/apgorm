@@ -82,11 +82,11 @@ class Database:
     def must_create_migrations(self) -> bool:
         return Migration.must_create_migrations(self)
 
-    def create_migrations(self):
+    def create_migrations(self, indent: int | None = None):
         next = Migration.create_migrations(self)
         if next.isempty():
             raise Exception("No migrations to create.")
-        next.save()
+        next.save(indent=indent)
 
     # database functions
     async def connect(self, **connect_kwargs):
