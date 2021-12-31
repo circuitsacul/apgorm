@@ -32,8 +32,6 @@ if TYPE_CHECKING:
 else:
     from dataclasses import dataclass, is_dataclass
 
-    field_type = None
-
     def nested_dataclass(*args, **kwargs):
         def wrapper(cls):
             cls = dataclass(cls, **kwargs)
