@@ -97,7 +97,6 @@ class Database:
 
     async def apply_migrations(self):
         for m in await Migration.load_unapplied_migrations(self):
-            print(m.path)
             await apply_migration(m, self)
 
     # database functions
