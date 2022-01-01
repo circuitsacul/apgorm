@@ -25,12 +25,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Sequence
 
 from apgorm.sql.generators.helpers import join, r
+from apgorm.sql.sql import Block
 
 from .constraint import Constraint
 
 if TYPE_CHECKING:
     from apgorm.field import BaseField
-    from apgorm.sql.sql import Block
 
 
 class Unique(Constraint):
@@ -42,7 +42,7 @@ class Unique(Constraint):
             r("CONSTRAINT"),
             r(self.name),
             r("UNIQUE ("),
-            join(r(","), self.fields),
+            join(r(","), *self.fields),
             r(")"),
             wrap=True,
         )

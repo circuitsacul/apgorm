@@ -25,11 +25,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from apgorm.sql.generators.helpers import r
+from apgorm.sql.sql import Block
 
 from .constraint import Constraint
 
 if TYPE_CHECKING:
-    from apgorm.sql.sql import Block
     from apgorm.types.boolean import Bool
 
 
