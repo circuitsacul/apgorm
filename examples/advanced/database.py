@@ -51,14 +51,14 @@ class User(apgorm.Model):
     nickname = VarChar(32).nullablefield(default=None)
 
     username_unique = Unique([username])
-    primary_key = PrimaryKey([id_])
+    users_pk = PrimaryKey([id_])
 
 
 class Game(apgorm.Model):
     id_ = Serial().field(read_only=True, use_eq=True)
     name = VarChar(32).field()
 
-    primary_key = PrimaryKey([id_])
+    games_pk = PrimaryKey([id_])
 
 
 class Player(apgorm.Model):
@@ -69,7 +69,7 @@ class Player(apgorm.Model):
 
     user_id_fk = ForeignKey([user_id], [User.id_])
     game_id_fk = ForeignKey([game_id], [Game.id_])
-    primary_key = PrimaryKey([id_])
+    players_pk = PrimaryKey([id_])
 
 
 class Database(apgorm.Database):

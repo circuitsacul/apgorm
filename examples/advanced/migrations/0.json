@@ -12,8 +12,8 @@
                 ],
                 "constraints": [
                     {
-                        "name": "primary_key",
-                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( _migrations.id_ )",
+                        "name": "_migrations_pk",
+                        "raw_sql": "CONSTRAINT _migrations_pk PRIMARY KEY ( id_ )",
                         "params": []
                     }
                 ]
@@ -34,8 +34,8 @@
                 ],
                 "constraints": [
                     {
-                        "name": "primary_key",
-                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( games.id_ )",
+                        "name": "games_pk",
+                        "raw_sql": "CONSTRAINT games_pk PRIMARY KEY ( id_ )",
                         "params": []
                     }
                 ]
@@ -72,8 +72,8 @@
                         "params": []
                     },
                     {
-                        "name": "primary_key",
-                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( players.id_ )",
+                        "name": "players_pk",
+                        "raw_sql": "CONSTRAINT players_pk PRIMARY KEY ( id_ )",
                         "params": []
                     },
                     {
@@ -105,13 +105,13 @@
                 ],
                 "constraints": [
                     {
-                        "name": "primary_key",
-                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( users.id_ )",
+                        "name": "username_unique",
+                        "raw_sql": "CONSTRAINT username_unique UNIQUE ( username )",
                         "params": []
                     },
                     {
-                        "name": "username_unique",
-                        "raw_sql": "CONSTRAINT username_unique UNIQUE ( users.username )",
+                        "name": "users_pk",
+                        "raw_sql": "CONSTRAINT users_pk PRIMARY KEY ( id_ )",
                         "params": []
                     }
                 ]
@@ -129,14 +129,14 @@
     "new_constraints": [
         {
             "table": "_migrations",
-            "name": "primary_key",
-            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( _migrations.id_ )",
+            "name": "_migrations_pk",
+            "raw_sql": "CONSTRAINT _migrations_pk PRIMARY KEY ( id_ )",
             "params": []
         },
         {
             "table": "games",
-            "name": "primary_key",
-            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( games.id_ )",
+            "name": "games_pk",
+            "raw_sql": "CONSTRAINT games_pk PRIMARY KEY ( id_ )",
             "params": []
         },
         {
@@ -147,8 +147,8 @@
         },
         {
             "table": "players",
-            "name": "primary_key",
-            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( players.id_ )",
+            "name": "players_pk",
+            "raw_sql": "CONSTRAINT players_pk PRIMARY KEY ( id_ )",
             "params": []
         },
         {
@@ -159,14 +159,14 @@
         },
         {
             "table": "users",
-            "name": "primary_key",
-            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( users.id_ )",
+            "name": "username_unique",
+            "raw_sql": "CONSTRAINT username_unique UNIQUE ( username )",
             "params": []
         },
         {
             "table": "users",
-            "name": "username_unique",
-            "raw_sql": "CONSTRAINT username_unique UNIQUE ( users.username )",
+            "name": "users_pk",
+            "raw_sql": "CONSTRAINT users_pk PRIMARY KEY ( id_ )",
             "params": []
         }
     ],

@@ -30,4 +30,4 @@ from apgorm.types.numeric import Int
 class AppliedMigration(Model):
     id_ = Int().field(read_only=True, use_eq=True)
 
-    primary_key = PrimaryKey([id_])
+    _migrations_pk = PrimaryKey([id_])
