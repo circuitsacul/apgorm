@@ -85,8 +85,6 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 class _BaseSerial(SqlType[int]):
     def field(  # type: ignore
         self: _S,
-        pk: bool = False,
-        unique: bool = False,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -94,8 +92,6 @@ class _BaseSerial(SqlType[int]):
         return Field(
             sql_type=self,
             not_null=True,
-            pk=pk,
-            unique=unique,
             read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
@@ -103,8 +99,6 @@ class _BaseSerial(SqlType[int]):
 
     def nullablefield(  # type: ignore
         self: _S,
-        pk: bool = False,
-        unique: bool = False,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -112,8 +106,6 @@ class _BaseSerial(SqlType[int]):
         return Field(
             sql_type=self,
             not_null=False,
-            pk=pk,
-            unique=unique,
             read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,

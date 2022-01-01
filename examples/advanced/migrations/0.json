@@ -10,7 +10,13 @@
                         "not_null": true
                     }
                 ],
-                "constraints": []
+                "constraints": [
+                    {
+                        "name": "primary_key",
+                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( _migrations.id_ )",
+                        "params": []
+                    }
+                ]
             },
             {
                 "name": "games",
@@ -26,7 +32,13 @@
                         "not_null": true
                     }
                 ],
-                "constraints": []
+                "constraints": [
+                    {
+                        "name": "primary_key",
+                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( games.id_ )",
+                        "params": []
+                    }
+                ]
             },
             {
                 "name": "players",
@@ -60,6 +72,11 @@
                         "params": []
                     },
                     {
+                        "name": "primary_key",
+                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( players.id_ )",
+                        "params": []
+                    },
+                    {
                         "name": "user_id_fk",
                         "raw_sql": "CONSTRAINT user_id_fk FOREIGN KEY ( user_id ) REFERENCES users ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE",
                         "params": []
@@ -86,7 +103,18 @@
                         "not_null": true
                     }
                 ],
-                "constraints": []
+                "constraints": [
+                    {
+                        "name": "primary_key",
+                        "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( users.id_ )",
+                        "params": []
+                    },
+                    {
+                        "name": "username_unique",
+                        "raw_sql": "CONSTRAINT username_unique UNIQUE ( users.username )",
+                        "params": []
+                    }
+                ]
             }
         ]
     },
@@ -100,6 +128,18 @@
     "renamed_tables": [],
     "new_constraints": [
         {
+            "table": "_migrations",
+            "name": "primary_key",
+            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( _migrations.id_ )",
+            "params": []
+        },
+        {
+            "table": "games",
+            "name": "primary_key",
+            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( games.id_ )",
+            "params": []
+        },
+        {
             "table": "players",
             "name": "game_id_fk",
             "raw_sql": "CONSTRAINT game_id_fk FOREIGN KEY ( game_id ) REFERENCES games ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE",
@@ -107,8 +147,26 @@
         },
         {
             "table": "players",
+            "name": "primary_key",
+            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( players.id_ )",
+            "params": []
+        },
+        {
+            "table": "players",
             "name": "user_id_fk",
             "raw_sql": "CONSTRAINT user_id_fk FOREIGN KEY ( user_id ) REFERENCES users ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE",
+            "params": []
+        },
+        {
+            "table": "users",
+            "name": "primary_key",
+            "raw_sql": "CONSTRAINT primary_key PRIMARY KEY ( users.id_ )",
+            "params": []
+        },
+        {
+            "table": "users",
+            "name": "username_unique",
+            "raw_sql": "CONSTRAINT username_unique UNIQUE ( users.username )",
             "params": []
         }
     ],

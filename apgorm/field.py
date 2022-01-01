@@ -51,8 +51,6 @@ class BaseField(Generic[_F, _T, _C]):
         *,
         default: SQL[_T] | UNDEF = UNDEF.UNDEF,
         not_null: bool = False,
-        pk: bool = False,
-        unique: bool = False,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -62,8 +60,6 @@ class BaseField(Generic[_F, _T, _C]):
         self.default = default
 
         self.not_null = not_null
-        self.pk = pk
-        self.unique = unique
 
         self.read_only = read_only
         self.use_repr = use_repr
@@ -97,8 +93,6 @@ class BaseField(Generic[_F, _T, _C]):
             sql_type=self.sql_type,
             default=self.default,
             not_null=self.not_null,
-            pk=self.pk,
-            unique=self.unique,
             read_only=self.read_only,
         )
 

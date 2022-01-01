@@ -25,7 +25,7 @@ from __future__ import annotations
 from enum import IntEnum
 
 import apgorm
-from apgorm.constraints import ForeignKey
+from apgorm.constraints import ForeignKey, PrimaryKey, Unique
 from apgorm.types.character import VarChar
 from apgorm.types.numeric import Int, Serial
 
@@ -46,24 +46,30 @@ class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
 
 
 class User(apgorm.Model):
-    id_ = Serial().field(pk=True, read_only=True, use_eq=True)
-    username = VarChar(32).field(unique=True)
+    id_ = Serial().field(read_only=True, use_eq=True)
+    username = VarChar(32).field()
     nickname = VarChar(32).nullablefield(default=None)
+
+    username_unique = Unique([username])
+    primary_key = PrimaryKey([id_])
 
 
 class Game(apgorm.Model):
-    id_ = Serial().field(pk=True, read_only=True, use_eq=True)
+    id_ = Serial().field(read_only=True, use_eq=True)
     name = VarChar(32).field()
+
+    primary_key = PrimaryKey([id_])
 
 
 class Player(apgorm.Model):
-    id_ = Serial().field(pk=True, read_only=True, use_eq=True)
+    id_ = Serial().field(read_only=True, use_eq=True)
     user_id = Int().field()
     game_id = Int().field()
     status = Int().field(default=0).with_converter(PlayerStatusConverter)
 
     user_id_fk = ForeignKey([user_id], [User.id_])
     game_id_fk = ForeignKey([game_id], [Game.id_])
+    primary_key = PrimaryKey([id_])
 
 
 class Database(apgorm.Database):

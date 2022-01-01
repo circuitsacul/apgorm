@@ -22,9 +22,12 @@
 
 from __future__ import annotations
 
+from apgorm.constraints import PrimaryKey
 from apgorm.model import Model
 from apgorm.types.numeric import Int
 
 
 class AppliedMigration(Model):
-    id_ = Int().field(pk=True, read_only=True, use_eq=True)
+    id_ = Int().field(read_only=True, use_eq=True)
+
+    primary_key = PrimaryKey([id_])
