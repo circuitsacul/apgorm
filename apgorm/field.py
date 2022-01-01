@@ -57,7 +57,7 @@ class BaseField(Generic[_F, _T, _C]):
         self.sql_type = sql_type
 
         if isinstance(default, BaseField):
-            default = default.full_name
+            default = default.name
         self.default = default
 
         self.not_null = not_null
