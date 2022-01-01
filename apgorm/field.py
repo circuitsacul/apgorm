@@ -31,7 +31,6 @@ from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
     from apgorm.model import Model
-    from apgorm.sql.sql import SQL
 
     from .types.base_type import SqlType
 
@@ -49,7 +48,7 @@ class BaseField(Generic[_F, _T, _C]):
         self,
         sql_type: _F,
         *,
-        default: SQL[_T] | UNDEF = UNDEF.UNDEF,
+        default: str | BaseField | None = None,
         not_null: bool = False,
         read_only: bool = False,
         use_repr: bool = True,
@@ -57,6 +56,8 @@ class BaseField(Generic[_F, _T, _C]):
     ):
         self.sql_type = sql_type
 
+        if isinstance(default, BaseField):
+            default = default.full_name
         self.default = default
 
         self.not_null = not_null

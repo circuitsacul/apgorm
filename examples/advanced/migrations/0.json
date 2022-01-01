@@ -7,7 +7,8 @@
                     {
                         "name": "id_",
                         "type_": "INTEGER",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     }
                 ],
                 "fk_constraints": [],
@@ -27,12 +28,14 @@
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     },
                     {
                         "name": "name",
                         "type_": "VARCHAR(32)",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     }
                 ],
                 "fk_constraints": [],
@@ -52,23 +55,26 @@
                     {
                         "name": "game_id",
                         "type_": "INTEGER",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     },
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     },
                     {
                         "name": "status",
                         "type_": "INTEGER",
                         "not_null": true,
-                        "default": 0
+                        "default": "0"
                     },
                     {
                         "name": "user_id",
                         "type_": "INTEGER",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     }
                 ],
                 "fk_constraints": [
@@ -99,18 +105,20 @@
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     },
                     {
                         "name": "nickname",
                         "type_": "VARCHAR(32)",
                         "not_null": false,
-                        "default": null
+                        "default": "null"
                     },
                     {
                         "name": "username",
                         "type_": "VARCHAR(32)",
-                        "not_null": true
+                        "not_null": true,
+                        "default": null
                     }
                 ],
                 "fk_constraints": [],
@@ -194,54 +202,62 @@
         {
             "table": "_migrations",
             "name": "id_",
-            "type_": "INTEGER"
+            "type_": "INTEGER",
+            "default": null
         },
         {
             "table": "games",
             "name": "id_",
-            "type_": "SERIAL"
+            "type_": "SERIAL",
+            "default": null
         },
         {
             "table": "games",
             "name": "name",
-            "type_": "VARCHAR(32)"
+            "type_": "VARCHAR(32)",
+            "default": null
         },
         {
             "table": "players",
             "name": "game_id",
-            "type_": "INTEGER"
+            "type_": "INTEGER",
+            "default": null
         },
         {
             "table": "players",
             "name": "id_",
-            "type_": "SERIAL"
+            "type_": "SERIAL",
+            "default": null
         },
         {
             "table": "players",
             "name": "status",
             "type_": "INTEGER",
-            "default": 0
+            "default": "0"
         },
         {
             "table": "players",
             "name": "user_id",
-            "type_": "INTEGER"
+            "type_": "INTEGER",
+            "default": null
         },
         {
             "table": "users",
             "name": "id_",
-            "type_": "SERIAL"
+            "type_": "SERIAL",
+            "default": null
         },
         {
             "table": "users",
             "name": "nickname",
             "type_": "VARCHAR(32)",
-            "default": null
+            "default": "null"
         },
         {
             "table": "users",
             "name": "username",
-            "type_": "VARCHAR(32)"
+            "type_": "VARCHAR(32)",
+            "default": null
         }
     ],
     "dropped_fields": [],

@@ -60,6 +60,14 @@ async def apply_migration(migration: Migration, db: Database):
                 r(new_field.type_),
             ).render()
         )
+        if new_field.default is not None:
+            await db.execute(
+                *alter.set_field_default(
+                    r(new_field.table),
+                    r(new_field.name),
+                    r(new_field.default),
+                ).render()
+            )
 
     for drop_field in migration.dropped_fields:
         await db.execute(

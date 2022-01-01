@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from typing import Any, List, Union
 
-from apgorm.undefined import UNDEF
 from apgorm.utils import nested_dataclass
 
 
@@ -33,7 +32,7 @@ class DescribeField:
     name: str
     type_: str
     not_null: bool
-    default: Union[Any, UNDEF] = UNDEF.UNDEF
+    default: Union[str, None] = None
 
 
 @nested_dataclass

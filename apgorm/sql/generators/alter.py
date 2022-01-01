@@ -96,3 +96,21 @@ def set_field_not_null(
             r("SET NOT NULL") if not_null else r("DROP NOT NULL"),
         ),
     )
+
+
+def set_field_default(
+    tablename: Block, fieldname: Block, default: Block
+) -> Block:
+    return _alter_field(
+        tablename,
+        fieldname,
+        Block(r("SET DEFAULT"), default),
+    )
+
+
+def drop_field_default(tablename: Block, fieldname: Block) -> Block:
+    return _alter_field(
+        tablename,
+        fieldname,
+        r("DROP DEFAULT"),
+    )

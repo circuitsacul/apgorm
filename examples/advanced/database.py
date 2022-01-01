@@ -48,7 +48,7 @@ class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
 class User(apgorm.Model):
     id_ = Serial().field(read_only=True, use_eq=True)
     username = VarChar(32).field()
-    nickname = VarChar(32).nullablefield(default=None)
+    nickname = VarChar(32).nullablefield(default="null")
 
     username_unique = Unique([username])
     users_pk = PrimaryKey([id_])
@@ -65,7 +65,7 @@ class Player(apgorm.Model):
     id_ = Serial().field(read_only=True, use_eq=True)
     user_id = Int().field()
     game_id = Int().field()
-    status = Int().field(default=0).with_converter(PlayerStatusConverter)
+    status = Int().field(default="0").with_converter(PlayerStatusConverter)
 
     user_id_fk = ForeignKey([user_id], [User.id_])
     game_id_fk = ForeignKey([game_id], [Game.id_])

@@ -34,16 +34,10 @@ from apgorm.migrations.describe import (
     DescribeConstraint,
     DescribeTable,
 )
-from apgorm.undefined import UNDEF
 from apgorm.utils import nested_dataclass
 
 if TYPE_CHECKING:
     from apgorm import Database
-
-
-def _dict_factory(result: list[tuple[Any, Any]]) -> dict:
-    result = [r for r in result if r[1] is not UNDEF.UNDEF]
-    return dict(result)
 
 
 @nested_dataclass
@@ -57,7 +51,7 @@ class FieldAdd:
     table: str
     name: str
     type_: str
-    default: Union[Any, UNDEF] = UNDEF.UNDEF
+    default: Union[str, None] = None
 
 
 @nested_dataclass
@@ -121,7 +115,7 @@ class Migration:
             f.write(json.dumps(self.todict(), indent=indent))
 
     def todict(self):
-        d = asdict(self, dict_factory=_dict_factory)
+        d = asdict(self)
         del d["path"]
         return d
 
