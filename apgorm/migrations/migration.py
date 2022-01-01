@@ -70,6 +70,13 @@ class FieldRename:
 
 
 @nested_dataclass
+class FieldNotNullAlter:
+    table: str
+    field: str
+    not_null: bool
+
+
+@nested_dataclass
 class ConstraintAdd:
     table: str
     name: str
@@ -100,6 +107,8 @@ class Migration:
     dropped_fields: List[FieldDrop]
     renamed_fields: List[FieldRename]
 
+    field_not_nulls: List[FieldNotNullAlter]
+
     def save(self, indent: int | None = None):
         with open(self.path, "w+") as f:
             f.write(json.dumps(self.todict(), indent=indent))
@@ -119,6 +128,7 @@ class Migration:
             "new_fields",
             "dropped_fields",
             "renamed_fields",
+            "field_not_nulls",
         ]
         for attr in must_be_empty:
             v = getattr(self, attr)
@@ -208,6 +218,8 @@ def _create_next_migration(
     new_fields: list[FieldAdd] = []
     dropped_fields: list[FieldDrop] = []
 
+    field_not_nulls: list[FieldNotNullAlter] = []
+
     for tablename, currtable in curr_tables_dict.items():
         lasttable: DescribeTable | None = None
         if tablename in last_tables_dict:
@@ -280,6 +292,18 @@ def _create_next_migration(
             ]
         )
 
+        # field not nulls
+        for field in currtable.fields:
+            if field.name in last_fields:
+                last_not_null = last_fields[field.name].not_null
+            else:
+                last_not_null = False
+
+            if field.not_null != last_not_null:
+                field_not_nulls.append(
+                    FieldNotNullAlter(tablename, field.name, field.not_null)
+                )
+
     # finalization
     next_id = lm.migration_id + 1 if lm else 0
     new_path = str(db.migrations_folder / cls.filename_from_id(next_id))
@@ -294,4 +318,5 @@ def _create_next_migration(
         new_fields=new_fields,
         dropped_fields=dropped_fields,
         renamed_fields=[],
+        field_not_nulls=field_not_nulls,
     )

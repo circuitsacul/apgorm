@@ -73,18 +73,10 @@ class BaseField(Generic[_F, _T, _C]):
         self._value: _T | UNDEF = UNDEF.UNDEF
 
     def describe(self) -> DescribeField:
-        constraints: list[str] = []
-        if self.not_null:
-            constraints.append("NOT NULL")
-        if self.unique:
-            constraints.append("UNIQUE")
-        if self.pk:
-            constraints.append("PRIMARY KEY")
-
         return DescribeField(
             self.name,
             self.sql_type.sql,
-            constraints,
+            self.not_null,
             self.default,
         )
 

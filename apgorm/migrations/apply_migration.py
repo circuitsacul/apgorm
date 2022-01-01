@@ -69,6 +69,16 @@ async def apply_migration(migration: Migration, db: Database):
             ).render()
         )
 
+    # field not nulls
+    for alter_not_null in migration.field_not_nulls:
+        await db.execute(
+            *alter.set_field_not_null(
+                r(alter_not_null.table),
+                r(alter_not_null.field),
+                alter_not_null.not_null,
+            ).render()
+        )
+
     # table constraints
     for new_constraint in migration.new_constraints:
         await db.execute(

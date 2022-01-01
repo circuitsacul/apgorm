@@ -7,10 +7,7 @@
                     {
                         "name": "id_",
                         "type_": "INTEGER",
-                        "constraints": [
-                            "NOT NULL",
-                            "PRIMARY KEY"
-                        ]
+                        "not_null": true
                     }
                 ],
                 "constraints": []
@@ -21,17 +18,12 @@
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "constraints": [
-                            "NOT NULL",
-                            "PRIMARY KEY"
-                        ]
+                        "not_null": true
                     },
                     {
                         "name": "name",
                         "type_": "VARCHAR(32)",
-                        "constraints": [
-                            "NOT NULL"
-                        ]
+                        "not_null": true
                     }
                 ],
                 "constraints": []
@@ -42,32 +34,23 @@
                     {
                         "name": "game_id",
                         "type_": "INTEGER",
-                        "constraints": [
-                            "NOT NULL"
-                        ]
+                        "not_null": true
                     },
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "constraints": [
-                            "NOT NULL",
-                            "PRIMARY KEY"
-                        ]
+                        "not_null": true
                     },
                     {
                         "name": "status",
                         "type_": "INTEGER",
-                        "constraints": [
-                            "NOT NULL"
-                        ],
+                        "not_null": true,
                         "default": 0
                     },
                     {
                         "name": "user_id",
                         "type_": "INTEGER",
-                        "constraints": [
-                            "NOT NULL"
-                        ]
+                        "not_null": true
                     }
                 ],
                 "constraints": [
@@ -89,24 +72,18 @@
                     {
                         "name": "id_",
                         "type_": "SERIAL",
-                        "constraints": [
-                            "NOT NULL",
-                            "PRIMARY KEY"
-                        ]
+                        "not_null": true
                     },
                     {
                         "name": "nickname",
                         "type_": "VARCHAR(32)",
-                        "constraints": [],
+                        "not_null": false,
                         "default": null
                     },
                     {
                         "name": "username",
                         "type_": "VARCHAR(32)",
-                        "constraints": [
-                            "NOT NULL",
-                            "UNIQUE"
-                        ]
+                        "not_null": true
                     }
                 ],
                 "constraints": []
@@ -191,5 +168,52 @@
         }
     ],
     "dropped_fields": [],
-    "renamed_fields": []
+    "renamed_fields": [],
+    "field_not_nulls": [
+        {
+            "table": "_migrations",
+            "field": "id_",
+            "not_null": true
+        },
+        {
+            "table": "games",
+            "field": "id_",
+            "not_null": true
+        },
+        {
+            "table": "games",
+            "field": "name",
+            "not_null": true
+        },
+        {
+            "table": "players",
+            "field": "game_id",
+            "not_null": true
+        },
+        {
+            "table": "players",
+            "field": "id_",
+            "not_null": true
+        },
+        {
+            "table": "players",
+            "field": "status",
+            "not_null": true
+        },
+        {
+            "table": "players",
+            "field": "user_id",
+            "not_null": true
+        },
+        {
+            "table": "users",
+            "field": "id_",
+            "not_null": true
+        },
+        {
+            "table": "users",
+            "field": "username",
+            "not_null": true
+        }
+    ]
 }

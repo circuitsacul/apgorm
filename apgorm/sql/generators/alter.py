@@ -84,3 +84,15 @@ def _alter_field(tablename: Block, fieldname: Block, sql: SQL) -> Block:
             sql,
         ),
     )
+
+
+def set_field_not_null(
+    tablename: Block, fieldname: Block, not_null: bool
+) -> Block:
+    return _alter_field(
+        tablename,
+        fieldname,
+        Block(
+            r("SET NOT NULL") if not_null else r("DROP NOT NULL"),
+        ),
+    )

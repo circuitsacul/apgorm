@@ -32,7 +32,7 @@ from apgorm.utils import nested_dataclass
 class DescribeField:
     name: str
     type_: str
-    constraints: List[str]
+    not_null: bool
     default: Union[Any, UNDEF] = UNDEF.UNDEF
 
 
