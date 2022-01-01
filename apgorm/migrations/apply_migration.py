@@ -80,7 +80,13 @@ async def apply_migration(migration: Migration, db: Database):
         )
 
     # table constraints
-    for new_constraint in migration.new_constraints:
+    new_constraints = (
+        migration.new_unique_constraints
+        + migration.new_pk_constraints
+        + migration.new_check_constraints
+        + migration.new_fk_constraints
+    )
+    for new_constraint in new_constraints:
         await db.execute(
             *alter.add_constraint(
                 r(new_constraint.table),

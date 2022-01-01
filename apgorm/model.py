@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.exceptions import ModelNotFound
 from apgorm.field import BaseField, ConvertedField
-from apgorm.migrations.describe import DescribeTable
+from apgorm.migrations.describe import DescribeConstraint, DescribeTable
 from apgorm.sql.query_builder import (
     DeleteQueryBuilder,
     FetchQueryBuilder,
@@ -35,7 +35,7 @@ from apgorm.sql.query_builder import (
 )
 from apgorm.undefined import UNDEF
 
-from .constraints import Constraint
+from .constraints import Check, Constraint, ForeignKey, PrimaryKey, Unique
 
 if TYPE_CHECKING:
     from apgorm.field import Field
@@ -79,10 +79,26 @@ class Model:
     @classmethod
     def describe(cls) -> DescribeTable:
         fields, constraints = cls._special_attrs()
+        unique: list[DescribeConstraint] = []
+        check: list[DescribeConstraint] = []
+        fk: list[DescribeConstraint] = []
+        pk: list[DescribeConstraint] = []
+        for c in constraints.values():
+            if isinstance(c, Check):
+                check.append(c.describe())
+            elif isinstance(c, ForeignKey):
+                fk.append(c.describe())
+            elif isinstance(c, PrimaryKey):
+                pk.append(c.describe())
+            elif isinstance(c, Unique):
+                unique.append(c.describe())
         return DescribeTable(
             cls.tablename,
             [f.describe() for f in fields.values()],
-            [c.describe() for c in constraints.values()],
+            fk,
+            pk,
+            unique,
+            check,
         )
 
     async def delete(self):

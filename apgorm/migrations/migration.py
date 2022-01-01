@@ -29,7 +29,11 @@ from typing import TYPE_CHECKING, Any, List, Type, Union
 
 import asyncpg
 
-from apgorm.migrations.describe import Describe, DescribeTable
+from apgorm.migrations.describe import (
+    Describe,
+    DescribeConstraint,
+    DescribeTable,
+)
 from apgorm.undefined import UNDEF
 from apgorm.utils import nested_dataclass
 
@@ -100,7 +104,10 @@ class Migration:
     dropped_tables: List[str]
     renamed_tables: List[TableRename]
 
-    new_constraints: List[ConstraintAdd]
+    new_unique_constraints: List[ConstraintAdd]
+    new_pk_constraints: List[ConstraintAdd]
+    new_check_constraints: List[ConstraintAdd]
+    new_fk_constraints: List[ConstraintAdd]
     dropped_constraints: List[ConstraintDrop]
 
     new_fields: List[FieldAdd]
@@ -123,7 +130,10 @@ class Migration:
             "new_tables",
             "dropped_tables",
             "renamed_tables",
-            "new_constraints",
+            "new_unique_constraints",
+            "new_pk_constraints",
+            "new_check_constraints",
+            "new_fk_constraints",
             "dropped_constraints",
             "new_fields",
             "dropped_fields",
@@ -193,6 +203,45 @@ class Migration:
         return list(by_id.values())
 
 
+def _handle_constraint_list(
+    tablename: str,
+    orig: list[DescribeConstraint],
+    curr: list[DescribeConstraint],
+) -> tuple[list[ConstraintAdd], list[ConstraintDrop]]:
+    origd = {c.name: c for c in orig}
+    currd = {c.name: c for c in curr}
+
+    new_constraints = [
+        ConstraintAdd(tablename, c.name, c.raw_sql, c.params)
+        for name, c in currd.items()
+        if name not in origd
+    ]
+    dropped_constraints = [
+        ConstraintDrop(tablename, c.name)
+        for name, c in origd.items()
+        if name not in currd
+    ]
+
+    common = [(currd[k], origd[k]) for k in currd.keys() & origd.keys()]
+    for curr_c, orig_c in common:
+        if curr_c.raw_sql == orig_c.raw_sql and curr_c.params == orig_c.params:
+            continue
+
+        new_constraints.append(
+            ConstraintAdd(
+                tablename, curr_c.name, curr_c.raw_sql, curr_c.params
+            )
+        )
+        dropped_constraints.append(
+            ConstraintDrop(
+                tablename,
+                curr_c.name,
+            )
+        )
+
+    return new_constraints, dropped_constraints
+
+
 def _create_next_migration(
     cls: Type[Migration],
     db: Database,
@@ -212,7 +261,10 @@ def _create_next_migration(
     ]
 
     # table constraints, fields, and field constraints
-    new_constraints: list[ConstraintAdd] = []
+    new_unique_constraints: list[ConstraintAdd] = []
+    new_pk_constraints: list[ConstraintAdd] = []
+    new_check_constraints: list[ConstraintAdd] = []
+    new_fk_constraints: list[ConstraintAdd] = []
     dropped_constraints: list[ConstraintDrop] = []
 
     new_fields: list[FieldAdd] = []
@@ -225,50 +277,38 @@ def _create_next_migration(
         if tablename in last_tables_dict:
             lasttable = last_tables_dict[tablename]
 
-        # table constraints
-        curr_constraints = {c.name: c for c in currtable.constraints}
-        if lasttable:
-            last_constraints = {c.name: c for c in lasttable.constraints}
-        else:
-            last_constraints = {}
-
-        new_constraints.extend(
-            [
-                ConstraintAdd(tablename, key, c.raw_sql, c.params)
-                for key, c in curr_constraints.items()
-                if key not in last_constraints
-            ]
+        # constraints
+        _new, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.unique_constraints if lasttable else [],
+            currtable.unique_constraints,
         )
-        dropped_constraints.extend(
-            [
-                ConstraintDrop(tablename, key)
-                for key in last_constraints
-                if key not in curr_constraints
-            ]
+        new_unique_constraints.extend(_new)
+        dropped_constraints.extend(_drop)
+
+        _new, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.pk_constraints if lasttable else [],
+            currtable.pk_constraints,
         )
+        new_pk_constraints.extend(_new)
+        dropped_constraints.extend(_drop)
 
-        for constraint in curr_constraints.values():
-            last_constraint = last_constraints.get(constraint.name, None)
-            if not last_constraint:
-                continue
+        _new, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.check_constraints if lasttable else [],
+            currtable.check_constraints,
+        )
+        new_check_constraints.extend(_new)
+        dropped_constraints.extend(_drop)
 
-            if (
-                constraint.raw_sql == last_constraint.raw_sql
-                and constraint.params == last_constraint.params
-            ):
-                continue
-
-            dropped_constraints.append(
-                ConstraintDrop(tablename, constraint.name)
-            )
-            new_constraints.append(
-                ConstraintAdd(
-                    tablename,
-                    constraint.name,
-                    constraint.raw_sql,
-                    constraint.params,
-                )
-            )
+        _new, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.fk_constraints if lasttable else [],
+            currtable.fk_constraints,
+        )
+        new_fk_constraints.extend(_new)
+        dropped_constraints.extend(_drop)
 
         # fields
         curr_fields = {f.name: f for f in currtable.fields}
@@ -313,7 +353,10 @@ def _create_next_migration(
         new_tables=new_tables,
         dropped_tables=dropped_tables,
         renamed_tables=[],
-        new_constraints=new_constraints,
+        new_unique_constraints=new_unique_constraints,
+        new_pk_constraints=new_pk_constraints,
+        new_check_constraints=new_check_constraints,
+        new_fk_constraints=new_fk_constraints,
         dropped_constraints=dropped_constraints,
         new_fields=new_fields,
         dropped_fields=dropped_fields,
