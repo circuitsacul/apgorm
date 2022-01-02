@@ -99,8 +99,7 @@ async def apply_migration(migration: Migration, db: Database):
             *alter.add_constraint(
                 r(new_constraint.table),
                 new_constraint.raw_sql,
-                new_constraint.params,
-            )
+            ).render()
         )
 
     for drop_constraint in migration.dropped_constraints:

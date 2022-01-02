@@ -22,9 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-from apgorm.sql.sql import SQL, Block, Renderer
+from apgorm.sql.sql import SQL, Block
 
 from .helpers import r
 
@@ -44,14 +42,8 @@ def _alter_table(tablename: Block, sql: SQL) -> Block:
 def add_constraint(
     tablename: Block,
     constraint_raw_sql: str,
-    constraint_params: list[Any],
-) -> tuple[str, list]:  # kinda a hack but it works
-    b = _alter_table(tablename, Block(r("ADD")))
-    renderer = Renderer()
-    renderer._curr_value_id = len(constraint_params)
-    raw_sql, params = renderer.render(b)
-
-    return f"{raw_sql} {constraint_raw_sql}", constraint_params + params
+) -> Block:
+    return _alter_table(tablename, Block(r("ADD"), r(constraint_raw_sql)))
 
 
 def drop_constraint(tablename: Block, constraint_name: Block) -> Block:

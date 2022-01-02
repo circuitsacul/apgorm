@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Union
+from typing import List, Union
 
 from apgorm.utils import nested_dataclass
 
@@ -39,7 +39,6 @@ class DescribeField:
 class DescribeConstraint:
     name: str
     raw_sql: str
-    params: List[Any]
 
 
 @nested_dataclass

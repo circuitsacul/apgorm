@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Type, Union
+from typing import TYPE_CHECKING, List, Type, Union
 
 import asyncpg
 
@@ -79,7 +79,6 @@ class ConstraintAdd:
     table: str
     name: str
     raw_sql: str
-    params: List[Any]
 
 
 @nested_dataclass
@@ -206,7 +205,7 @@ def _handle_constraint_list(
     currd = {c.name: c for c in curr}
 
     new_constraints = [
-        ConstraintAdd(tablename, c.name, c.raw_sql, c.params)
+        ConstraintAdd(tablename, c.name, c.raw_sql)
         for name, c in currd.items()
         if name not in origd
     ]
@@ -218,13 +217,11 @@ def _handle_constraint_list(
 
     common = [(currd[k], origd[k]) for k in currd.keys() & origd.keys()]
     for curr_c, orig_c in common:
-        if curr_c.raw_sql == orig_c.raw_sql and curr_c.params == orig_c.params:
+        if curr_c.raw_sql == orig_c.raw_sql:
             continue
 
         new_constraints.append(
-            ConstraintAdd(
-                tablename, curr_c.name, curr_c.raw_sql, curr_c.params
-            )
+            ConstraintAdd(tablename, curr_c.name, curr_c.raw_sql)
         )
         dropped_constraints.append(
             ConstraintDrop(

@@ -31,7 +31,16 @@ class Constraint:
         raise NotImplementedError
 
     def describe(self) -> DescribeConstraint:
+        raw_sql, params = self.creation_sql().render()
+        if len(params) > 0:
+            raise Exception(
+                f'{self.__class__.__name__} constraint "{self.name}" '
+                "received parameters, but ALTER TABLE does not accept "
+                "parameters. Please modify the constraint to remove these "
+                "parameters (write them as raw sql).\nThe parameters were: "
+                + "\n - ".join([str(p) for p in params])
+            )
         return DescribeConstraint(
             self.name,
-            *self.creation_sql().render(),
+            raw_sql,
         )
