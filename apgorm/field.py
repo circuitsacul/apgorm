@@ -96,8 +96,11 @@ class BaseField(Generic[_F, _T, _C]):
         return dict(
             sql_type=self.sql_type,
             default=self.default,
+            one_time_default=self.one_time_default,
             not_null=self.not_null,
             read_only=self.read_only,
+            use_repr=self.use_repr,
+            use_eq=self.use_eq,
         )
 
     def copy(self) -> BaseField[_F, _T, _C]:
