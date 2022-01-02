@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 import asyncpg
 
 from apgorm.exceptions import ModelNotFound
-from apgorm.sql.generators import alter
+from apgorm.sql.generators import alter, comp, query
 from apgorm.sql.generators.helpers import r
 
 if TYPE_CHECKING:
@@ -79,6 +79,14 @@ async def apply_migration(migration: Migration, db: Database):
 
     # field not nulls
     for alter_not_null in migration.field_not_nulls:
+        if alter_not_null.one_time_default is not None:
+            await db.execute(
+                *query.update(
+                    r(alter_not_null.table),
+                    {r(alter_not_null.field): alter_not_null.one_time_default},
+                    comp.is_null(r(alter_not_null.field)),
+                ).render()
+            )
         await db.execute(
             *alter.set_field_not_null(
                 r(alter_not_null.table),

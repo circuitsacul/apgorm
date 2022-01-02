@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Type, Union
+from typing import TYPE_CHECKING, Any, List, Type, Union
 
 import asyncpg
 
@@ -72,6 +72,7 @@ class FieldNotNullAlter:
     table: str
     field: str
     not_null: bool
+    one_time_default: Union[Any, None]
 
 
 @nested_dataclass
@@ -330,9 +331,33 @@ def _create_next_migration(
             else:
                 last_not_null = False
 
-            if field.not_null != last_not_null:
-                field_not_nulls.append(
-                    FieldNotNullAlter(tablename, field.name, field.not_null)
+            if field.not_null is last_not_null:
+                continue
+
+            field_not_nulls.append(
+                FieldNotNullAlter(
+                    tablename,
+                    field.name,
+                    field.not_null,
+                    field.one_time_default,
+                )
+            )
+
+            # make sure we're not adding a not null constraint
+            # to a field that could have null values and doesn't have
+            # a default value or one-time-default
+            if (
+                # if this is the initial migration (lm is None),
+                # this check is unecessary
+                lm is not None
+                and field.not_null is True
+                and field.one_time_default is None
+            ):
+                raise Exception(
+                    "You can't create a field with a not null constraint ("
+                    "or add a not null constraint to a field) without "
+                    "specifying a one-time default to fill possible null "
+                    f"values.\nAffected field: {tablename}.{field.name}"
                 )
 
     # finalization

@@ -39,6 +39,7 @@ class SqlType(Generic[_T]):
     def field(
         self: _S,
         default: str | BaseField | None = None,
+        one_time_default: _T | None = None,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -46,6 +47,7 @@ class SqlType(Generic[_T]):
         return Field(
             sql_type=self,
             default=default,
+            one_time_default=one_time_default,
             not_null=True,
             read_only=read_only,
             use_repr=use_repr,
