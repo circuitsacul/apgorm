@@ -68,6 +68,12 @@ class Model:
             else:
                 f._value = value
 
+        # carry the copies of the fields over to primary_key so that
+        # Model.field is Model.primary_key[index of that field]
+        self.primary_key = tuple(
+            [self.fields[f.name] for f in self.primary_key]
+        )
+
         for c in all_constraints.values():
             self.constraints[c.name] = c
 
@@ -105,7 +111,7 @@ class Model:
         )
 
     def _pk_field_values(self) -> dict[str, Any]:
-        return {f.name: getattr(self, f.name).v for f in self.primary_key}
+        return {f.name: f.v for f in self.primary_key}
 
     async def delete(self):
         await self.delete_query().where(**self._pk_field_values()).execute()
