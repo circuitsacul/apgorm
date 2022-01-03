@@ -193,7 +193,7 @@ class Model:
                 [
                     f"{f.name}:{f.v!r}"
                     for f in self.fields.values()
-                    if f.use_repr
+                    if f.use_repr and f._value is not UNDEF.UNDEF
                 ]
             )
             + ">"
