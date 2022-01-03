@@ -20,7 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from apgorm.sql import Block
+from apgorm.migrations.describe import DescribeConstraint
+from apgorm.sql.sql import Block
 
 
 class Constraint:
@@ -28,3 +29,18 @@ class Constraint:
 
     def creation_sql(self) -> Block:
         raise NotImplementedError
+
+    def describe(self) -> DescribeConstraint:
+        raw_sql, params = self.creation_sql().render()
+        if len(params) > 0:
+            raise Exception(
+                f'{self.__class__.__name__} constraint "{self.name}" '
+                "received parameters, but ALTER TABLE does not accept "
+                "parameters. Please modify the constraint to remove these "
+                "parameters (write them as raw sql).\nThe parameters were: "
+                + "\n - ".join([str(p) for p in params])
+            )
+        return DescribeConstraint(
+            self.name,
+            raw_sql,
+        )

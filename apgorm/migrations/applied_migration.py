@@ -22,27 +22,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
-
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
+from apgorm.constraints import PrimaryKey
+from apgorm.model import Model
+from apgorm.types.numeric import Int
 
 
-class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
-        self.fields = fields
+class AppliedMigration(Model):
+    id_ = Int().field(read_only=True, use_eq=True)
 
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
-        )
+    _migrations_pk = PrimaryKey([id_])

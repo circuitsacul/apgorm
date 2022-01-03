@@ -26,11 +26,11 @@ from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
 from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
+from apgorm.migrations.describe import DescribeField
 from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
     from apgorm.model import Model
-    from apgorm.sql.sql import SQL
 
     from .types.base_type import SqlType
 
@@ -48,21 +48,21 @@ class BaseField(Generic[_F, _T, _C]):
         self,
         sql_type: _F,
         *,
-        default: SQL[_T] | UNDEF = UNDEF.UNDEF,
+        default: str | BaseField | None = None,
+        one_time_default: _T | None = None,
         not_null: bool = False,
-        pk: bool = False,
-        unique: bool = False,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ):
         self.sql_type = sql_type
 
+        if isinstance(default, BaseField):
+            default = default.name
         self.default = default
+        self.one_time_default = one_time_default
 
         self.not_null = not_null
-        self.pk = pk
-        self.unique = unique
 
         self.read_only = read_only
         self.use_repr = use_repr
@@ -71,23 +71,14 @@ class BaseField(Generic[_F, _T, _C]):
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
 
-    def describe(self) -> dict[str, Any]:
-        constraints: list[str] = []
-        if self.not_null:
-            constraints.append("NOT NULL")
-        if self.unique:
-            constraints.append("UNIQUE")
-        if self.pk:
-            constraints.append("PRIMARY KEY")
-
-        ret: dict[str, Any] = {
-            "type": self.sql_type.sql,
-            "constraints": constraints,
-        }
-        if self.default is not UNDEF.UNDEF:
-            ret["default"] = self.default
-
-        return ret
+    def describe(self) -> DescribeField:
+        return DescribeField(
+            self.name,
+            self.sql_type.sql,
+            self.not_null,
+            self.default,
+            self.one_time_default,
+        )
 
     @property
     def full_name(self) -> str:
@@ -105,10 +96,11 @@ class BaseField(Generic[_F, _T, _C]):
         return dict(
             sql_type=self.sql_type,
             default=self.default,
+            one_time_default=self.one_time_default,
             not_null=self.not_null,
-            pk=self.pk,
-            unique=self.unique,
             read_only=self.read_only,
+            use_repr=self.use_repr,
+            use_eq=self.use_eq,
         )
 
     def copy(self) -> BaseField[_F, _T, _C]:

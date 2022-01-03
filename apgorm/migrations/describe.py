@@ -22,27 +22,50 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import Any, List, Union
 
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
+from apgorm.utils import nested_dataclass
 
 
-class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
-        self.fields = fields
+@nested_dataclass
+class DescribeField:
+    name: str
+    type_: str
+    not_null: bool
+    default: Union[str, None] = None
 
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
+    # NOTE: since the default default value for a field
+    # is null, we don't need to worry about using UNDEF
+    # here. We can just treat None as a command to drop
+    # the default value.
+    one_time_default: Union[Any, None] = None
+
+
+@nested_dataclass
+class DescribeConstraint:
+    name: str
+    raw_sql: str
+
+
+@nested_dataclass
+class DescribeTable:
+    name: str
+    fields: List[DescribeField]
+    fk_constraints: List[DescribeConstraint]
+    pk_constraints: List[DescribeConstraint]
+    unique_constraints: List[DescribeConstraint]
+    check_constraints: List[DescribeConstraint]
+
+    @property
+    def constraints(self) -> List[DescribeConstraint]:
+        return (
+            self.fk_constraints
+            + self.pk_constraints
+            + self.unique_constraints
+            + self.check_constraints
         )
+
+
+@nested_dataclass
+class Describe:
+    tables: List[DescribeTable]

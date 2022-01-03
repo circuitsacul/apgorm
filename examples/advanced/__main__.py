@@ -22,27 +22,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+import asyncio
 
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
+from .main import main
 
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
-
-
-class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
-        self.fields = fields
-
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
-        )
+if __name__ == "__main__":
+    asyncio.run(main())

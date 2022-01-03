@@ -1,0 +1,317 @@
+{
+    "describe": {
+        "tables": [
+            {
+                "name": "_migrations",
+                "fields": [
+                    {
+                        "name": "id_",
+                        "type_": "INTEGER",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    }
+                ],
+                "fk_constraints": [],
+                "pk_constraints": [
+                    {
+                        "name": "_migrations_pk",
+                        "raw_sql": "CONSTRAINT _migrations_pk PRIMARY KEY ( id_ )"
+                    }
+                ],
+                "unique_constraints": [],
+                "check_constraints": []
+            },
+            {
+                "name": "games",
+                "fields": [
+                    {
+                        "name": "id_",
+                        "type_": "SERIAL",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "name",
+                        "type_": "VARCHAR(32)",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    }
+                ],
+                "fk_constraints": [],
+                "pk_constraints": [
+                    {
+                        "name": "games_pk",
+                        "raw_sql": "CONSTRAINT games_pk PRIMARY KEY ( id_ )"
+                    }
+                ],
+                "unique_constraints": [],
+                "check_constraints": []
+            },
+            {
+                "name": "players",
+                "fields": [
+                    {
+                        "name": "game_id",
+                        "type_": "INTEGER",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "id_",
+                        "type_": "SERIAL",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "status",
+                        "type_": "INTEGER",
+                        "not_null": true,
+                        "default": "0",
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "user_id",
+                        "type_": "INTEGER",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    }
+                ],
+                "fk_constraints": [
+                    {
+                        "name": "game_id_fk",
+                        "raw_sql": "CONSTRAINT game_id_fk FOREIGN KEY ( game_id ) REFERENCES games ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE"
+                    },
+                    {
+                        "name": "user_id_fk",
+                        "raw_sql": "CONSTRAINT user_id_fk FOREIGN KEY ( user_id ) REFERENCES users ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE"
+                    }
+                ],
+                "pk_constraints": [
+                    {
+                        "name": "players_pk",
+                        "raw_sql": "CONSTRAINT players_pk PRIMARY KEY ( id_ )"
+                    }
+                ],
+                "unique_constraints": [],
+                "check_constraints": []
+            },
+            {
+                "name": "users",
+                "fields": [
+                    {
+                        "name": "id_",
+                        "type_": "SERIAL",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "nickname",
+                        "type_": "VARCHAR(32)",
+                        "not_null": false,
+                        "default": "null",
+                        "one_time_default": null
+                    },
+                    {
+                        "name": "username",
+                        "type_": "VARCHAR(32)",
+                        "not_null": true,
+                        "default": null,
+                        "one_time_default": null
+                    }
+                ],
+                "fk_constraints": [],
+                "pk_constraints": [
+                    {
+                        "name": "users_pk",
+                        "raw_sql": "CONSTRAINT users_pk PRIMARY KEY ( id_ )"
+                    }
+                ],
+                "unique_constraints": [
+                    {
+                        "name": "username_unique",
+                        "raw_sql": "CONSTRAINT username_unique UNIQUE ( username )"
+                    }
+                ],
+                "check_constraints": []
+            }
+        ]
+    },
+    "new_tables": [
+        "_migrations",
+        "games",
+        "players",
+        "users"
+    ],
+    "dropped_tables": [],
+    "renamed_tables": [],
+    "new_unique_constraints": [
+        {
+            "table": "users",
+            "name": "username_unique",
+            "raw_sql": "CONSTRAINT username_unique UNIQUE ( username )"
+        }
+    ],
+    "new_pk_constraints": [
+        {
+            "table": "_migrations",
+            "name": "_migrations_pk",
+            "raw_sql": "CONSTRAINT _migrations_pk PRIMARY KEY ( id_ )"
+        },
+        {
+            "table": "games",
+            "name": "games_pk",
+            "raw_sql": "CONSTRAINT games_pk PRIMARY KEY ( id_ )"
+        },
+        {
+            "table": "players",
+            "name": "players_pk",
+            "raw_sql": "CONSTRAINT players_pk PRIMARY KEY ( id_ )"
+        },
+        {
+            "table": "users",
+            "name": "users_pk",
+            "raw_sql": "CONSTRAINT users_pk PRIMARY KEY ( id_ )"
+        }
+    ],
+    "new_check_constraints": [],
+    "new_fk_constraints": [
+        {
+            "table": "players",
+            "name": "game_id_fk",
+            "raw_sql": "CONSTRAINT game_id_fk FOREIGN KEY ( game_id ) REFERENCES games ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE"
+        },
+        {
+            "table": "players",
+            "name": "user_id_fk",
+            "raw_sql": "CONSTRAINT user_id_fk FOREIGN KEY ( user_id ) REFERENCES users ( id_ ) ON DELETE CASCADE ON UPDATE CASCADE"
+        }
+    ],
+    "dropped_constraints": [],
+    "new_fields": [
+        {
+            "table": "_migrations",
+            "name": "id_",
+            "type_": "INTEGER",
+            "default": null
+        },
+        {
+            "table": "games",
+            "name": "id_",
+            "type_": "SERIAL",
+            "default": null
+        },
+        {
+            "table": "games",
+            "name": "name",
+            "type_": "VARCHAR(32)",
+            "default": null
+        },
+        {
+            "table": "players",
+            "name": "game_id",
+            "type_": "INTEGER",
+            "default": null
+        },
+        {
+            "table": "players",
+            "name": "id_",
+            "type_": "SERIAL",
+            "default": null
+        },
+        {
+            "table": "players",
+            "name": "status",
+            "type_": "INTEGER",
+            "default": "0"
+        },
+        {
+            "table": "players",
+            "name": "user_id",
+            "type_": "INTEGER",
+            "default": null
+        },
+        {
+            "table": "users",
+            "name": "id_",
+            "type_": "SERIAL",
+            "default": null
+        },
+        {
+            "table": "users",
+            "name": "nickname",
+            "type_": "VARCHAR(32)",
+            "default": "null"
+        },
+        {
+            "table": "users",
+            "name": "username",
+            "type_": "VARCHAR(32)",
+            "default": null
+        }
+    ],
+    "dropped_fields": [],
+    "renamed_fields": [],
+    "field_not_nulls": [
+        {
+            "table": "_migrations",
+            "field": "id_",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "games",
+            "field": "id_",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "games",
+            "field": "name",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "players",
+            "field": "game_id",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "players",
+            "field": "id_",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "players",
+            "field": "status",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "players",
+            "field": "user_id",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "users",
+            "field": "id_",
+            "not_null": true,
+            "one_time_default": null
+        },
+        {
+            "table": "users",
+            "field": "username",
+            "not_null": true,
+            "one_time_default": null
+        }
+    ]
+}

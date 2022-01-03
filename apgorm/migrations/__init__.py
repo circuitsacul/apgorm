@@ -19,30 +19,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Sequence
-
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
-
-
-class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
-        self.fields = fields
-
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
-        )

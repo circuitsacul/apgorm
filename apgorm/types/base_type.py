@@ -22,11 +22,12 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from apgorm.field import Field
-from apgorm.sql.sql import SQL
-from apgorm.undefined import UNDEF
+
+if TYPE_CHECKING:
+    from apgorm.field import BaseField
 
 _T = TypeVar("_T", covariant=True)
 _S = TypeVar("_S", bound="SqlType", covariant=True)
@@ -37,9 +38,8 @@ class SqlType(Generic[_T]):
 
     def field(
         self: _S,
-        default: SQL[_T] | UNDEF = UNDEF.UNDEF,
-        pk: bool = False,
-        unique: bool = False,
+        default: str | BaseField | None = None,
+        one_time_default: _T | None = None,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -47,9 +47,8 @@ class SqlType(Generic[_T]):
         return Field(
             sql_type=self,
             default=default,
+            one_time_default=one_time_default,
             not_null=True,
-            pk=pk,
-            unique=unique,
             read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
@@ -57,9 +56,7 @@ class SqlType(Generic[_T]):
 
     def nullablefield(
         self: _S,
-        default: SQL[_T | None] | UNDEF = UNDEF.UNDEF,
-        pk: bool = False,
-        unique: bool = False,
+        default: str | BaseField | None = None,
         read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
@@ -68,8 +65,6 @@ class SqlType(Generic[_T]):
             sql_type=self,
             default=default,
             not_null=False,
-            pk=pk,
-            unique=unique,
             read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,

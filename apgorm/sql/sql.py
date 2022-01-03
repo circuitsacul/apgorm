@@ -67,7 +67,7 @@ class Block(Generic[_SQLT]):
             self.wrap = wrap
             for p in pieces:
                 if isinstance(p, BaseField):
-                    self._pieces.append(Raw(p.full_name))
+                    self._pieces.append(Raw(p.name))
                 elif isinstance(p, Block):
                     self._pieces.extend(p.get_pieces())
                 elif isinstance(p, (Raw, Parameter)):
@@ -92,7 +92,7 @@ class Block(Generic[_SQLT]):
         elif isinstance(other, Parameter):
             self._pieces.append(other)
         elif isinstance(other, BaseField):
-            self._pieces.append(Raw(other.full_name))
+            self._pieces.append(Raw(other.name))
         else:
             raise TypeError
 

@@ -24,16 +24,25 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Type
+from pathlib import Path
+from typing import Any, AsyncGenerator, Awaitable, Type
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
+
+from apgorm.migrations import describe
+from apgorm.migrations.applied_migration import AppliedMigration
+from apgorm.migrations.apply_migration import apply_migration
+from apgorm.migrations.migration import Migration
 
 from .model import Model
 
 
 class Database:
-    def __init__(self):
+    _migrations = AppliedMigration
+
+    def __init__(self, migrations_folder: Path):
+        self.migrations_folder = migrations_folder
         self.models: list[Type[Model]] = []
 
         for attr_name in dir(self):
@@ -61,9 +70,36 @@ class Database:
 
         self.pool: asyncpg.Pool | None = None
 
-    def describe(self) -> dict[str, Any]:
-        return {"tables": {m.tablename: m.describe() for m in self.models}}
+    # migration functions
+    def describe(self) -> describe.Describe:
+        return describe.Describe([m.describe() for m in self.models])
 
+    def load_all_migrations(self) -> list[Migration]:
+        return Migration.load_all_migrations(self.migrations_folder)
+
+    def load_last_migration(self) -> Migration | None:
+        return Migration.load_last_migration(self.migrations_folder)
+
+    def must_create_migrations(self) -> bool:
+        return Migration.must_create_migrations(self)
+
+    def create_migrations(self, indent: int | None = None):
+        next = Migration.create_migrations(self)
+        if next.isempty():
+            raise Exception("No migrations to create.")
+        next.save(indent=indent)
+
+    def load_unapplied_migrations(self) -> Awaitable[list[Migration]]:
+        return Migration.load_unapplied_migrations(self)
+
+    async def must_apply_migrations(self) -> bool:
+        return len(await self.load_unapplied_migrations()) > 0
+
+    async def apply_migrations(self):
+        for m in await Migration.load_unapplied_migrations(self):
+            await apply_migration(m, self)
+
+    # database functions
     async def connect(self, **connect_kwargs):
         self.pool = await asyncpg.create_pool(**connect_kwargs)
 
