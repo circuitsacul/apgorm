@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
-from apgorm.exceptions import ReadOnlyField, UndefinedFieldValue
+from apgorm.exceptions import UndefinedFieldValue
 from apgorm.migrations.describe import DescribeField
 from apgorm.undefined import UNDEF
 
@@ -51,7 +51,6 @@ class BaseField(Generic[_F, _T, _C]):
         default: str | BaseField | None = None,
         one_time_default: _T | None = None,
         not_null: bool = False,
-        read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ):
@@ -64,7 +63,6 @@ class BaseField(Generic[_F, _T, _C]):
 
         self.not_null = not_null
 
-        self.read_only = read_only
         self.use_repr = use_repr
         self.use_eq = use_eq
 
@@ -98,7 +96,6 @@ class BaseField(Generic[_F, _T, _C]):
             default=self.default,
             one_time_default=self.one_time_default,
             not_null=self.not_null,
-            read_only=self.read_only,
             use_repr=self.use_repr,
             use_eq=self.use_eq,
         )
@@ -121,8 +118,6 @@ class Field(BaseField[_F, _T, _T]):
 
     @v.setter
     def v(self, other: _T):
-        if self.read_only:
-            raise ReadOnlyField(self)
         self._value = other
         self.changed = True
 
@@ -154,8 +149,6 @@ class ConverterField(BaseField[_F, _T, _C]):
 
     @v.setter
     def v(self, other: _C):
-        if self.read_only:
-            raise ReadOnlyField(self)
         self._value = self.converter.to_stored(other)
         self.changed = True
 

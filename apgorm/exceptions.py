@@ -58,15 +58,6 @@ class UndefinedFieldValue(ApgormException):
         )
 
 
-class ReadOnlyField(ApgormException):
-    """The field is read-only (you can't change its value)."""
-
-    def __init__(self, field: BaseField):
-        self.field = field
-
-        super().__init__(f"The field {field.full_name} is read-only.")
-
-
 class BadArgument(ApgormException):
     """Bad arguments were passed."""
 

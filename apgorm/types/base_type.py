@@ -40,7 +40,6 @@ class SqlType(Generic[_T]):
         self: _S,
         default: str | BaseField | None = None,
         one_time_default: _T | None = None,
-        read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ) -> Field[_S, _T]:
@@ -49,7 +48,6 @@ class SqlType(Generic[_T]):
             default=default,
             one_time_default=one_time_default,
             not_null=True,
-            read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
         )
@@ -57,7 +55,6 @@ class SqlType(Generic[_T]):
     def nullablefield(
         self: _S,
         default: str | BaseField | None = None,
-        read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ) -> Field[_S, _T | None]:
@@ -65,7 +62,6 @@ class SqlType(Generic[_T]):
             sql_type=self,
             default=default,
             not_null=False,
-            read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
         )

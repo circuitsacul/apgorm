@@ -86,7 +86,6 @@ class _BaseSerial(SqlType[int]):
     def field(  # type: ignore
         self: _S,
         one_time_default: int | None = None,
-        read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ) -> Field[_S, int]:
@@ -94,21 +93,18 @@ class _BaseSerial(SqlType[int]):
             sql_type=self,
             one_time_default=one_time_default,
             not_null=True,
-            read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
         )
 
     def nullablefield(  # type: ignore
         self: _S,
-        read_only: bool = False,
         use_repr: bool = True,
         use_eq: bool = False,
     ) -> Field[_S, int | None]:
         return Field(
             sql_type=self,
             not_null=False,
-            read_only=read_only,
             use_repr=use_repr,
             use_eq=use_eq,
         )
