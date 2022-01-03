@@ -7,7 +7,7 @@ extend-ignore="E203"
 [tool.poetry]
 name = "apgorm"
 version = "0.1.0"
-description = ""
+description = "An ORM wrapped around asyncpg."
 authors = ["Circuit <circuitsacul@gmail.com>"]
 license = "MIT"
 
