@@ -10,7 +10,6 @@ These are features that will exist by the first release of apgorm:
 
 ## Limitations
 There are some limitations that should be noted:
- - All models *must* have a `id_` field. It doesn't matter what kind of field it is, but it must exist.
  - There are limitations on what the name of a column can be. For example, you cannot have a column named `tablename` since that is used to declare the name of the model.
  - `apgorm` only supports PostgreSQL with asyncpg (although I'd be interested to see if anyone wants to fork apgorm for use with another library/database).
  - Doesn't support python migrations. This means that you can't create your own migration file with python code.
