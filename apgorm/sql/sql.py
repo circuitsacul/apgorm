@@ -92,7 +92,7 @@ class Block(Generic[_SQLT]):
         elif isinstance(other, Parameter):
             self._pieces.append(other)
         elif isinstance(other, BaseField):
-            self._pieces.append(Raw(other.full_name))
+            self._pieces.append(Raw(other.name))
         else:
             raise TypeError
 

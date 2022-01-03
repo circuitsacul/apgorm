@@ -60,8 +60,6 @@ class FilterQueryBuilder(Query[_T]):
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
         for k, v in values.items():
-            if isinstance(v, BaseField):
-                v = r(v.full_name)
             key = r(f"{self.model.tablename}.{k}")
             self.filters.append(eq(key, v))
 
