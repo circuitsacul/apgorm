@@ -52,7 +52,7 @@ class DescribeTable:
     name: str
     fields: List[DescribeField]
     fk_constraints: List[DescribeConstraint]
-    pk_constraints: List[DescribeConstraint]
+    pk_constraint: DescribeConstraint
     unique_constraints: List[DescribeConstraint]
     check_constraints: List[DescribeConstraint]
 
@@ -60,7 +60,7 @@ class DescribeTable:
     def constraints(self) -> List[DescribeConstraint]:
         return (
             self.fk_constraints
-            + self.pk_constraints
+            + [self.pk_constraint]
             + self.unique_constraints
             + self.check_constraints
         )

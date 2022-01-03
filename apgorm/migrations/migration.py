@@ -280,8 +280,8 @@ def _create_next_migration(
 
         _new, _drop = _handle_constraint_list(
             tablename,
-            lasttable.pk_constraints if lasttable else [],
-            currtable.pk_constraints,
+            [lasttable.pk_constraint] if lasttable else [],
+            [currtable.pk_constraint],
         )
         new_pk_constraints.extend(_new)
         dropped_constraints.extend(_drop)

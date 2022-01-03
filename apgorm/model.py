@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import annotations
+from __future__ import annotations, print_function
 
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
@@ -38,8 +38,6 @@ from apgorm.undefined import UNDEF
 from .constraints import Check, Constraint, ForeignKey, PrimaryKey, Unique
 
 if TYPE_CHECKING:
-    from apgorm.field import Field
-
     from .database import Database
 
 
@@ -50,14 +48,7 @@ class Model:
     tablename: str  # populated by Database
     database: Database  # populated by Database
 
-    id_: Field
-    """
-    Hint:
-    ```
-    id_ = Serial().field(use_eq=True)
-    <model name>_pk = PrimaryKey([id_])
-    ```
-    """
+    primary_key: tuple[BaseField, ...]
 
     def __init__(self, **values):
         self.fields: dict[str, BaseField] = {}
@@ -81,36 +72,47 @@ class Model:
             self.constraints[c.name] = c
 
     @classmethod
+    def _primary_key(cls) -> PrimaryKey:
+        pk = PrimaryKey(cls.primary_key)
+        pk.name = (
+            f"{cls.tablename}_"
+            + "{}".format("_".join([f.name for f in cls.primary_key]))
+            + "_primary_key"
+        )
+        return pk
+
+    @classmethod
     def describe(cls) -> DescribeTable:
         fields, constraints = cls._special_attrs()
         unique: list[DescribeConstraint] = []
         check: list[DescribeConstraint] = []
         fk: list[DescribeConstraint] = []
-        pk: list[DescribeConstraint] = []
         for c in constraints.values():
             if isinstance(c, Check):
                 check.append(c.describe())
             elif isinstance(c, ForeignKey):
                 fk.append(c.describe())
-            elif isinstance(c, PrimaryKey):
-                pk.append(c.describe())
             elif isinstance(c, Unique):
                 unique.append(c.describe())
+
         return DescribeTable(
             cls.tablename,
             [f.describe() for f in fields.values()],
             fk,
-            pk,
+            cls._primary_key().describe(),
             unique,
             check,
         )
 
+    def _pk_field_values(self) -> dict[str, Any]:
+        return {f.name: getattr(self, f.name).v for f in self.primary_key}
+
     async def delete(self):
-        await self.delete_query().where(id_=self.id_.v).execute()
+        await self.delete_query().where(**self._pk_field_values()).execute()
 
     async def save(self):
         changed_fields = self._get_changed_fields()
-        q = self.update_query().where(id_=self.id_.v)
+        q = self.update_query().where(**self._pk_field_values())
         q.set(**{f.name: f._value for f in changed_fields})
         await q.execute()
         self._set_saved()
@@ -181,6 +183,12 @@ class Model:
                 fields[attr_name] = attr
 
             elif isinstance(attr, Constraint):
+                if isinstance(attr, PrimaryKey):
+                    raise Exception(
+                        "Primary keys must be specified through Model."
+                        f"primary_key.\nRelated attr: {cls.__name__}."
+                        f"{attr_name}"
+                    )
                 constraints[attr_name] = attr
 
         return fields, constraints
