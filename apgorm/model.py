@@ -214,7 +214,7 @@ class Model:
         )
 
     def _eq_fields(self) -> dict[str, Any]:
-        return {f.name: f.v for f in self.fields.values() if f.use_eq}
+        return {f.name: f.v for f in self.primary_key}
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):

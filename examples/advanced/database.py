@@ -46,7 +46,7 @@ class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
 
 
 class User(apgorm.Model):
-    id_ = Serial().field(use_eq=True)
+    id_ = Serial().field()
     username = VarChar(32).field()
     nickname = VarChar(32).nullablefield(default="null")
 
@@ -55,7 +55,7 @@ class User(apgorm.Model):
 
 
 class Game(apgorm.Model):
-    id_ = Serial().field(use_eq=True)
+    id_ = Serial().field()
     name = VarChar(32).field()
 
     primary_key = (id_,)

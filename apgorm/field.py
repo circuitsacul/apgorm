@@ -52,7 +52,6 @@ class BaseField(Generic[_F, _T, _C]):
         one_time_default: _T | None = None,
         not_null: bool = False,
         use_repr: bool = True,
-        use_eq: bool = False,
     ):
         self.sql_type = sql_type
 
@@ -64,7 +63,6 @@ class BaseField(Generic[_F, _T, _C]):
         self.not_null = not_null
 
         self.use_repr = use_repr
-        self.use_eq = use_eq
 
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
@@ -97,7 +95,6 @@ class BaseField(Generic[_F, _T, _C]):
             one_time_default=self.one_time_default,
             not_null=self.not_null,
             use_repr=self.use_repr,
-            use_eq=self.use_eq,
         )
 
     def copy(self) -> BaseField[_F, _T, _C]:

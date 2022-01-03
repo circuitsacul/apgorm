@@ -87,26 +87,22 @@ class _BaseSerial(SqlType[int]):
         self: _S,
         one_time_default: int | None = None,
         use_repr: bool = True,
-        use_eq: bool = False,
     ) -> Field[_S, int]:
         return Field(
             sql_type=self,
             one_time_default=one_time_default,
             not_null=True,
             use_repr=use_repr,
-            use_eq=use_eq,
         )
 
     def nullablefield(  # type: ignore
         self: _S,
         use_repr: bool = True,
-        use_eq: bool = False,
     ) -> Field[_S, int | None]:
         return Field(
             sql_type=self,
             not_null=False,
             use_repr=use_repr,
-            use_eq=use_eq,
         )
 
 

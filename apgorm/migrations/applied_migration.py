@@ -27,6 +27,6 @@ from apgorm.types.numeric import Int
 
 
 class AppliedMigration(Model):
-    id_ = Int().field(use_eq=True)
+    id_ = Int().field()
 
     primary_key = (id_,)
