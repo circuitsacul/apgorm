@@ -42,6 +42,6 @@ class Check(Constraint):
             r("CONSTRAINT"),
             r(self.name),
             r("CHECK"),
-            self.check,
+            Block(self.check, wrap=True),
             wrap=True,
         )
