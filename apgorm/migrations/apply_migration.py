@@ -31,6 +31,7 @@ from apgorm.sql.generators import alter, comp, query
 from apgorm.sql.generators.helpers import r
 
 if TYPE_CHECKING:
+    from apgorm.connection import Connection
     from apgorm.database import Database
 
     from .migration import Migration
@@ -44,16 +45,26 @@ async def apply_migration(migration: Migration, db: Database):
     else:
         raise Exception("Migration already applied.")
 
+    assert db.pool is not None
+    async with db.pool.acquire() as con:
+        async with con.transaction():
+            await _apply_migration(migration, con)
+
+    # mark that the migration was applied
+    await db._migrations(id_=migration.migration_id).create()
+
+
+async def _apply_migration(migration: Migration, con: Connection):
     # tables
     for new_table in migration.new_tables:
-        await db.execute(*alter.add_table(r(new_table)).render())
+        await con.execute(*alter.add_table(r(new_table)).render())
 
     for drop_table in migration.dropped_tables:
-        await db.execute(*alter.drop_table(r(drop_table)).render())
+        await con.execute(*alter.drop_table(r(drop_table)).render())
 
     # fields
     for new_field in migration.new_fields:
-        await db.execute(
+        await con.execute(
             *alter.add_field(
                 r(new_field.table),
                 r(new_field.name),
@@ -61,7 +72,7 @@ async def apply_migration(migration: Migration, db: Database):
             ).render()
         )
         if new_field.default is not None:
-            await db.execute(
+            await con.execute(
                 *alter.set_field_default(
                     r(new_field.table),
                     r(new_field.name),
@@ -70,7 +81,7 @@ async def apply_migration(migration: Migration, db: Database):
             )
 
     for drop_field in migration.dropped_fields:
-        await db.execute(
+        await con.execute(
             *alter.drop_field(
                 r(drop_field.table),
                 r(drop_field.name),
@@ -80,14 +91,14 @@ async def apply_migration(migration: Migration, db: Database):
     # field not nulls
     for alter_not_null in migration.field_not_nulls:
         if alter_not_null.one_time_default is not None:
-            await db.execute(
+            await con.execute(
                 *query.update(
                     r(alter_not_null.table),
                     {r(alter_not_null.field): alter_not_null.one_time_default},
                     comp.is_null(r(alter_not_null.field)),
                 ).render()
             )
-        await db.execute(
+        await con.execute(
             *alter.set_field_not_null(
                 r(alter_not_null.table),
                 r(alter_not_null.field),
@@ -103,7 +114,7 @@ async def apply_migration(migration: Migration, db: Database):
         + migration.new_fk_constraints
     )
     for new_constraint in new_constraints:
-        await db.execute(
+        await con.execute(
             *alter.add_constraint(
                 r(new_constraint.table),
                 new_constraint.raw_sql,
@@ -111,12 +122,9 @@ async def apply_migration(migration: Migration, db: Database):
         )
 
     for drop_constraint in migration.dropped_constraints:
-        await db.execute(
+        await con.execute(
             *alter.drop_constraint(
                 r(drop_constraint.table),
                 r(drop_constraint.name),
             ).render()
         )
-
-    # mark that the migration was applied
-    await db._migrations(id_=migration.migration_id).create()

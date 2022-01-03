@@ -35,6 +35,7 @@ from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
 from apgorm.migrations.migration import Migration
 
+from .connection import Pool
 from .model import Model
 
 
@@ -68,7 +69,7 @@ class Database:
             for name, constraint in constraints.items():
                 constraint.name = name
 
-        self.pool: asyncpg.Pool | None = None
+        self.pool: Pool | None = None
 
     # migration functions
     def describe(self) -> describe.Describe:
@@ -101,48 +102,46 @@ class Database:
 
     # database functions
     async def connect(self, **connect_kwargs):
-        self.pool = await asyncpg.create_pool(**connect_kwargs)
+        self.pool = Pool(await asyncpg.create_pool(**connect_kwargs))
 
     async def cleanup(self, timeout: float = 30):
         if self.pool is not None:
             await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
     async def execute(self, query: str, args: list[Any]):
-        print(query, args)
         assert self.pool is not None
-        await self.pool.execute(query, *args)
+        async with self.pool.acquire() as con:
+            async with con.transaction():
+                await con.execute(query, args)
 
     async def fetchrow(
         self, query: str, args: list[Any]
     ) -> dict[str, Any] | None:
-        print(query, args)
         assert self.pool is not None
-        res = await self.pool.fetchrow(query, *args)
-        if res is not None:
-            res = dict(res)
-        assert res is None or isinstance(res, dict)
-        return res
+        async with self.pool.acquire() as con:
+            async with con.transaction():
+                return await con.fetchrow(query, args)
 
     async def fetchmany(
         self, query: str, args: list[Any]
     ) -> list[dict[str, Any]]:
-        print(query, args)
         assert self.pool is not None
-        res = await self.pool.fetch(query, *args)
-        return [dict(r) for r in res]
+        async with self.pool.acquire() as con:
+            async with con.transaction():
+                return await con.fetchmany(query, args)
 
     async def fetchval(self, query: str, args: list[Any]) -> Any:
-        print(query, args)
         assert self.pool is not None
-        return await self.pool.fetchval(query, *args)
+        async with self.pool.acquire() as con:
+            async with con.transaction():
+                return await con.fetchval(query, args)
 
     @asynccontextmanager
     async def cursor(
         self, query: str, args: list[Any]
     ) -> AsyncGenerator[CursorFactory, None]:
-        print(query, args)
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                cursor: CursorFactory = con.cursor(query, *args)
+                cursor: CursorFactory = await con.cursor(query, args)
                 yield cursor
