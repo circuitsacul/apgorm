@@ -52,7 +52,11 @@ class Model:
 
     id_: Field
     """
-    Hint: `id_ = Serial().field(pk=True, use_eq=True)`
+    Hint:
+    ```
+    id_ = Serial().field(use_eq=True)
+    <model name>_pk = PrimaryKey([id_])
+    ```
     """
 
     def __init__(self, **values):
