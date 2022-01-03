@@ -55,7 +55,7 @@ class Parameter(Generic[_T]):
 
 class Block(Generic[_SQLT]):
     def __init__(self, *pieces: SQL | Raw, wrap: bool = False):
-        self._pieces: list[Raw | Parameter] = []
+        self._pieces: list[Raw | Parameter | BaseField] = []
 
         if len(pieces) == 1 and isinstance(pieces[0], Block):
             block = pieces[0]
@@ -66,11 +66,9 @@ class Block(Generic[_SQLT]):
         else:
             self.wrap = wrap
             for p in pieces:
-                if isinstance(p, BaseField):
-                    self._pieces.append(Raw(p.name))
-                elif isinstance(p, Block):
+                if isinstance(p, Block):
                     self._pieces.extend(p.get_pieces())
-                elif isinstance(p, (Raw, Parameter)):
+                elif isinstance(p, (Raw, Parameter, BaseField)):
                     self._pieces.append(p)
                 else:
                     self._pieces.append(Parameter(p))
@@ -80,7 +78,7 @@ class Block(Generic[_SQLT]):
 
     def get_pieces(
         self, force_wrap: bool | None = None
-    ) -> list[Raw | Parameter]:
+    ) -> list[Raw | Parameter | BaseField]:
         wrap = self.wrap if force_wrap is None else force_wrap
         if wrap:
             return [Raw("("), *self._pieces, Raw(")")]
@@ -89,10 +87,8 @@ class Block(Generic[_SQLT]):
     def __iadd__(self, other: object):
         if isinstance(other, Block):
             self._pieces.extend(other.get_pieces())
-        elif isinstance(other, Parameter):
+        elif isinstance(other, (Parameter, BaseField)):
             self._pieces.append(other)
-        elif isinstance(other, BaseField):
-            self._pieces.append(Raw(other.name))
         else:
             raise TypeError
 
@@ -115,6 +111,8 @@ class Renderer:
         for piece in sql.get_pieces(force_wrap=False):
             if isinstance(piece, Raw):
                 sql_pieces.append(str(piece))
+            elif isinstance(piece, BaseField):
+                sql_pieces.append(str(piece.name))
             else:
                 sql_pieces.append(f"${self.next_value_id}")
                 params.append(piece.value)
