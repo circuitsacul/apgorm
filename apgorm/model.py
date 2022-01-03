@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.exceptions import ModelNotFound
-from apgorm.field import BaseField, ConvertedField
+from apgorm.field import BaseField, ConverterField
 from apgorm.migrations.describe import DescribeConstraint, DescribeTable
 from apgorm.sql.query_builder import (
     DeleteQueryBuilder,
@@ -68,7 +68,7 @@ class Model:
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
                 continue
-            if isinstance(f, ConvertedField):
+            if isinstance(f, ConverterField):
                 f._value = f.converter.to_stored(value)
             else:
                 f._value = value

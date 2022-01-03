@@ -128,10 +128,10 @@ class Field(BaseField[_F, _T, _T]):
 
     def with_converter(
         self, converter: Converter[_T, _C] | Type[Converter[_T, _C]]
-    ) -> ConvertedField[_F, _T, _C]:
+    ) -> ConverterField[_F, _T, _C]:
         if isinstance(converter, type) and issubclass(converter, Converter):
             converter = converter()
-        f: ConvertedField[_F, _T, _C] = ConvertedField(
+        f: ConverterField[_F, _T, _C] = ConverterField(
             **self._copy_kwargs(), converter=converter
         )
         if hasattr(self, "name"):
@@ -141,7 +141,7 @@ class Field(BaseField[_F, _T, _T]):
         return f
 
 
-class ConvertedField(BaseField[_F, _T, _C]):
+class ConverterField(BaseField[_F, _T, _C]):
     def __init__(self, *args, **kwargs):
         self.converter: Converter[_T, _C] = kwargs.pop("converter")
         super().__init__(*args, **kwargs)
