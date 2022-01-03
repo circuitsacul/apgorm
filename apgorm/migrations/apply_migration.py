@@ -55,14 +55,15 @@ async def apply_migration(migration: Migration, db: Database):
 
 
 async def _apply_migration(migration: Migration, con: Connection):
-    # tables
+    # add tables
     for new_table in migration.new_tables:
         await con.execute(*alter.add_table(r(new_table)).render())
 
+    # drop tables
     for drop_table in migration.dropped_tables:
         await con.execute(*alter.drop_table(r(drop_table)).render())
 
-    # fields
+    # add fields
     for new_field in migration.new_fields:
         await con.execute(
             *alter.add_field(
@@ -80,6 +81,16 @@ async def _apply_migration(migration: Migration, con: Connection):
                 ).render()
             )
 
+    # drop constraints
+    for drop_constraint in migration.dropped_constraints:
+        await con.execute(
+            *alter.drop_constraint(
+                r(drop_constraint.table),
+                r(drop_constraint.name),
+            ).render()
+        )
+
+    # drop fields
     for drop_field in migration.dropped_fields:
         await con.execute(
             *alter.drop_field(
@@ -106,7 +117,7 @@ async def _apply_migration(migration: Migration, con: Connection):
             ).render()
         )
 
-    # table constraints
+    # add constraints
     new_constraints = (
         migration.new_unique_constraints
         + migration.new_pk_constraints
@@ -118,13 +129,5 @@ async def _apply_migration(migration: Migration, con: Connection):
             *alter.add_constraint(
                 r(new_constraint.table),
                 new_constraint.raw_sql,
-            ).render()
-        )
-
-    for drop_constraint in migration.dropped_constraints:
-        await con.execute(
-            *alter.drop_constraint(
-                r(drop_constraint.table),
-                r(drop_constraint.name),
             ).render()
         )
