@@ -4,13 +4,11 @@ An ORM wrapped around asyncpg. Examples can be found under `examples/`. Run exam
 Please note that this library is not for those learning SQL or Postgres. Although the basic usage of apgorm is straightforward, you will run into problems, especially with migrations, if you don't understand regular SQL well.
 
 ## Features
-These are features that will exist by the first release of apgorm:
  - Fully type-checked
  - Fairly straightforward and easy-to-use
  - Migration support
 
 ## Limitations
-There are some limitations that should be noted:
  - There are limitations on what the name of a column can be. For example, you cannot have a column named `tablename` since that is used to declare the name of the model.
  - `apgorm` only supports PostgreSQL with asyncpg (although I'd be interested to see if anyone wants to fork apgorm for use with another library/database).
  - Doesn't support python migrations. This means that you can't create your own migration file with python code.
