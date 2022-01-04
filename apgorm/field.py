@@ -25,9 +25,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
-from apgorm.exceptions import UndefinedFieldValue
+from apgorm.exceptions import InvalidFieldValue, UndefinedFieldValue
 from apgorm.migrations.describe import DescribeField
 from apgorm.undefined import UNDEF
+from apgorm.validator import Validator
 
 if TYPE_CHECKING:
     from apgorm.model import Model
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from .types.base_type import SqlType
 
 
+_SELF = TypeVar("_SELF", bound="BaseField", covariant=True)
 _T = TypeVar("_T")
 _C = TypeVar("_C")
 _F = TypeVar("_F", bound="SqlType")
@@ -64,6 +66,21 @@ class BaseField(Generic[_F, _T, _C]):
 
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
+
+        self._validators: list[Validator] = []
+
+    def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
+        self._validators.append(validator)
+        return self
+
+    def _validate(self, value: _C):
+        try:
+            if not all([v(value) for v in self._validators]):
+                raise InvalidFieldValue(self, value)
+        except InvalidFieldValue:
+            raise
+        except Exception as e:
+            raise InvalidFieldValue(self, value, exc=e)
 
     def describe(self) -> DescribeField:
         return DescribeField(
@@ -99,6 +116,7 @@ class BaseField(Generic[_F, _T, _C]):
             n.name = self.name
         if hasattr(self, "model"):
             n.model = self.model
+        n._validators = self._validators
         return n
 
 
@@ -111,6 +129,7 @@ class Field(BaseField[_F, _T, _T]):
 
     @v.setter
     def v(self, other: _T):
+        self._validate(other)
         self._value = other
         self.changed = True
 
@@ -142,6 +161,7 @@ class ConverterField(BaseField[_F, _T, _C]):
 
     @v.setter
     def v(self, other: _C):
+        self._validate(other)
         self._value = self.converter.to_stored(other)
         self.changed = True
 
