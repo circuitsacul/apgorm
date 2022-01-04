@@ -118,6 +118,8 @@ class Model:
 
     async def save(self):
         changed_fields = self._get_changed_fields()
+        if len(changed_fields) == 0:
+            return
         q = self.update_query().where(**self._pk_field_values())
         q.set(**{f.name: f._value for f in changed_fields})
         await q.execute()
