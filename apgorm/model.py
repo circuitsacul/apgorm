@@ -62,7 +62,10 @@ class Model:
 
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
-                continue
+                if f.default is not UNDEF.UNDEF:
+                    value = f.default
+                else:
+                    continue
             if isinstance(f, ConverterField):
                 f._value = f.converter.to_stored(value)
             else:

@@ -50,14 +50,12 @@ class BaseField(Generic[_F, _T, _C]):
         self,
         sql_type: _F,
         *,
-        default: str | BaseField | None = None,
+        default: _T | UNDEF = UNDEF.UNDEF,
         not_null: bool = False,
         use_repr: bool = True,
     ):
         self.sql_type = sql_type
 
-        if isinstance(default, BaseField):
-            default = default.name
         self.default = default
 
         self.not_null = not_null
@@ -87,7 +85,6 @@ class BaseField(Generic[_F, _T, _C]):
             name=self.name,
             type_=self.sql_type.sql,
             not_null=self.not_null,
-            default=self.default,
         )
 
     @property

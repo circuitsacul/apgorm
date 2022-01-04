@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from apgorm.migrations.describe import DescribeConstraint
 from apgorm.sql.generators import alter
@@ -113,7 +113,6 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     drop_fields: list[str] = []
 
     field_not_nulls: list[str] = []
-    field_defaults: list[str] = []
 
     for tablename, currtable in curr_tables.items():
         lasttable = (
@@ -143,35 +142,8 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
             ]
         )
 
-        # field defaults & not nulls:
+        # field not nulls:
         for field in curr_fields.values():
-            last_default = (
-                UNDEF.UNDEF
-                if field.name not in last_fields
-                else last_fields[field.name].default
-            )
-
-            set_d_to: Any | UNDEF = UNDEF.UNDEF
-            if last_default is UNDEF.UNDEF:
-                if field.default is not None:
-                    set_d_to = field.default
-            elif last_default != field.default:
-                set_d_to = field.default
-
-            if set_d_to is not UNDEF.UNDEF:
-                if set_d_to is None:
-                    field_defaults.append(
-                        alter.drop_field_default(
-                            r(tablename), r(field.name)
-                        ).render_no_params()
-                    )
-                else:
-                    field_defaults.append(
-                        alter.set_field_default(
-                            r(tablename), r(field.name), r(set_d_to)
-                        ).render_no_params()
-                    )
-
             last_not_null = (
                 UNDEF.UNDEF
                 if field.name not in last_fields
@@ -238,7 +210,6 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
 
     migrations.extend(drop_fields)
     migrations.extend(field_not_nulls)
-    migrations.extend(field_defaults)
 
     migrations.extend(add_unique_constraints)
     migrations.extend(add_check_constraints)
