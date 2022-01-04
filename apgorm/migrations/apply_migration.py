@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 
 import asyncpg
 
-from apgorm.exceptions import ModelNotFound
+from apgorm.exceptions import MigrationAlreadyApplied, ModelNotFound
 
 if TYPE_CHECKING:
     from apgorm.database import Database
@@ -40,7 +40,7 @@ async def apply_migration(migration: Migration, db: Database):
     except (asyncpg.exceptions.UndefinedTableError, ModelNotFound):
         pass
     else:
-        raise Exception("Migration already applied.")
+        raise MigrationAlreadyApplied(str(migration.path))
 
     assert db.pool is not None
     async with db.pool.acquire() as con:

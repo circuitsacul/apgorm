@@ -26,6 +26,7 @@ from enum import Enum
 from typing import List, Sequence
 from typing import cast as typingcast
 
+from apgorm.exceptions import BadArgument
 from apgorm.field import BaseField
 from apgorm.sql.generators.helpers import join, r
 from apgorm.sql.sql import Block
@@ -57,12 +58,12 @@ class ForeignKey(Constraint):
         self.on_update = on_update
 
         if len(ref_fields) != len(fields):
-            # TODO: actual exception
-            raise Exception("Must have same number of fields and ref_fields.")
+            raise BadArgument(
+                "Must have same number of fields and ref_fields."
+            )
 
         if len(fields) == 0:
-            # TODO: actual exception
-            raise Exception("Must specify at least on field and ref_field.")
+            raise BadArgument("Must specify at least on field and ref_field.")
 
     def creation_sql(self) -> Block:
         ref_table: Block
@@ -78,14 +79,14 @@ class ForeignKey(Constraint):
             )
             > 1
         ):
-            raise ValueError(
+            raise BadArgument(
                 "All fields in ref_fields must be of the same table."
             )
 
         if self.ref_table is None:
             _ref_fields = self.ref_fields
             if not all([isinstance(f, BaseField) for f in _ref_fields]):
-                raise TypeError(
+                raise BadArgument(
                     "ref_fields must either all be BaseFields or "
                     "ref_table must be specified."
                 )

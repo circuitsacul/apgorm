@@ -30,6 +30,7 @@ from typing import Any, AsyncGenerator, Type
 import asyncpg
 from asyncpg.cursor import CursorFactory
 
+from apgorm.exceptions import NoMigrationsToCreate
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
@@ -90,7 +91,7 @@ class Database:
 
     def create_migrations(self, indent: int | None = None) -> Migration:
         if not self.must_create_migrations():
-            raise Exception("No migrations to create.")
+            raise NoMigrationsToCreate
         d = self.describe()
         sql = create_next_migration(d, self.migrations_folder)
         assert sql is not None

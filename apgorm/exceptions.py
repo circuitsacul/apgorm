@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Sequence, Type
 
 if TYPE_CHECKING:
     from .field import BaseField
@@ -36,6 +36,20 @@ class ApgormBaseException(Exception):
 # migration-side exceptions
 class MigrationException(ApgormBaseException):
     """Base class for all exceptions related to migrations."""
+
+
+class NoMigrationsToCreate(MigrationException):
+    """The migration for the given id was not found."""
+
+    def __init__(self):
+        super().__init__("There are no migrations to create.")
+
+
+class MigrationAlreadyApplied(MigrationException):
+    """The migration has already been applied."""
+
+    def __init__(self, path: str):
+        super().__init__(f"The migration at {path} has already been applied.")
 
 
 # apgorm-side exceptions
@@ -55,6 +69,18 @@ class UndefinedFieldValue(ApgormException):
             f"The field {field.full_name} is undefined. "
             "This usually means that the model has not been "
             "created."
+        )
+
+
+class SpecifiedPrimaryKey(ApgormException):
+    """You tried to create a primary key constraint by using PrimaryKey
+    instead of Model.primary_key."""
+
+    def __init__(self, cls: str, fields: Sequence[str]):
+        super().__init__(
+            f"You tried to specify a primary key on {cls} by using "
+            f"the PrimaryKey constraint. Please use {cls}.primary_key "
+            "instead:\nprimary_key = ({},)".format(", ".join(fields))
         )
 
 

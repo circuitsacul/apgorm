@@ -93,7 +93,7 @@ class Block(Generic[_SQLT]):
         elif isinstance(other, (Parameter, BaseField)):
             self._pieces.append(other)
         else:
-            raise TypeError
+            raise TypeError(f"Unsupported type {type(other)}")
 
         return self
 

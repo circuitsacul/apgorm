@@ -24,7 +24,7 @@ from __future__ import annotations, print_function
 
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
-from apgorm.exceptions import ModelNotFound
+from apgorm.exceptions import ModelNotFound, SpecifiedPrimaryKey
 from apgorm.field import BaseField, ConverterField
 from apgorm.migrations.describe import DescribeConstraint, DescribeTable
 from apgorm.sql.query_builder import (
@@ -192,10 +192,14 @@ class Model:
 
             elif isinstance(attr, Constraint):
                 if isinstance(attr, PrimaryKey):
-                    raise Exception(
-                        "Primary keys must be specified through Model."
-                        f"primary_key.\nRelated attr: {cls.__name__}."
-                        f"{attr_name}"
+                    raise SpecifiedPrimaryKey(
+                        cls.__name__,
+                        [
+                            f.name
+                            if isinstance(f, BaseField)
+                            else f.render_no_params()
+                            for f in attr.fields
+                        ],
                     )
                 constraints[attr_name] = attr
 
