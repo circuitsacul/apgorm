@@ -22,64 +22,58 @@
 
 from __future__ import annotations
 
+from enum import IntEnum
 from pathlib import Path
+from typing import Optional
 
 import apgorm
-from apgorm.sql.generators.comp import neq
 from apgorm.types.character import VarChar
+from apgorm.types.numeric import Int
 
 
-class User(apgorm.Model):
+class PlayerStatus(IntEnum):
+    NOT_FINISHED = 0
+    WINNER = 1
+    LOSER = 2
+    DROPPED = 3
+
+
+class PlayerStatusConverter(apgorm.Converter[Optional[int], PlayerStatus]):
+    def to_stored(self, value: PlayerStatus) -> int:
+        return int(value)
+
+    def from_stored(self, value: int | None) -> PlayerStatus:
+        if value is None:
+            value = 0
+        return PlayerStatus(value)
+
+
+class Player(apgorm.Model):
     username = VarChar(32).field()
-    nickname = VarChar(32).nullablefield()
+    status = Int().nullablefield().with_converter(PlayerStatusConverter)
 
     primary_key = (username,)
 
 
 class Database(apgorm.Database):
-    users = User
+    players = Player
 
 
 async def _main():
-    # create a user
-    user = User(username="Circuit")
-    await user.create()
+    player = Player(username="Circuit", status=PlayerStatus.NOT_FINISHED)
+    await player.create()
 
-    # get the user
-    _u = await User.fetch(username="Circuit")
-    assert user == _u
+    player.status.v  # PlayerStatus.NOT_FINISHED
+    player.status._value  # 0
 
-    # delete the user
-    await user.delete()
+    player.status.v = PlayerStatus.WINNER
+    await player.save()
 
-    # create lots of users
-    for un in ["Circuit", "Bad Guy", "Super Man"]:
-        await User(username=un).create()
-
-    # get all users except for "Bad Guy"
-    query = User.fetch_query()
-    query.where(neq(User.username, "Bad Guy"))
-    good_users = await query.fetchmany()
-
-    # set the nickname for all good users to "Good Guy"
-    for user in good_users:
-        user.nickname.v = "Good Guy"
-        await user.save()
-
-    # OR, you can use User.update_query...
-    (
-        await User.update_query()
-        .where(neq(User.username, "Bad Guy"))
-        .set(nickname="Good Guy")
-        .execute()
-    )
-
-    # delete all users
-    await User.delete_query().execute()
+    await player.delete()
 
 
 async def main():
-    db = Database(Path("examples/basic/migrations"))
+    db = Database(Path("examples/converters/migrations"))
     await db.connect(database="apgorm")
 
     if db.must_create_migrations():
