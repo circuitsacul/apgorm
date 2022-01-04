@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any, List, Union
 
 from apgorm.utils import nested_dataclass
@@ -69,3 +70,6 @@ class DescribeTable:
 @nested_dataclass
 class Describe:
     tables: List[DescribeTable]
+
+    def todict(self) -> dict[str, Any]:
+        return asdict(self)

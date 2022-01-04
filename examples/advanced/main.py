@@ -76,7 +76,7 @@ async def _main(db: Database):
     print("\nAdd some players (or, attach some users to games)")
     for user in all_users:
         for game in all_games:
-            await Player(user_id=user.id_.v, game_id=game.id_.v).create()
+            await Player(username=user.username.v, game_id=game.id_.v).create()
 
     print("\nPrint the players, users, and games:")
     print("\n".join([repr(p) for p in await Player.fetch_query().fetchmany()]))
