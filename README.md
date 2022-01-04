@@ -1,7 +1,7 @@
 # apgorm
 An ORM wrapped around asyncpg. Examples can be found under `examples/`. Run examples with `python -m examples.<example_name>` (`python -m examples.advanced`).
 
-Please note that this library is not for those learning SQL or Postgres. The library is rather complex to use and you will run into problems if you don't understand regular SQL well.
+Please note that this library is not for those learning SQL or Postgres. Although the basic usage of apgorm is straightforward, you will run into problems, especially with migrations, if you don't understand regular SQL well.
 
 ## Features
 These are features that will exist by the first release of apgorm:
