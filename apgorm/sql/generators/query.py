@@ -61,7 +61,7 @@ def select(
     sql += Block(r("FROM"), tablename)
 
     if where is not None:
-        sql += Block(r("WHERE "), where)
+        sql += Block(r("WHERE"), where)
 
     if order_by is not None:
         sql += Block(r("ORDER BY"), order_by)
