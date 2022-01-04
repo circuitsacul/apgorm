@@ -67,10 +67,10 @@ class BaseField(Generic[_F, _T, _C]):
 
     def describe(self) -> DescribeField:
         return DescribeField(
-            self.name,
-            self.sql_type.sql,
-            self.not_null,
-            self.default,
+            name=self.name,
+            type_=self.sql_type.sql,
+            not_null=self.not_null,
+            default=self.default,
         )
 
     @property

@@ -102,12 +102,12 @@ class Model:
                 unique.append(c.describe())
 
         return DescribeTable(
-            cls.tablename,
-            [f.describe() for f in fields.values()],
-            fk,
-            cls._primary_key().describe(),
-            unique,
-            check,
+            name=cls.tablename,
+            fields=[f.describe() for f in fields.values()],
+            fk_constraints=fk,
+            pk_constraint=cls._primary_key().describe(),
+            unique_constraints=unique,
+            check_constraints=check,
         )
 
     def _pk_field_values(self) -> dict[str, Any]:

@@ -20,30 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import annotations
+from typing import List, Union
 
-from dataclasses import asdict
-from typing import Any, List, Union
-
-from apgorm.utils import nested_dataclass
+from pydantic import BaseModel
 
 
-@nested_dataclass
-class DescribeField:
+class DescribeField(BaseModel):
     name: str
     type_: str
     not_null: bool
     default: Union[str, None] = None
 
 
-@nested_dataclass
-class DescribeConstraint:
+class DescribeConstraint(BaseModel):
     name: str
     raw_sql: str
 
 
-@nested_dataclass
-class DescribeTable:
+class DescribeTable(BaseModel):
     name: str
     fields: List[DescribeField]
     fk_constraints: List[DescribeConstraint]
@@ -61,9 +55,5 @@ class DescribeTable:
         )
 
 
-@nested_dataclass
-class Describe:
+class Describe(BaseModel):
     tables: List[DescribeTable]
-
-    def todict(self) -> dict[str, Any]:
-        return asdict(self)

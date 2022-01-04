@@ -75,7 +75,7 @@ class Database:
 
     # migration functions
     def describe(self) -> describe.Describe:
-        return describe.Describe([m.describe() for m in self.models])
+        return describe.Describe(tables=[m.describe() for m in self.models])
 
     def load_all_migrations(self) -> list[Migration]:
         return Migration.load_all_migrations(self.migrations_folder)

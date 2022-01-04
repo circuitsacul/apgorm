@@ -72,7 +72,7 @@ class Migration:
         next_path = folder / str(next_id)
         next_path.mkdir(parents=True, exist_ok=False)
         with (next_path / "describe.json").open("w+") as f:
-            f.write(json.dumps(describe.todict(), indent=4))
+            f.write(json.dumps(describe.dict(), indent=4))
         with (next_path / "migrations.sql").open("w+") as f:
             f.write(migrations)
 
