@@ -6,7 +6,6 @@ Please note that this library is not for those learning SQL or Postgres. Althoug
 ## Features
 These are features that will exist by the first release of apgorm:
  - Fully type-checked
- - 100% code coverage
  - Fairly straightforward and easy-to-use
  - Migration support
 
