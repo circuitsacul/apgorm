@@ -6,8 +6,7 @@
                 {
                     "name": "id_",
                     "type_": "INTEGER",
-                    "not_null": true,
-                    "default": null
+                    "not_null": true
                 }
             ],
             "fk_constraints": [],
@@ -24,14 +23,12 @@
                 {
                     "name": "nickname",
                     "type_": "VARCHAR(32)",
-                    "not_null": false,
-                    "default": null
+                    "not_null": false
                 },
                 {
                     "name": "username",
                     "type_": "VARCHAR(32)",
-                    "not_null": true,
-                    "default": null
+                    "not_null": true
                 }
             ],
             "fk_constraints": [],

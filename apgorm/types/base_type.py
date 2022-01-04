@@ -22,12 +22,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from apgorm.field import Field
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
+from apgorm.undefined import UNDEF
 
 _T = TypeVar("_T", covariant=True)
 _S = TypeVar("_S", bound="SqlType", covariant=True)
@@ -38,7 +36,7 @@ class SqlType(Generic[_T]):
 
     def field(
         self: _S,
-        default: str | BaseField | None = None,
+        default: _T | UNDEF = UNDEF.UNDEF,
         use_repr: bool = True,
     ) -> Field[_S, _T]:
         return Field(
@@ -50,7 +48,7 @@ class SqlType(Generic[_T]):
 
     def nullablefield(
         self: _S,
-        default: str | BaseField | None = None,
+        default: _T | None | UNDEF = UNDEF.UNDEF,
         use_repr: bool = True,
     ) -> Field[_S, _T | None]:
         return Field(

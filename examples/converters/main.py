@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from enum import IntEnum
 from pathlib import Path
-from typing import Optional
 
 import apgorm
 from apgorm.types.character import VarChar
@@ -38,19 +37,17 @@ class PlayerStatus(IntEnum):
     DROPPED = 3
 
 
-class PlayerStatusConverter(apgorm.Converter[Optional[int], PlayerStatus]):
+class PlayerStatusConverter(apgorm.Converter[int, PlayerStatus]):
     def to_stored(self, value: PlayerStatus) -> int:
         return int(value)
 
-    def from_stored(self, value: int | None) -> PlayerStatus:
-        if value is None:
-            value = 0
+    def from_stored(self, value: int) -> PlayerStatus:
         return PlayerStatus(value)
 
 
 class Player(apgorm.Model):
     username = VarChar(32).field()
-    status = Int().nullablefield().with_converter(PlayerStatusConverter)
+    status = Int().field(default=0).with_converter(PlayerStatusConverter)
 
     primary_key = (username,)
 
