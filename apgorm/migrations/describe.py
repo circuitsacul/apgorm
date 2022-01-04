@@ -35,12 +35,6 @@ class DescribeField:
     not_null: bool
     default: Union[str, None] = None
 
-    # NOTE: since the default default value for a field
-    # is null, we don't need to worry about using UNDEF
-    # here. We can just treat None as a command to drop
-    # the default value.
-    one_time_default: Union[Any, None] = None
-
 
 @nested_dataclass
 class DescribeConstraint:

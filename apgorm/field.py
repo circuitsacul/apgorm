@@ -49,7 +49,6 @@ class BaseField(Generic[_F, _T, _C]):
         sql_type: _F,
         *,
         default: str | BaseField | None = None,
-        one_time_default: _T | None = None,
         not_null: bool = False,
         use_repr: bool = True,
     ):
@@ -58,7 +57,6 @@ class BaseField(Generic[_F, _T, _C]):
         if isinstance(default, BaseField):
             default = default.name
         self.default = default
-        self.one_time_default = one_time_default
 
         self.not_null = not_null
 
@@ -73,7 +71,6 @@ class BaseField(Generic[_F, _T, _C]):
             self.sql_type.sql,
             self.not_null,
             self.default,
-            self.one_time_default,
         )
 
     @property
@@ -92,7 +89,6 @@ class BaseField(Generic[_F, _T, _C]):
         return dict(
             sql_type=self.sql_type,
             default=self.default,
-            one_time_default=self.one_time_default,
             not_null=self.not_null,
             use_repr=self.use_repr,
         )

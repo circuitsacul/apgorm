@@ -85,12 +85,10 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 class _BaseSerial(SqlType[int]):
     def field(  # type: ignore
         self: _S,
-        one_time_default: int | None = None,
         use_repr: bool = True,
     ) -> Field[_S, int]:
         return Field(
             sql_type=self,
-            one_time_default=one_time_default,
             not_null=True,
             use_repr=use_repr,
         )

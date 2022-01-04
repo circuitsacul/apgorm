@@ -7,8 +7,7 @@
                     "name": "id_",
                     "type_": "INTEGER",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 }
             ],
             "fk_constraints": [],
@@ -26,15 +25,13 @@
                     "name": "id_",
                     "type_": "SERIAL",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 },
                 {
                     "name": "name",
                     "type_": "VARCHAR(32)",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 }
             ],
             "fk_constraints": [],
@@ -52,22 +49,19 @@
                     "name": "game_id",
                     "type_": "INTEGER",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 },
                 {
                     "name": "status",
                     "type_": "INTEGER",
                     "not_null": true,
-                    "default": "0",
-                    "one_time_default": null
+                    "default": "0"
                 },
                 {
                     "name": "username",
                     "type_": "VARCHAR(32)",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 }
             ],
             "fk_constraints": [
@@ -94,15 +88,13 @@
                     "name": "nickname",
                     "type_": "VARCHAR(32)",
                     "not_null": false,
-                    "default": "null",
-                    "one_time_default": null
+                    "default": "null"
                 },
                 {
                     "name": "username",
                     "type_": "VARCHAR(32)",
                     "not_null": true,
-                    "default": null,
-                    "one_time_default": null
+                    "default": null
                 }
             ],
             "fk_constraints": [],
