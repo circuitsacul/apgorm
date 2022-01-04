@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Awaitable, Type
+from typing import Any, AsyncGenerator, Type
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -33,6 +33,7 @@ from asyncpg.cursor import CursorFactory
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
+from apgorm.migrations.create_migration import create_next_migration
 from apgorm.migrations.migration import Migration
 
 from .connection import Pool
@@ -82,22 +83,38 @@ class Database:
         return Migration.load_last_migration(self.migrations_folder)
 
     def must_create_migrations(self) -> bool:
-        return Migration.must_create_migrations(self)
+        sql = create_next_migration(self.describe(), self.migrations_folder)
+        if sql is None:
+            return False
+        return True
 
-    def create_migrations(self, indent: int | None = None):
-        next = Migration.create_migrations(self)
-        if next.isempty():
+    def create_migrations(self, indent: int | None = None) -> Migration:
+        if not self.must_create_migrations():
             raise Exception("No migrations to create.")
-        next.save(indent=indent)
+        d = self.describe()
+        sql = create_next_migration(d, self.migrations_folder)
+        assert sql is not None
+        return Migration.create_migration(d, sql, self.migrations_folder)
 
-    def load_unapplied_migrations(self) -> Awaitable[list[Migration]]:
-        return Migration.load_unapplied_migrations(self)
+    async def load_unapplied_migrations(self) -> list[Migration]:
+        try:
+            applied = [
+                m.id_.v
+                for m in await self._migrations.fetch_query().fetchmany()
+            ]
+        except asyncpg.UndefinedTableError:
+            applied = []
+        return [
+            m
+            for m in self.load_all_migrations()
+            if m.migration_id not in applied
+        ]
 
     async def must_apply_migrations(self) -> bool:
         return len(await self.load_unapplied_migrations()) > 0
 
     async def apply_migrations(self):
-        for m in await Migration.load_unapplied_migrations(self):
+        for m in await self.load_unapplied_migrations():
             await apply_migration(m, self)
 
     # database functions

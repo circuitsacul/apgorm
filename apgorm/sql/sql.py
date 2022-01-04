@@ -76,6 +76,9 @@ class Block(Generic[_SQLT]):
     def render(self) -> tuple[str, list[Any]]:
         return Renderer().render(self)
 
+    def render_no_params(self) -> str:
+        return self.render()[0]
+
     def get_pieces(
         self, force_wrap: bool | None = None
     ) -> list[Raw | Parameter | BaseField]:
