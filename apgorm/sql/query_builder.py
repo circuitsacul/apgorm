@@ -58,8 +58,7 @@ class FilterQueryBuilder(Query[_T]):
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
         for k, v in values.items():
-            key = r(f"{self.model.tablename}.{k}")
-            self.filters.append(key.eq(v))
+            self.filters.append(r(k).eq(v))
 
         return self
 
