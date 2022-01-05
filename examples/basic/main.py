@@ -25,7 +25,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import apgorm
-from apgorm.sql.generators.comp import neq
 from apgorm.types.character import VarChar
 
 
@@ -58,7 +57,7 @@ async def _main():
 
     # get all users except for "Bad Guy"
     query = User.fetch_query()
-    query.where(neq(User.username, "Bad Guy"))
+    query.where(User.username.neq("Bad Guy"))
     good_users = await query.fetchmany()
 
     # set the nickname for all good users to "Good Guy"
@@ -69,7 +68,7 @@ async def _main():
     # OR, you can use User.update_query...
     (
         await User.update_query()
-        .where(neq(User.username, "Bad Guy"))
+        .where(User.username.neq("Bad Guy"))
         .set(nickname="Good Guy")
         .execute()
     )

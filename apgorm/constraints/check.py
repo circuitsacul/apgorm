@@ -24,8 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from apgorm.sql.generators.helpers import r
-from apgorm.sql.sql import Block
+from apgorm.sql.sql import Block, r
 
 from .constraint import Constraint
 

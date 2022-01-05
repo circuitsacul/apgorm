@@ -27,11 +27,13 @@ from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
 from apgorm.converter import Converter
 from apgorm.exceptions import InvalidFieldValue, UndefinedFieldValue
 from apgorm.migrations.describe import DescribeField
+from apgorm.sql.sql import Comparable, r
 from apgorm.undefined import UNDEF
 from apgorm.validator import Validator
 
 if TYPE_CHECKING:
     from apgorm.model import Model
+    from apgorm.sql.sql import Block
 
     from .types.base_type import SqlType
 
@@ -42,7 +44,7 @@ _C = TypeVar("_C")
 _F = TypeVar("_F", bound="SqlType")
 
 
-class BaseField(Generic[_F, _T, _C]):
+class BaseField(Comparable, Generic[_F, _T, _C]):
     name: str  # populated by Database
     model: Type[Model]  # populated by Database
 
@@ -66,6 +68,9 @@ class BaseField(Generic[_F, _T, _C]):
         self._value: _T | UNDEF = UNDEF.UNDEF
 
         self._validators: list[Validator] = []
+
+    def _get_block(self) -> Block:
+        return r(self.name)
 
     def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
         self._validators.append(validator)

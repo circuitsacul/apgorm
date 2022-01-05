@@ -26,10 +26,8 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
 
 from apgorm.field import BaseField
 
-from .generators.comp import and_, eq
-from .generators.helpers import r
 from .generators.query import delete, insert, select, update
-from .sql import SQL, Block
+from .sql import SQL, Block, r
 
 if TYPE_CHECKING:
     from apgorm.model import Model
@@ -55,13 +53,13 @@ class FilterQueryBuilder(Query[_T]):
     def where_logic(self) -> Block[Bool] | None:
         if len(self.filters) == 0:
             return None
-        return and_(*self.filters)
+        return self.filters.pop().and_(*self.filters)
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
         for k, v in values.items():
             key = r(f"{self.model.tablename}.{k}")
-            self.filters.append(eq(key, v))
+            self.filters.append(key.eq(v))
 
         return self
 

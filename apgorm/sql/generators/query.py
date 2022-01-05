@@ -22,25 +22,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Sequence, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Sequence, Type
 
 from apgorm.field import BaseField
-from apgorm.sql.sql import SQL, Block
-from apgorm.types.base_type import SqlType
+from apgorm.sql.sql import SQL, Block, join, r, wrap
 from apgorm.types.boolean import Bool
-
-from .helpers import join, r, wrap
 
 if TYPE_CHECKING:
     from apgorm.model import Model
-
-
-_SQLT = TypeVar("_SQLT", bound=SqlType)
-
-
-# TODO: any difference between :: and CAST AS?
-def cast(param: SQL, type_: _SQLT) -> Block[_SQLT]:
-    return Block(param, r("::"), r(type_.sql), wrap=True)
 
 
 def select(

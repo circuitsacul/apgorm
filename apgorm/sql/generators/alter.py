@@ -22,9 +22,7 @@
 
 from __future__ import annotations
 
-from apgorm.sql.sql import SQL, Block
-
-from .helpers import r
+from apgorm.sql.sql import SQL, Block, r
 
 
 def add_table(tablename: Block) -> Block:
