@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
 
 from apgorm.sql.sql import Block, join, r
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class PrimaryKey(Constraint):
-    def __init__(self, fields: Sequence[BaseField | Block]):
+    def __init__(self, *fields: BaseField | Block):
         self.fields = fields
 
     def creation_sql(self) -> Block:

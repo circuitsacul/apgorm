@@ -82,7 +82,7 @@ class Model:
 
     @classmethod
     def _primary_key(cls) -> PrimaryKey:
-        pk = PrimaryKey(cls.primary_key)
+        pk = PrimaryKey(*cls.primary_key)
         pk.name = (
             f"{cls.tablename}_"
             + "{}".format("_".join([f.name for f in cls.primary_key]))
