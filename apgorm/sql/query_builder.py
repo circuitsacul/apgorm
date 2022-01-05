@@ -81,16 +81,19 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self.ascending = ascending
         return self
 
-    def _fetch_query(self) -> tuple[str, list[Any]]:
+    def _fetch_query(self, limit: int | None = None) -> tuple[str, list[Any]]:
         return select(
             from_=self.model,
             where=self.where_logic(),
             order_by=self.order_by_field,
             ascending=self.ascending,
+            limit=limit,
         ).render()
 
-    async def fetchmany(self) -> list[_T]:
-        query, params = self._fetch_query()
+    async def fetchmany(self, limit: int | None = None) -> list[_T]:
+        if not isinstance(limit, int):
+            raise TypeError("Limit can only be an int.")
+        query, params = self._fetch_query(limit=limit)
         res = await self.con.fetchmany(query, params)
         return [self.model(**r) for r in res]
 

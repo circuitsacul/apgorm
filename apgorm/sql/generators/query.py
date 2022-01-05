@@ -38,6 +38,7 @@ def select(
     where: Block[Bool] | None = None,
     order_by: BaseField | Block | None = None,
     ascending: bool = True,
+    limit: int | None = None,
 ) -> Block[Any]:
     sql = Block[Any](r("SELECT"))
 
@@ -55,6 +56,9 @@ def select(
     if order_by is not None:
         sql += Block(r("ORDER BY"), order_by)
         sql += r("ASC" if ascending else "DESC")
+
+    if limit is not None:
+        sql += Block(r("LIMIT"), r(str(limit)))
 
     return wrap(sql)
 
