@@ -113,17 +113,17 @@ class Model:
             check_constraints=check,
         )
 
-    def _pk_field_values(self) -> dict[str, Any]:
+    def _pk_fields(self) -> dict[str, Any]:
         return {f.name: f.v for f in self.primary_key}
 
     async def delete(self):
-        await self.delete_query().where(**self._pk_field_values()).execute()
+        await self.delete_query().where(**self._pk_fields()).execute()
 
     async def save(self):
         changed_fields = self._get_changed_fields()
         if len(changed_fields) == 0:
             return
-        q = self.update_query().where(**self._pk_field_values())
+        q = self.update_query().where(**self._pk_fields())
         q.set(**{f.name: f._value for f in changed_fields})
         await q.execute()
         self._set_saved()
@@ -222,11 +222,8 @@ class Model:
             + ">"
         )
 
-    def _eq_fields(self) -> dict[str, Any]:
-        return {f.name: f.v for f in self.primary_key}
-
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):
             raise TypeError(f"Unsupported type {type(other)}.")
 
-        return self._eq_fields() == other._eq_fields()
+        return self._pk_fields() == other._pk_fields()
