@@ -45,6 +45,6 @@ async def apply_migration(migration: Migration, db: Database):
     assert db.pool is not None
     async with db.pool.acquire() as con:
         async with con.transaction():
-            await db.execute(migration.migrations, [])
+            await con.execute(migration.migrations, [])
 
     await db._migrations(id_=migration.migration_id).create()
