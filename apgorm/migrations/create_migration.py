@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 
 from apgorm.migrations.describe import DescribeConstraint
 from apgorm.sql.generators import alter
-from apgorm.sql.generators.helpers import r
+from apgorm.sql.sql import r
 from apgorm.undefined import UNDEF
 
 from .migration import Migration

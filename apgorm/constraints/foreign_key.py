@@ -28,8 +28,7 @@ from typing import cast as typingcast
 
 from apgorm.exceptions import BadArgument
 from apgorm.field import BaseField
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
+from apgorm.sql.sql import Block, join, r
 
 from .constraint import Constraint
 

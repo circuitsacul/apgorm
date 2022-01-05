@@ -24,8 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Sequence
 
-from apgorm.sql.generators.helpers import join, r
-from apgorm.sql.sql import Block
+from apgorm.sql.sql import Block, join, r
 
 from .constraint import Constraint
 
