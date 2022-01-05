@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
 _T = TypeVar("_T", covariant=True)
 _SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
+_CAST_SQLT = TypeVar("_CAST_SQLT", bound="SqlType")
 _PARAM = TypeVar("_PARAM")
 SQL = Union[
     "BaseField[SqlType[_T], _T, Any]",
@@ -79,10 +80,10 @@ class Comparable:
     def _get_block(self) -> Block:
         raise NotImplementedError
 
-    def _op(self, op: str, other: SQL) -> Block[Bool]:
+    def _op(self, op: str, other: SQL) -> Block:
         return wrap(self._get_block(), r(op), other)
 
-    def _opjoin(self, op: str, *values: SQL) -> Block[Bool]:
+    def _opjoin(self, op: str, *values: SQL) -> Block:
         return join(r(op), self._get_block(), *values)
 
     def _func(self, func: str) -> Block:
@@ -171,6 +172,9 @@ class Comparable:
 
     def gteq(self, other: SQL) -> Block[Bool]:
         return self._op(">=", other)
+
+    def cast(self, type_: _CAST_SQLT) -> Block[_CAST_SQLT]:
+        return self._op("::", r(type_.sql))
 
 
 class Block(Comparable, Generic[_SQLT]):
