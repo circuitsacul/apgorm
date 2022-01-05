@@ -7,6 +7,7 @@ Please note that this library is not for those learning SQL or Postgres. Althoug
  - Fully type-checked
  - Fairly straightforward and easy-to-use
  - Migration support
+ - Protection against SQL-injection
 
 ## Limitations
  - There are limitations on what the name of a column can be. For example, you cannot have a column named `tablename` since that is used to declare the name of the model.
