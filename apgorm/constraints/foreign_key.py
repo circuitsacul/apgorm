@@ -113,7 +113,8 @@ class ForeignKey(Constraint):
             ref_table,
             r("("),
             join(r(","), *ref_fields),
-            r(f") ON DELETE {self.on_delete.value}"),
+            (r(") MATCH FULL") if self.match_full else r(") MATCH SIMPLE")),
+            r(f"ON DELETE {self.on_delete.value}"),
             r(f"ON UPDATE {self.on_update.value}"),
             wrap=True,
         )
