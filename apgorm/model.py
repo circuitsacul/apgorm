@@ -153,8 +153,13 @@ class Model:
             fields_to_return[0]._value = result
 
     @classmethod
-    async def fetch(cls: Type[_T], **values) -> _T:
-        res = await cls.fetch_query().where(**values).fetchone()
+    async def fetch(
+        cls: Type[_T],
+        con: Connection | None = None,
+        /,
+        **values,
+    ) -> _T:
+        res = await cls.fetch_query(con=con).where(**values).fetchone()
         if res is None:
             raise ModelNotFound(cls, values)
         return res
