@@ -53,7 +53,7 @@ class FilterQueryBuilder(Query[_T]):
     def where_logic(self) -> Block[Bool] | None:
         if len(self.filters) == 0:
             return None
-        return self.filters.pop().and_(*self.filters)
+        return self.filters.pop(0).and_(*self.filters)
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         self.filters.extend(filters)
