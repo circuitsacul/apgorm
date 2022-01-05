@@ -46,7 +46,7 @@ def select(
     else:
         sql += join(r(","), *fields, wrap=True)
 
-    tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
+    tablename = from_ if isinstance(from_, Block) else r(from_._tablename)
     sql += Block(r("FROM"), tablename)
 
     if where is not None:
@@ -63,7 +63,7 @@ def delete(
     from_: Model | Type[Model] | Block,
     where: Block[Bool] | None = None,
 ) -> Block:
-    tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
+    tablename = from_ if isinstance(from_, Block) else r(from_._tablename)
     sql = Block[Any](r("DELETE FROM"), tablename)
     if where is not None:
         sql += Block(r("WHERE"), where)
@@ -75,7 +75,7 @@ def update(
     values: dict[SQL, SQL],
     where: Block[Bool] | None = None,
 ) -> Block:
-    tablename = table if isinstance(table, Block) else r(table.tablename)
+    tablename = table if isinstance(table, Block) else r(table._tablename)
     sql = Block[Any](r("UPDATE"), tablename, r("SET"))
 
     set_logic: list[Block] = []
@@ -99,7 +99,7 @@ def insert(
     | Block
     | None = None,
 ) -> Block[Any]:
-    tablename = into if isinstance(into, Block) else r(into.tablename)
+    tablename = into if isinstance(into, Block) else r(into._tablename)
 
     sql = Block[Any](r("INSERT INTO"), tablename)
     if len(fields) > 0:

@@ -46,19 +46,19 @@ _T = TypeVar("_T", bound="Model")
 
 
 class Model:
-    tablename: str  # populated by Database
-    database: Database  # populated by Database
+    _tablename: str  # populated by Database
+    _database: Database  # populated by Database
 
     primary_key: tuple[BaseField, ...]
 
     def __init__(self, **values):
-        self.fields: dict[str, BaseField] = {}
-        self.constraints: dict[str, Constraint] = {}
+        self._all_fields: dict[str, BaseField] = {}
+        self._all_constraints: dict[str, Constraint] = {}
 
         all_fields, all_constraints = self._special_attrs()
         for f in all_fields.values():
             f = f.copy()
-            self.fields[f.name] = f
+            self._all_fields[f.name] = f
             setattr(self, f.name, f)
 
             value = values.get(f.name, UNDEF.UNDEF)
@@ -75,17 +75,17 @@ class Model:
         # carry the copies of the fields over to primary_key so that
         # Model.field is Model.primary_key[index of that field]
         self.primary_key = tuple(
-            [self.fields[f.name] for f in self.primary_key]
+            [self._all_fields[f.name] for f in self.primary_key]
         )
 
         for c in all_constraints.values():
-            self.constraints[c.name] = c
+            self._all_constraints[c.name] = c
 
     @classmethod
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
         pk.name = (
-            f"{cls.tablename}_"
+            f"{cls._tablename}_"
             + "{}".format("_".join([f.name for f in cls.primary_key]))
             + "_primary_key"
         )
@@ -106,7 +106,7 @@ class Model:
                 unique.append(c.describe())
 
         return DescribeTable(
-            name=cls.tablename,
+            name=cls._tablename,
             fields=[f.describe() for f in fields.values()],
             fk_constraints=fk,
             pk_constraint=cls._primary_key().describe(),
@@ -134,12 +134,12 @@ class Model:
         q.set(
             **{
                 f.name: f._value
-                for f in self.fields.values()
+                for f in self._all_fields.values()
                 if f._value is not UNDEF.UNDEF
             }
         )
         q.return_fields(
-            *[f for f in self.fields.values() if f._value is UNDEF.UNDEF]
+            *[f for f in self._all_fields.values() if f._value is UNDEF.UNDEF]
         )
         result = await q.execute()
 
@@ -189,11 +189,11 @@ class Model:
         return InsertQueryBuilder(model=cls, con=con)
 
     def _set_saved(self):
-        for f in self.fields.values():
+        for f in self._all_fields.values():
             f.changed = False
 
     def _get_changed_fields(self) -> list[BaseField]:
-        return [f for f in self.fields.values() if f.changed]
+        return [f for f in self._all_fields.values() if f.changed]
 
     @classmethod
     def _special_attrs(
@@ -233,7 +233,7 @@ class Model:
             + " ".join(
                 [
                     f"{f.name}:{f.v!r}"
-                    for f in self.fields.values()
+                    for f in self._all_fields.values()
                     if f.use_repr and f._value is not UNDEF.UNDEF
                 ]
             )

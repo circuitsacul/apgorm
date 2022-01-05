@@ -71,7 +71,7 @@ class ForeignKey(Constraint):
         if (
             len(
                 {
-                    f.model.tablename
+                    f.model._tablename
                     for f in self.ref_fields
                     if isinstance(f, BaseField)
                 }
@@ -91,7 +91,7 @@ class ForeignKey(Constraint):
                 )
             _ref_fields = typingcast(List[BaseField], _ref_fields)
 
-            ref_table = r(_ref_fields[0].model.tablename)
+            ref_table = r(_ref_fields[0].model._tablename)
 
         else:
             ref_table = self.ref_table

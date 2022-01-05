@@ -45,8 +45,8 @@ class Database:
     _migrations = AppliedMigration
 
     def __init__(self, migrations_folder: Path):
-        self.migrations_folder = migrations_folder
-        self.models: list[Type[Model]] = []
+        self._migrations_folder = migrations_folder
+        self._all_models: list[Type[Model]] = []
 
         for attr_name in dir(self):
             try:
@@ -59,9 +59,9 @@ class Database:
             if not issubclass(attr, Model):
                 continue
 
-            attr.database = self
-            attr.tablename = attr_name
-            self.models.append(attr)
+            attr._database = self
+            attr._tablename = attr_name
+            self._all_models.append(attr)
 
             fields, constraints = attr._special_attrs()
             for name, field in fields.items():
@@ -75,16 +75,18 @@ class Database:
 
     # migration functions
     def describe(self) -> describe.Describe:
-        return describe.Describe(tables=[m.describe() for m in self.models])
+        return describe.Describe(
+            tables=[m.describe() for m in self._all_models]
+        )
 
     def load_all_migrations(self) -> list[Migration]:
-        return Migration.load_all_migrations(self.migrations_folder)
+        return Migration.load_all_migrations(self._migrations_folder)
 
     def load_last_migration(self) -> Migration | None:
-        return Migration.load_last_migration(self.migrations_folder)
+        return Migration.load_last_migration(self._migrations_folder)
 
     def must_create_migrations(self) -> bool:
-        sql = create_next_migration(self.describe(), self.migrations_folder)
+        sql = create_next_migration(self.describe(), self._migrations_folder)
         if sql is None:
             return False
         return True
@@ -93,9 +95,9 @@ class Database:
         if not self.must_create_migrations():
             raise NoMigrationsToCreate
         d = self.describe()
-        sql = create_next_migration(d, self.migrations_folder)
+        sql = create_next_migration(d, self._migrations_folder)
         assert sql is not None
-        return Migration.create_migration(d, sql, self.migrations_folder)
+        return Migration.create_migration(d, sql, self._migrations_folder)
 
     async def load_unapplied_migrations(self) -> list[Migration]:
         try:

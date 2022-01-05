@@ -94,7 +94,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
     @property
     def full_name(self) -> str:
-        return f"{self.model.tablename}.{self.name}"
+        return f"{self.model._tablename}.{self.name}"
 
     @property
     def v(self) -> _C:

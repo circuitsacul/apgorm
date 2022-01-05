@@ -40,7 +40,7 @@ _T = TypeVar("_T", bound="Model")
 class Query(Generic[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None):
         self.model = model
-        self.con = con or model.database
+        self.con = con or model._database
 
 
 _S = TypeVar("_S", bound="FilterQueryBuilder")
@@ -104,7 +104,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     async def cursor(self) -> AsyncGenerator[_T, None]:
         query, params = self._fetch_query()
         con = self.con if isinstance(self.con, Connection) else None
-        async with self.model.database.cursor(
+        async with self.model._database.cursor(
             query, params, con=con
         ) as cursor:
             async for res in cursor:
@@ -114,7 +114,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     async def execute(self):
         query, params = delete(self.model, self.where_logic()).render()
-        await self.model.database.execute(query, params)
+        await self.model._database.execute(query, params)
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
