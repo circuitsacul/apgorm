@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Awaitable, Coroutine
+from typing import Any, Coroutine
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -77,9 +77,9 @@ class Connection:
         print(query, params)
         return [dict(r) for r in await self.con.fetch(query, *params)]
 
-    async def fetchval(self, query: str, params: list[Any]) -> Awaitable[Any]:
+    async def fetchval(self, query: str, params: list[Any]) -> Any:
         print(query, params)
-        return await self.con.fetchval(query, *params)  # type: ignore
+        return await self.con.fetchval(query, *params)
 
     async def cursor(self, query: str, params: list[Any]) -> CursorFactory:
         print(query, params)
