@@ -38,6 +38,7 @@ from apgorm.undefined import UNDEF
 from .constraints import Check, Constraint, ForeignKey, PrimaryKey, Unique
 
 if TYPE_CHECKING:
+    from .connection import Connection
     from .database import Database
 
 
@@ -116,20 +117,20 @@ class Model:
     def _pk_fields(self) -> dict[str, Any]:
         return {f.name: f.v for f in self.primary_key}
 
-    async def delete(self):
-        await self.delete_query().where(**self._pk_fields()).execute()
+    async def delete(self, con: Connection | None = None):
+        await self.delete_query(con=con).where(**self._pk_fields()).execute()
 
-    async def save(self):
+    async def save(self, con: Connection | None = None):
         changed_fields = self._get_changed_fields()
         if len(changed_fields) == 0:
             return
-        q = self.update_query().where(**self._pk_fields())
+        q = self.update_query(con=con).where(**self._pk_fields())
         q.set(**{f.name: f._value for f in changed_fields})
         await q.execute()
         self._set_saved()
 
-    async def create(self):
-        q = self.insert_query()
+    async def create(self, con: Connection | None = None):
+        q = self.insert_query(con=con)
         q.set(
             **{
                 f.name: f._value
@@ -159,20 +160,28 @@ class Model:
         return res
 
     @classmethod
-    def fetch_query(cls: Type[_T]) -> FetchQueryBuilder[_T]:
-        return FetchQueryBuilder(model=cls)
+    def fetch_query(
+        cls: Type[_T], con: Connection | None = None
+    ) -> FetchQueryBuilder[_T]:
+        return FetchQueryBuilder(model=cls, con=con)
 
     @classmethod
-    def delete_query(cls: Type[_T]) -> DeleteQueryBuilder[_T]:
-        return DeleteQueryBuilder(model=cls)
+    def delete_query(
+        cls: Type[_T], con: Connection | None = None
+    ) -> DeleteQueryBuilder[_T]:
+        return DeleteQueryBuilder(model=cls, con=con)
 
     @classmethod
-    def update_query(cls: Type[_T]) -> UpdateQueryBuilder[_T]:
-        return UpdateQueryBuilder(model=cls)
+    def update_query(
+        cls: Type[_T], con: Connection | None = None
+    ) -> UpdateQueryBuilder[_T]:
+        return UpdateQueryBuilder(model=cls, con=con)
 
     @classmethod
-    def insert_query(cls: Type[_T]) -> InsertQueryBuilder[_T]:
-        return InsertQueryBuilder(model=cls)
+    def insert_query(
+        cls: Type[_T], con: Connection | None = None
+    ) -> InsertQueryBuilder[_T]:
+        return InsertQueryBuilder(model=cls, con=con)
 
     def _set_saved(self):
         for f in self.fields.values():

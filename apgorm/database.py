@@ -37,7 +37,7 @@ from apgorm.migrations.apply_migration import apply_migration
 from apgorm.migrations.create_migration import create_next_migration
 from apgorm.migrations.migration import Migration
 
-from .connection import Pool
+from .connection import Connection, Pool
 from .model import Model
 
 
@@ -156,10 +156,13 @@ class Database:
 
     @asynccontextmanager
     async def cursor(
-        self, query: str, args: list[Any]
+        self, query: str, args: list[Any], con: Connection | None = None
     ) -> AsyncGenerator[CursorFactory, None]:
-        assert self.pool is not None
-        async with self.pool.acquire() as con:
-            async with con.transaction():
-                cursor: CursorFactory = await con.cursor(query, args)
-                yield cursor
+        if con:
+            yield con.cursor(query, args)
+
+        else:
+            assert self.pool is not None
+            async with self.pool.acquire() as con:
+                async with con.transaction():
+                    yield con.cursor(query, args)

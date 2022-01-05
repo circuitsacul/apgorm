@@ -81,6 +81,6 @@ class Connection:
         print(query, params)
         return await self.con.fetchval(query, *params)
 
-    async def cursor(self, query: str, params: list[Any]) -> CursorFactory:
+    def cursor(self, query: str, params: list[Any]) -> CursorFactory:
         print(query, params)
         return self.con.cursor(query, *params)

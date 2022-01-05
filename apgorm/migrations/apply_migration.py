@@ -46,5 +46,4 @@ async def apply_migration(migration: Migration, db: Database):
     async with db.pool.acquire() as con:
         async with con.transaction():
             await con.execute(migration.migrations, [])
-
-    await db._migrations(id_=migration.migration_id).create()
+            await db._migrations(id_=migration.migration_id).create(con=con)

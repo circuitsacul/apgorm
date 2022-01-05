@@ -30,6 +30,7 @@ from .generators.query import delete, insert, select, update
 from .sql import SQL, Block, r
 
 if TYPE_CHECKING:
+    from apgorm.connection import Connection
     from apgorm.model import Model
     from apgorm.types.boolean import Bool
 
@@ -37,16 +38,17 @@ _T = TypeVar("_T", bound="Model")
 
 
 class Query(Generic[_T]):
-    def __init__(self, model: Type[_T]):
+    def __init__(self, model: Type[_T], con: Connection | None = None):
         self.model = model
+        self.con = con or model.database
 
 
 _S = TypeVar("_S", bound="FilterQueryBuilder")
 
 
 class FilterQueryBuilder(Query[_T]):
-    def __init__(self, model: Type[_T]):
-        super().__init__(model)
+    def __init__(self, model: Type[_T], con: Connection | None = None):
+        super().__init__(model, con)
 
         self.filters: list[Block[Bool]] = []
 
@@ -64,8 +66,8 @@ class FilterQueryBuilder(Query[_T]):
 
 
 class FetchQueryBuilder(FilterQueryBuilder[_T]):
-    def __init__(self, model: Type[_T]):
-        super().__init__(model)
+    def __init__(self, model: Type[_T], con: Connection | None = None):
+        super().__init__(model, con)
 
         self.order_by_field: BaseField | Block | None = None
         self.ascending: bool = True
@@ -89,19 +91,22 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
     async def fetchmany(self) -> list[_T]:
         query, params = self._fetch_query()
-        res = await self.model.database.fetchmany(query, params)
+        res = await self.con.fetchmany(query, params)
         return [self.model(**r) for r in res]
 
     async def fetchone(self) -> _T | None:
         query, params = self._fetch_query()
-        res = await self.model.database.fetchrow(query, params)
+        res = await self.con.fetchrow(query, params)
         if res is None:
             return None
         return self.model(**res)
 
     async def cursor(self) -> AsyncGenerator[_T, None]:
         query, params = self._fetch_query()
-        async with self.model.database.cursor(query, params) as cursor:
+        con = self.con if isinstance(self.con, Connection) else None
+        async with self.model.database.cursor(
+            query, params, con=con
+        ) as cursor:
             async for res in cursor:
                 yield self.model(**res)
 
@@ -113,8 +118,8 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
-    def __init__(self, model: Type[_T]):
-        super().__init__(model)
+    def __init__(self, model: Type[_T], con: Connection | None = None):
+        super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
 
@@ -128,12 +133,12 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
         ).render()
-        await self.model.database.execute(query, params)
+        await self.con.execute(query, params)
 
 
 class InsertQueryBuilder(Query[_T]):
-    def __init__(self, model: Type[_T]):
-        super().__init__(model)
+    def __init__(self, model: Type[_T], con: Connection | None = None):
+        super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
         self.fields_to_return: list[Block | BaseField] = []
@@ -158,4 +163,4 @@ class InsertQueryBuilder(Query[_T]):
             value_values,
             return_fields=self.fields_to_return or None,
         ).render()
-        return await self.model.database.fetchval(query, params)
+        return await self.con.fetchval(query, params)
