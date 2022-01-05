@@ -36,6 +36,11 @@ class DescribeConstraint(BaseModel):
     raw_sql: str
 
 
+class DescribeIndex(BaseModel):
+    name: str
+    raw_sql: str
+
+
 class DescribeTable(BaseModel):
     name: str
     fields: List[DescribeField]
@@ -56,3 +61,4 @@ class DescribeTable(BaseModel):
 
 class Describe(BaseModel):
     tables: List[DescribeTable]
+    indexes: List[DescribeIndex]

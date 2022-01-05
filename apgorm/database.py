@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Type
+from typing import Any, AsyncGenerator, Sequence, Type
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -38,11 +38,13 @@ from apgorm.migrations.create_migration import create_next_migration
 from apgorm.migrations.migration import Migration
 
 from .connection import Connection, Pool
+from .indexes import Index
 from .model import Model
 
 
 class Database:
     _migrations = AppliedMigration
+    indexes: Sequence[Index] | None = None
 
     def __init__(self, migrations_folder: Path):
         self._migrations_folder = migrations_folder
@@ -76,7 +78,8 @@ class Database:
     # migration functions
     def describe(self) -> describe.Describe:
         return describe.Describe(
-            tables=[m.describe() for m in self._all_models]
+            tables=[m.describe() for m in self._all_models],
+            indexes=[i.describe() for i in self.indexes or []],
         )
 
     def load_all_migrations(self) -> list[Migration]:
