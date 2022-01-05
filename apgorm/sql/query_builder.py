@@ -58,6 +58,10 @@ class FilterQueryBuilder(Query[_T]):
         return self.filters.pop(0).and_(*self.filters)
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
+        # NOTE: Although **values might look like an SQL-injection
+        # vulnerability, it's really not. Since the keys for **values
+        # can only contain A-Za-z_ characters, there's no possibly way
+        # to perform sql injection, even if the keys are user input.
         self.filters.extend(filters)
         for k, v in values.items():
             self.filters.append(r(k).eq(v))
@@ -92,6 +96,10 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
     async def fetchmany(self, limit: int | None = None) -> list[_T]:
         if not isinstance(limit, int):
+            # NOTE: although limit as a string would work, there is a good
+            # chance that it's a string because it was user input, meaning
+            # that allowing limit to be a string would create an SQL-injection
+            # vulnerability.
             raise TypeError("Limit can only be an int.")
         query, params = self._fetch_query(limit=limit)
         res = await self.con.fetchmany(query, params)
