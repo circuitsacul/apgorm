@@ -39,5 +39,6 @@
             "unique_constraints": [],
             "check_constraints": []
         }
-    ]
+    ],
+    "indexes": []
 }

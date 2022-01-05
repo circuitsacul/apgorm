@@ -33,6 +33,14 @@ def drop_table(tablename: Block) -> Block:
     return Block(r("DROP TABLE"), tablename)
 
 
+def add_index(raw_sql: str) -> Block:
+    return Block(r("CREATE"), r(raw_sql))
+
+
+def drop_index(name: Block) -> Block:
+    return Block(r("DROP INDEX"), name)
+
+
 def _alter_table(tablename: Block, sql: SQL) -> Block:
     return Block(r("ALTER TABLE"), tablename, sql)
 

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import constraints, exceptions, migrations, sql, types
+from . import constraints, exceptions, indexes, migrations, sql, types
 from .converter import Converter
 from .database import Database
 from .model import Model
@@ -34,4 +34,5 @@ __all__ = (
     "migrations",
     "sql",
     "exceptions",
+    "indexes",
 )

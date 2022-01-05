@@ -99,6 +99,31 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     ]
 
     # everything else
+    curr_indexes = {c.name: c for c in cd.indexes}
+    last_indexes = {c.name: c for c in lm.describe.indexes} if lm else {}
+    comm_indexes = [
+        (curr_indexes[k], last_indexes[k])
+        for k in curr_indexes.keys() & last_indexes.keys()
+    ]
+    add_indexes: list[str] = [
+        alter.add_index(c.raw_sql).render_no_params()
+        for name, c in curr_indexes.items()
+        if name not in last_indexes
+    ]
+    drop_indexes: list[str] = [
+        alter.drop_index(r(c.name)).render_no_params()
+        for name, c in last_indexes.items()
+        if name not in curr_indexes
+    ]
+    for curr, last in comm_indexes:
+        if curr.raw_sql != last.raw_sql:
+            drop_indexes.append(
+                alter.drop_index(r(curr.name)).render_no_params()
+            )
+            add_indexes.append(
+                alter.add_index(curr.raw_sql).render_no_params()
+            )
+
     add_unique_constraints: list[str] = []
     add_pk_constraints: list[str] = []
     add_check_constraints: list[str] = []
@@ -208,8 +233,12 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(drop_unique_constraints)
     migrations.extend(drop_check_constraints)
 
+    migrations.extend(drop_indexes)
+
     migrations.extend(drop_fields)
     migrations.extend(field_not_nulls)
+
+    migrations.extend(add_indexes)
 
     migrations.extend(add_unique_constraints)
     migrations.extend(add_check_constraints)
