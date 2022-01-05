@@ -95,7 +95,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         ).render()
 
     async def fetchmany(self, limit: int | None = None) -> list[_T]:
-        if not isinstance(limit, int):
+        if limit is not None and not isinstance(limit, int):
             # NOTE: although limit as a string would work, there is a good
             # chance that it's a string because it was user input, meaning
             # that allowing limit to be a string would create an SQL-injection
