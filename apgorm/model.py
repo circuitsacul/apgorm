@@ -22,7 +22,7 @@
 
 from __future__ import annotations, print_function
 
-from typing import TYPE_CHECKING, Any, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Type, TypeVar, cast
 
 from apgorm.exceptions import ModelNotFound, SpecifiedPrimaryKey
 from apgorm.field import BaseField, ConverterField
@@ -141,11 +141,15 @@ class Model:
             *[f for f in self.fields.values() if f._value is UNDEF.UNDEF]
         )
         result = await q.execute()
-        if len(q.fields_to_return) > 1:
-            for f, v in zip(q.fields_to_return, result):
+
+        fields_to_return = cast("list[BaseField]", q.fields_to_return)
+        assert all([isinstance(f, BaseField) for f in fields_to_return])
+
+        if len(fields_to_return) > 1:
+            for f, v in zip(fields_to_return, result):
                 f._value = v
-        elif len(q.fields_to_return) == 1:
-            q.fields_to_return[0]._value = result
+        elif len(fields_to_return) == 1:
+            fields_to_return[0]._value = result
 
     @classmethod
     async def fetch(cls: Type[_T], **values) -> _T:
