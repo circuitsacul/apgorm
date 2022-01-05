@@ -103,7 +103,7 @@ class BadArgument(ApgormException):
     """Bad arguments were passed."""
 
     def __init__(self, message: str):
-        self.messages = message
+        self.message = message
 
         super().__init__(message)
 
