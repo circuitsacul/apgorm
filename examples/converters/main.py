@@ -59,12 +59,14 @@ class Database(apgorm.Database):
 async def _main():
     player = Player(username="Circuit", status=PlayerStatus.NOT_FINISHED)
     await player.create()
+    print("Created player", player)
 
-    player.status.v  # PlayerStatus.NOT_FINISHED
-    player.status._value  # 0
+    print("player.status.v:", player.status.v)  # PlayerStatus.NOT_FINISHED
+    print("players.status._value:", player.status._value)  # 0
 
     player.status.v = PlayerStatus.WINNER
     await player.save()
+    print(f"Set status to {player.status.v!r} ({player.status._value!r})")
 
     await player.delete()
 

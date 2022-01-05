@@ -43,22 +43,26 @@ async def _main():
     # create a user
     user = User(username="Circuit")
     await user.create()
+    print("Created", user)
 
     # get the user
     _u = await User.fetch(username="Circuit")
-    assert user == _u
+    print(f"{user} == {_u}:", user == _u)
 
     # delete the user
     await user.delete()
+    print("Deleted", user)
 
     # create lots of users
     for un in ["Circuit", "Bad Guy", "Super Man"]:
         await User(username=un).create()
+        print("Created user with name", un)
 
     # get all users except for "Bad Guy"
     query = User.fetch_query()
     query.where(User.username.neq("Bad Guy"))
     good_users = await query.fetchmany()
+    print("Users except for 'Bad Guy':", good_users)
 
     # set the nickname for all good users to "Good Guy"
     for user in good_users:
@@ -71,6 +75,11 @@ async def _main():
         .where(User.username.neq("Bad Guy"))
         .set(nickname="Good Guy")
         .execute()
+    )
+
+    print(
+        "Users after setting nicknames:",
+        await User.fetch_query().fetchmany(),
     )
 
     # delete all users

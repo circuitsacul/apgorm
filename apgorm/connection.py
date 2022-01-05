@@ -62,11 +62,9 @@ class Connection:
         return self.con.transaction()
 
     async def execute(self, query: str, params: list[Any]):
-        print(query, params)
         await self.con.execute(query, *params)
 
     async def fetchrow(self, query: str, params: list[Any]) -> dict | None:
-        print(query, params)
         res = await self.con.fetchrow(query, *params)
         if res is not None:
             res = dict(res)
@@ -74,13 +72,10 @@ class Connection:
         return res
 
     async def fetchmany(self, query: str, params: list[Any]) -> list[dict]:
-        print(query, params)
         return [dict(r) for r in await self.con.fetch(query, *params)]
 
     async def fetchval(self, query: str, params: list[Any]) -> Any:
-        print(query, params)
         return await self.con.fetchval(query, *params)
 
     def cursor(self, query: str, params: list[Any]) -> CursorFactory:
-        print(query, params)
         return self.con.cursor(query, *params)
