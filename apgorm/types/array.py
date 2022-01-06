@@ -26,7 +26,7 @@ from typing import TypeVar
 
 from .base_type import SqlType
 
-_T = TypeVar("_T", bound=SqlType)
+_T = TypeVar("_T")
 
 
 class Array(SqlType["list[_T | None]"]):
@@ -39,7 +39,7 @@ class Array(SqlType["list[_T | None]"]):
     ```
     """
 
-    def __init__(self, subtype: _T, size: int | None = None):
+    def __init__(self, subtype: SqlType[_T], size: int | None = None):
         """Create an array type.
 
         Args:
@@ -81,7 +81,7 @@ class Array(SqlType["list[_T | None]"]):
         return self._size
 
     @property
-    def subtype(self) -> _T:
+    def subtype(self) -> SqlType[_T]:
         """The arrays sub type.
 
         Returns:
