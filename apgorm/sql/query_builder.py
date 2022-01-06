@@ -38,6 +38,8 @@ _T = TypeVar("_T", bound="Model")
 
 
 class Query(Generic[_T]):
+    """Base class for query builders."""
+
     def __init__(self, model: Type[_T], con: Connection | None = None):
         self.model = model
         self.con = con or model._database
@@ -47,6 +49,8 @@ _S = TypeVar("_S", bound="FilterQueryBuilder")
 
 
 class FilterQueryBuilder(Query[_T]):
+    """Base class for query builders that have "where logic"."""
+
     def __init__(self, model: Type[_T], con: Connection | None = None):
         super().__init__(model, con)
 
@@ -58,6 +62,19 @@ class FilterQueryBuilder(Query[_T]):
         return and_(*self.filters)
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
+        """Extend the current where logic.
+
+        Example:
+        ```
+        builder.where(User.nickname.neq("Nickname"), status=4)
+        # nickname != "Nickname", status == 4
+        ```
+
+        Returns:
+            FilterQueryBuilder: Returns the query builder to allow for
+            chaining.
+        """
+
         # NOTE: Although **values might look like an SQL-injection
         # vulnerability, it's really not. Since the keys for **values
         # can only contain A-Za-z_ characters, there's no possibly way
@@ -70,6 +87,8 @@ class FilterQueryBuilder(Query[_T]):
 
 
 class FetchQueryBuilder(FilterQueryBuilder[_T]):
+    """Query builder for fetching models."""
+
     def __init__(self, model: Type[_T], con: Connection | None = None):
         super().__init__(model, con)
 
@@ -81,6 +100,17 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         field: Block | BaseField,
         ascending: bool = True,
     ) -> FetchQueryBuilder[_T]:
+        """Specify the order logic of the query.
+
+        Args:
+            field (Block | BaseField): The field or raw field name to order by.
+            ascending (bool, optional): Whether to sort ascending (or
+            descending). Defaults to True.
+
+        Returns:
+            FetchQueryBuilder: Returns the query builder to allow for chaining.
+        """
+
         self.order_by_field = field
         self.ascending = ascending
         return self
@@ -95,6 +125,20 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         ).render()
 
     async def fetchmany(self, limit: int | None = None) -> list[_T]:
+        """Execute the query and return a list of models.
+
+        Args:
+            limit (int, optional): The maximum number of models to return.
+            Defaults to None.
+
+        Raises:
+            TypeError: You specified a limit that wasn't an integer (must be a
+            python int).
+
+        Returns:
+            list[Model]: The list of models matching the query.
+        """
+
         if limit is not None and not isinstance(limit, int):
             # NOTE: although limit as a string would work, there is a good
             # chance that it's a string because it was user input, meaning
@@ -106,6 +150,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         return [self.model(**r) for r in res]
 
     async def fetchone(self) -> _T | None:
+        """Fetch the first model found.
+
+        Returns:
+            Model | None: Returns the model, or None if none were found.
+        """
+
         query, params = self._fetch_query()
         res = await self.con.fetchrow(query, params)
         if res is None:
@@ -113,6 +163,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         return self.model(**res)
 
     async def cursor(self) -> AsyncGenerator[_T, None]:
+        """Return an iterator of the resulting models.
+
+        Yields:
+            Model: The (next) model from the iterator.
+        """
+
         query, params = self._fetch_query()
         con = self.con if isinstance(self.con, Connection) else None
         async with self.model._database.cursor(
@@ -123,22 +179,41 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
 
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
+    """Query builder for deleting models."""
+
     async def execute(self):
+        """Execute the deletion query."""
+
         query, params = delete(self.model, self.where_logic()).render()
         await self.model._database.execute(query, params)
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
+    """Query builder for updating models."""
+
     def __init__(self, model: Type[_T], con: Connection | None = None):
         super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> UpdateQueryBuilder[_T]:
+        """Specify changes in the model.
+
+        Example:
+        ```
+        builder.set(username="New Name")
+
+        Returns:
+            UpdateQueryBuilder: Returns the query builder to allow for
+            chaining.
+        """
+
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
     async def execute(self):
+        """Execute the query."""
+
         query, params = update(
             self.model,
             {k: v for k, v in self.set_values.items()},
@@ -148,6 +223,8 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
 
 
 class InsertQueryBuilder(Query[_T]):
+    """Query builder for creating a model."""
+
     def __init__(self, model: Type[_T], con: Connection | None = None):
         super().__init__(model, con)
 

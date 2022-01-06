@@ -40,17 +40,55 @@ SQL = Union[
     "Parameter[_T]",
     _T,
 ]
+"""
+A type alias that allows for any field, raw sql, parameter.
+
+If used like `SQL[int]`, then it must have a python type of int.
+For example:
+
+```
+integer: SQL[int] = p(1)  # works
+integer: SQL[int] = p(1).cast(BigInt())  # works
+integer: SQL[int] = p("hi")  # fails
+"""
+
 CASTED = Union[
     "BaseField[_SQLT, Any, Any]",
     "Block[_SQLT]",
 ]
+"""
+A type alias that allows for any field or raw sql with a specified
+SQL type. For example:
+
+```
+bigint: CASTED[BigInt] = p(1).cast(BigInt())  # works
+bigint: CASTED[BigInt] = p(1)  # fails
+bigint: CASTED[BigInt] = p(1).cast(SmallInt())  # fails
+```
+"""
 
 
 def wrap(*pieces: SQL) -> Block:
+    """Return the SQL pieces as a Block, wrapping them in parantheses."""
+
     return Block(*pieces, wrap=True)
 
 
 def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
+    """SQL version of "delim".join(values). For example:
+
+    ```
+    join(r(","), value1, value2, value3)
+    ```
+
+    Args:
+        joiner (SQL): The joiner or deliminator.
+
+    Kwargs:
+        wrap (bool): Whether or not to return the result wrapped. Defaults to
+        False.
+    """
+
     new_values: list[SQL] = []
     for x, v in enumerate(values):
         new_values.append(v)
@@ -60,14 +98,30 @@ def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
 
 
 def or_(*pieces: SQL[bool]) -> Block[Bool]:
+    """Shortcut for `join(r("OR"), value1, value2, ...)`."""
+
     return join(r("OR"), *pieces)
 
 
 def and_(*pieces: SQL[bool]) -> Block[Bool]:
+    """Shortcut for `join(r("AND"), value1, value2, ...)`."""
+
     return join(r("AND"), *pieces)
 
 
 def r(string: str) -> Block:
+    """Treat the string as raw SQL and return a Block.
+
+    Never, ever, ever wrap user input in `r()`. A good rule of thumb is that
+    if you see a call to `r()`, the input should be text in quotes, not a
+    variable.
+
+    ```
+    r(somevarthatmightbeuserinput)  # bad
+    r("some text")  # good
+    ```
+    """
+
     return Block(Raw(string))
 
 
@@ -126,7 +180,21 @@ class Comparable:
 
 
 class Block(Comparable, Generic[_SQLT]):
+    """Represents a list of raw sql and parameters."""
+
     def __init__(self, *pieces: SQL | Raw, wrap: bool = False):
+        """Create a Block.
+
+        Kwargs:
+            wrap (bool): Whether or not to add `( )` around the result.
+
+        Example:
+        ```
+        sql = Block(r("SELECT"), "Hello, World", r(","), 17)
+        sql.render()  # "SELECT $1, $2", ["Hello, World", 17]
+        ```
+        """
+
         self._pieces: list[Raw | Parameter] = []
 
         if len(pieces) == 1 and isinstance(pieces[0], Block):
@@ -151,9 +219,25 @@ class Block(Comparable, Generic[_SQLT]):
         return self
 
     def render(self) -> tuple[str, list[Any]]:
+        """Return the rendered result of the Block.
+
+        Returns:
+            tuple[str, list[Any]]: The raw SQL (as a string) and the list of
+            parameters.
+        """
+
         return Renderer().render(self)
 
     def render_no_params(self) -> str:
+        """Convenience function to get the SQL but not the parameters.
+
+        Although it is technically easier to write `.render()[0]`, this is
+        cleaner and more obvious to those reading your code.
+
+        Returns:
+            str: The sql.
+        """
+
         return self.render()[0]
 
     def get_pieces(
