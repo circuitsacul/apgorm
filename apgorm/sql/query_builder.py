@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
 from apgorm.field import BaseField
 
 from .generators.query import delete, insert, select, update
-from .sql import SQL, Block, r
+from .sql import SQL, Block, and_, r
 
 if TYPE_CHECKING:
     from apgorm.connection import Connection
@@ -55,7 +55,7 @@ class FilterQueryBuilder(Query[_T]):
     def where_logic(self) -> Block[Bool] | None:
         if len(self.filters) == 0:
             return None
-        return self.filters.pop(0).and_(*self.filters)
+        return and_(*self.filters)
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         # NOTE: Although **values might look like an SQL-injection

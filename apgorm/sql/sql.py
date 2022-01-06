@@ -59,6 +59,14 @@ def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
     return Block(*new_values, wrap=wrap)
 
 
+def or_(*pieces: SQL[bool]) -> Block[Bool]:
+    return join(r("OR"), *pieces)
+
+
+def and_(*pieces: SQL[bool]) -> Block[Bool]:
+    return join(r("AND"), *pieces)
+
+
 def r(string: str) -> Block:
     return Block(Raw(string))
 
@@ -83,77 +91,17 @@ class Comparable:
     def _op(self, op: str, other: SQL) -> Block:
         return wrap(self._get_block(), r(op), other)
 
-    def _opjoin(self, op: str, *values: SQL) -> Block:
-        return join(r(op), self._get_block(), *values)
-
     def _func(self, func: str) -> Block:
         return wrap(func, wrap(self._get_block()))
 
     def _rfunc(self, rfunc: str) -> Block:
         return wrap(wrap(self._get_block()), rfunc)
 
-    def or_(self, *values: SQL[bool]) -> Block[Bool]:
-        return self._opjoin("OR", *values)
-
-    def and_(self, *values: SQL[bool]) -> Block[Bool]:
-        return self._opjoin("AND", *values)
-
     def not_(self) -> Block[Bool]:
         return self._func("NOT")
 
-    def between(self, low: SQL, high: SQL) -> Block[Bool]:
-        return wrap(self._get_block(), r("BETWEEN"), low, r("AND"), high)
-
-    def not_between(self, low: SQL, high: SQL) -> Block[Bool]:
-        return wrap(self._get_block(), r("NOT BETWEEN"), low, r("AND"), high)
-
-    def between_symmetric(self, first: SQL, second: SQL) -> Block[Bool]:
-        return wrap(
-            self._get_block(),
-            r("BETWEEN SYMMETRIC"),
-            first,
-            r("AND"),
-            second,
-        )
-
-    def not_between_symmetric(self, first: SQL, second: SQL) -> Block[Bool]:
-        return wrap(
-            self._get_block(),
-            r("NOT BETWEEN SYMMETRIC"),
-            first,
-            r("AND"),
-            second,
-        )
-
-    def is_distinct(self, from_: SQL) -> Block[Bool]:
-        return self._op("IS DISTINCT", from_)
-
-    def is_not_distinct(self, from_: SQL) -> Block[Bool]:
-        return self._op("IS NOT DISTINCT", from_)
-
     def is_null(self) -> Block[Bool]:
         return self._rfunc("IS NULL")
-
-    def is_not_null(self) -> Block[Bool]:
-        return self._rfunc("IS NOT NULL")
-
-    def is_true(self) -> Block[Bool]:
-        return self._rfunc("IS TRUE")
-
-    def is_not_true(self) -> Block[Bool]:
-        return self._rfunc("IS NOT TRUE")
-
-    def is_false(self) -> Block[Bool]:
-        return self._rfunc("IS FALSE")
-
-    def is_not_false(self) -> Block[Bool]:
-        return self._rfunc("IS NOT FALSE")
-
-    def is_unkown(self) -> Block[Bool]:
-        return self._rfunc("IS UNKOWN")
-
-    def is_not_unkown(self) -> Block[Bool]:
-        return self._rfunc("IS NOT UNKOWN")
 
     def eq(self, other: SQL) -> Block[Bool]:
         return self._op("=", other)
