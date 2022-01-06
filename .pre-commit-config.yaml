@@ -19,11 +19,3 @@ repos:
       - id: mypy
         pass_filenames: false
         entry: mypy .
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
