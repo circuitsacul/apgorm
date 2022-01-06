@@ -22,8 +22,6 @@
 
 from __future__ import annotations
 
-from typing import Generic, Protocol, TypeVar
-
 _T = TypeVar("_T", contravariant=True)
 
 
