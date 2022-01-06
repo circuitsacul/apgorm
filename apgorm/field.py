@@ -93,8 +93,6 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             raise InvalidFieldValue(self, value, exc=e)
 
     def describe(self) -> DescribeField:
-        """Return the description of the field."""
-
         return DescribeField(
             name=self.name,
             type_=self.sql_type.sql,

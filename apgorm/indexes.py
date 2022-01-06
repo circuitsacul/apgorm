@@ -129,8 +129,6 @@ class Index:
         )
 
     def describe(self) -> DescribeIndex:
-        """The description of the index."""
-
         return DescribeIndex(
             name=self.get_name(),
             raw_sql=self.creation_sql().render_no_params(),

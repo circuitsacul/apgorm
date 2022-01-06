@@ -43,11 +43,6 @@ class Constraint:
         raise NotImplementedError
 
     def describe(self) -> DescribeConstraint:
-        """Returns the description of this constraint.
-
-        Returns:
-            DescribeConstraint: The description.
-        """
         return DescribeConstraint(
             name=self.name,
             raw_sql=self.creation_sql().render_no_params(),
