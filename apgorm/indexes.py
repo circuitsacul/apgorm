@@ -43,6 +43,8 @@ class _IndexType:
 
 
 class IndexType(Enum):
+    """An enum containing every supported index type."""
+
     BTREE = _IndexType("BTREE", multi=True, unique=True)
     HASH = _IndexType("HASH")
     GIST = _IndexType("GIST", multi=True)
@@ -52,6 +54,8 @@ class IndexType(Enum):
 
 
 class Index:
+    """Represents an index for a table."""
+
     def __init__(
         self,
         table: Type[Model],
@@ -59,6 +63,28 @@ class Index:
         type_: IndexType = IndexType.BTREE,
         unique: bool = False,
     ):
+        """Create an index. Must be added to Database.indexes before the
+        database is initialized. For example:
+        ```
+        class MyDatabase(Database):
+            ...
+
+            indexes = [Index(...), Index(...), ...]
+        ```
+
+        Args:
+            table (Type[Model]): The table this index is for.
+            fields (Sequence[BaseField): A list of fields that this index is
+            for.
+            type_ (IndexType, optional): The index type. Defaults to
+            IndexType.BTREE.
+            unique (bool, optional): Whether or not the index should be unique
+            (BTREE only). Defaults to False.
+
+        Raises:
+            BadArgument: Bad arguments were passed to Index.
+        """
+
         self.type_: _IndexType = type_.value
         if isinstance(fields, (Block, BaseField)):
             fields = [fields]
@@ -78,6 +104,8 @@ class Index:
             )
 
     def get_name(self) -> str:
+        """Create a name based on the type, table, and fields of the index."""
+
         fields = [f.name for f in self.fields if isinstance(f, BaseField)]
         return "_{type_}_index_{table}__{cols}".format(
             type_=self.type_.name,
@@ -86,6 +114,8 @@ class Index:
         ).lower()
 
     def creation_sql(self) -> Block:
+        """The raw sql for the index."""
+
         return Block(
             (r("UNIQUE INDEX") if self.unique else r("INDEX")),
             r(self.get_name()),
@@ -99,6 +129,8 @@ class Index:
         )
 
     def describe(self) -> DescribeIndex:
+        """The description of the index."""
+
         return DescribeIndex(
             name=self.get_name(),
             raw_sql=self.creation_sql().render_no_params(),
