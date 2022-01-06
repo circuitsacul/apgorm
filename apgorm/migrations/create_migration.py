@@ -128,11 +128,13 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     add_pk_constraints: list[str] = []
     add_check_constraints: list[str] = []
     add_fk_constraints: list[str] = []
+    add_exclude_constraints: list[str] = []
 
     drop_unique_constraints: list[str] = []
     drop_pk_constraints: list[str] = []
     drop_check_constraints: list[str] = []
     drop_fk_constraints: list[str] = []
+    drop_exclude_constraints: list[str] = []
 
     add_fields: list[str] = []
     drop_fields: list[str] = []
@@ -223,6 +225,14 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         add_fk_constraints.extend(_new)
         drop_fk_constraints.extend(_drop)
 
+        _new, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.exclude_constraints if lasttable else [],
+            currtable.exclude_constraints,
+        )
+        add_exclude_constraints.extend(_new)
+        drop_exclude_constraints.extend(_drop)
+
     # finalization
     migrations.extend(add_tables)
     migrations.extend(drop_tables)
@@ -232,6 +242,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(drop_pk_constraints)
     migrations.extend(drop_unique_constraints)
     migrations.extend(drop_check_constraints)
+    migrations.extend(drop_exclude_constraints)
 
     migrations.extend(drop_indexes)
 
@@ -244,6 +255,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(add_check_constraints)
     migrations.extend(add_pk_constraints)
     migrations.extend(add_fk_constraints)
+    migrations.extend(add_exclude_constraints)
 
     if len(migrations) == 0:
         return None

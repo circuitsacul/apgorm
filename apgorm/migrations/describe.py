@@ -48,6 +48,7 @@ class DescribeTable(BaseModel):
     pk_constraint: DescribeConstraint
     unique_constraints: List[DescribeConstraint]
     check_constraints: List[DescribeConstraint]
+    exclude_constraints: List[DescribeConstraint]
 
     @property
     def constraints(self) -> List[DescribeConstraint]:
@@ -56,6 +57,7 @@ class DescribeTable(BaseModel):
             + [self.pk_constraint]
             + self.unique_constraints
             + self.check_constraints
+            + self.exclude_constraints
         )
 
 

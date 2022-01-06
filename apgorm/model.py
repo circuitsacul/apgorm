@@ -35,7 +35,14 @@ from apgorm.sql.query_builder import (
 )
 from apgorm.undefined import UNDEF
 
-from .constraints import Check, Constraint, ForeignKey, PrimaryKey, Unique
+from .constraints import (
+    Check,
+    Constraint,
+    Exclude,
+    ForeignKey,
+    PrimaryKey,
+    Unique,
+)
 
 if TYPE_CHECKING:
     from .connection import Connection
@@ -97,6 +104,7 @@ class Model:
         unique: list[DescribeConstraint] = []
         check: list[DescribeConstraint] = []
         fk: list[DescribeConstraint] = []
+        exclude: list[DescribeConstraint] = []
         for c in constraints.values():
             if isinstance(c, Check):
                 check.append(c.describe())
@@ -104,6 +112,8 @@ class Model:
                 fk.append(c.describe())
             elif isinstance(c, Unique):
                 unique.append(c.describe())
+            elif isinstance(c, Exclude):
+                exclude.append(c.describe())
 
         return DescribeTable(
             name=cls._tablename,
@@ -112,6 +122,7 @@ class Model:
             pk_constraint=cls._primary_key().describe(),
             unique_constraints=unique,
             check_constraints=check,
+            exclude_constraints=exclude,
         )
 
     def _pk_fields(self) -> dict[str, Any]:

@@ -20,19 +20,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .check import Check
-from .constraint import Constraint
-from .exclude import Exclude
-from .foreign_key import Action, ForeignKey
-from .primary_key import PrimaryKey
-from .unique import Unique
+from __future__ import annotations
 
-__all__ = (
-    "Check",
-    "ForeignKey",
-    "Action",
-    "PrimaryKey",
-    "Unique",
-    "Constraint",
-    "Exclude",
-)
+from typing import TYPE_CHECKING, Any
+
+from apgorm.indexes import IndexType, _IndexType
+from apgorm.sql.sql import Block, join, r, wrap
+
+from .constraint import Constraint
+
+if TYPE_CHECKING:
+    from apgorm.field import BaseField
+    from apgorm.types.boolean import Bool
+
+
+class Exclude(Constraint):
+    def __init__(
+        self,
+        *elements: tuple[BaseField | Block, str],
+        using: IndexType = IndexType.BTREE,
+        where: Block[Bool] | None = None
+    ):
+        self.using: _IndexType = using.value
+        self.elements = elements
+        self.where = where
+
+    def creation_sql(self) -> Block:
+        sql = Block[Any](
+            r("CONSTRAINT"),
+            r(self.name),
+            r("EXCLUDE USING"),
+            r(self.using.name),
+            join(
+                r(","),
+                *[wrap(f, r("WITH"), r(op)) for f, op in self.elements],
+                wrap=True,
+            ),
+        )
+        if self.where is not None:
+            sql += Block(r("WHERE"), wrap(self.where))
+
+        return sql

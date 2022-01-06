@@ -15,7 +15,8 @@
                 "raw_sql": "CONSTRAINT _migrations_id__primary_key PRIMARY KEY ( id_ )"
             },
             "unique_constraints": [],
-            "check_constraints": []
+            "check_constraints": [],
+            "exclude_constraints": []
         },
         {
             "name": "users",
@@ -37,7 +38,8 @@
                 "raw_sql": "CONSTRAINT users_username_primary_key PRIMARY KEY ( username )"
             },
             "unique_constraints": [],
-            "check_constraints": []
+            "check_constraints": [],
+            "exclude_constraints": []
         }
     ],
     "indexes": []
