@@ -32,13 +32,18 @@ _S = TypeVar("_S", bound="SqlType", covariant=True)
 
 
 class SqlType(Generic[_T]):
+    """Base type for all SQL types."""
+
     sql: str
+    """The raw sql for the type."""
 
     def field(
         self: _S,
         default: _T | UNDEF = UNDEF.UNDEF,
         use_repr: bool = True,
     ) -> Field[_S, _T]:
+        """Generate a field using this type."""
+
         return Field(
             sql_type=self,
             default=default,
@@ -51,6 +56,8 @@ class SqlType(Generic[_T]):
         default: _T | None | UNDEF = UNDEF.UNDEF,
         use_repr: bool = True,
     ) -> Field[_S, _T | None]:
+        """Generate a nullable field using this type."""
+
         return Field(
             sql_type=self,
             default=default,

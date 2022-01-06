@@ -34,6 +34,16 @@ if TYPE_CHECKING:
 
 class Unique(Constraint):
     def __init__(self, *fields: BaseField | Block):
+        """Specify a unique constraint for a table.
+
+        ```
+        class User(Model):
+            ...
+            nickname = VarChar(32).field()
+            nickname_unique = Unique(nickname)
+            ...
+        ```
+        """
         self.fields = fields
 
     def creation_sql(self) -> Block:

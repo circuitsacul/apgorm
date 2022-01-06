@@ -43,10 +43,34 @@ from .model import Model
 
 
 class Database:
+    """Base database class. You must subclass this, as
+    all tables and indexes are stored as classvars.
+
+    Example:
+    ```
+    class MyDatabase(Database):
+        users = User
+        games = Game
+        players = Players
+
+        indexes = [SomeIndex, SomeOtherIndex]
+    ```
+    """
+
     _migrations = AppliedMigration
+    """Internal table to track applied migrations."""
+
     indexes: Sequence[Index] | None = None
+    """A list of indexes for the database."""
 
     def __init__(self, migrations_folder: Path):
+        """Initialize the database.
+
+        Args:
+            migrations_folder (pathlib.Path): The folder in which migrations
+            are/will be stored.
+        """
+
         self._migrations_folder = migrations_folder
         self._all_models: list[Type[Model]] = []
 
@@ -77,24 +101,57 @@ class Database:
 
     # migration functions
     def describe(self) -> describe.Describe:
+        """Return the description of the database.
+
+        Returns:
+            describe.Describe: The description.
+        """
+
         return describe.Describe(
             tables=[m.describe() for m in self._all_models],
             indexes=[i.describe() for i in self.indexes or []],
         )
 
     def load_all_migrations(self) -> list[Migration]:
+        """Load all migrations and return them.
+
+        Returns:
+            list[Migration]: The migrations.
+        """
+
         return Migration.load_all_migrations(self._migrations_folder)
 
     def load_last_migration(self) -> Migration | None:
+        """Loads and returns the most recent migration, if any.
+
+        Returns:
+            Migration | None: The migration.
+        """
+
         return Migration.load_last_migration(self._migrations_folder)
 
     def must_create_migrations(self) -> bool:
+        """Whether or not you need to call Database.create_migrations()
+
+        Returns:
+            bool
+        """
+
         sql = create_next_migration(self.describe(), self._migrations_folder)
         if sql is None:
             return False
         return True
 
     def create_migrations(self, indent: int | None = None) -> Migration:
+        """Create migrations.
+
+        Raises:
+            NoMigrationsToCreate: Migrations do not creating.
+
+        Returns:
+            Migration: The created migration.
+        """
+
         if not self.must_create_migrations():
             raise NoMigrationsToCreate
         d = self.describe()
@@ -103,6 +160,13 @@ class Database:
         return Migration.create_migration(d, sql, self._migrations_folder)
 
     async def load_unapplied_migrations(self) -> list[Migration]:
+        """Returns a list of migrations that have not been applied on the
+        current database.
+
+        Returns:
+            list[Migration]: The unapplied migrations.
+        """
+
         try:
             applied = [
                 m.id_.v
@@ -117,21 +181,44 @@ class Database:
         ]
 
     async def must_apply_migrations(self) -> bool:
+        """Whether or not there are migrations that need to be applied.
+
+        Returns:
+            bool
+        """
+
         return len(await self.load_unapplied_migrations()) > 0
 
     async def apply_migrations(self):
+        """Applies all migrations that need to be applied."""
+
         for m in await self.load_unapplied_migrations():
             await apply_migration(m, self)
 
     # database functions
     async def connect(self, **connect_kwargs):
+        """Connect to a database. Any kwargs that can be passed to
+        asyncpg.create_pool() can be used here.
+        """
+
         self.pool = Pool(await asyncpg.create_pool(**connect_kwargs))
 
     async def cleanup(self, timeout: float = 30):
+        """Close the connection.
+
+        Args:
+            timeout (float): The maximum time pool.close() has. Defaults to 30.
+
+        Raises:
+            TimeoutError: The operation timed out.
+        """
+
         if self.pool is not None:
             await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
     async def execute(self, query: str, args: list[Any]):
+        """Execute SQL within a transaction."""
+
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
@@ -140,6 +227,12 @@ class Database:
     async def fetchrow(
         self, query: str, args: list[Any]
     ) -> dict[str, Any] | None:
+        """Fetch the first matching row.
+
+        Returns:
+            dict | None: The row, if any.
+        """
+
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
@@ -148,12 +241,20 @@ class Database:
     async def fetchmany(
         self, query: str, args: list[Any]
     ) -> list[dict[str, Any]]:
+        """Fetch all matching rows.
+
+        Returns:
+            list[dict]: All matching rows.
+        """
+
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
                 return await con.fetchmany(query, args)
 
     async def fetchval(self, query: str, args: list[Any]) -> Any:
+        """Fetch a single value."""
+
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
@@ -163,6 +264,16 @@ class Database:
     async def cursor(
         self, query: str, args: list[Any], con: Connection | None = None
     ) -> AsyncGenerator[CursorFactory, None]:
+        """Yields a CursorFactory, but inside a transaction.
+
+        Usage:
+        ```
+        async with db.cursor(query, args) as cursor:
+            async for res in cursor:
+                print(res)
+        ```
+        """
+
         if con:
             yield con.cursor(query, args)
 

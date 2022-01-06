@@ -34,6 +34,12 @@ if TYPE_CHECKING:
 
 class Check(Constraint):
     def __init__(self, check: Block[Bool]):
+        """Specify a check constraint for a table.
+
+        Args:
+            check (Block[Bool]): The raw SQL for the check constraint.
+        """
+
         self.check = check
 
     def creation_sql(self) -> Block:

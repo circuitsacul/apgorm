@@ -34,6 +34,16 @@ if TYPE_CHECKING:
 
 class PrimaryKey(Constraint):
     def __init__(self, *fields: BaseField | Block):
+        """Do not use. Specify primary keys like this instead:
+
+        ```
+        class Users(Model):
+            username = VarChar(32).field()
+
+            primary_key = (username,)
+        ```
+        """
+
         self.fields = fields
 
     def creation_sql(self) -> Block:

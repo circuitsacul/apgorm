@@ -45,8 +45,13 @@ _F = TypeVar("_F", bound="SqlType")
 
 
 class BaseField(Comparable, Generic[_F, _T, _C]):
+    """Represents a field for a table."""
+
     name: str  # populated by Database
+    """The name of the field, populated when Database is initialized."""
     model: Type[Model]  # populated by Database
+    """The model this field belongs to, populated when Database is
+    initialized."""
 
     def __init__(
         self,
@@ -73,6 +78,8 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         return r(self.name)
 
     def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
+        """Add a validator to the value of this field."""
+
         self._validators.append(validator)
         return self
 
@@ -94,10 +101,19 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
     @property
     def full_name(self) -> str:
+        """The full name of the field (`tablename.fieldname`)."""
+
         return f"{self.model._tablename}.{self.name}"
 
     @property
     def v(self) -> _C:
+        """The current value of the field.
+
+        Raises:
+            UndefinedFieldValue: The field value is undefined.
+            Probably means that the model has not been created.
+        """
+
         raise NotImplementedError
 
     @v.setter
@@ -113,6 +129,8 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         )
 
     def copy(self) -> BaseField[_F, _T, _C]:
+        """Create a copy of the field."""
+
         n = self.__class__(**self._copy_kwargs())
         if hasattr(self, "name"):
             n.name = self.name
@@ -138,6 +156,15 @@ class Field(BaseField[_F, _T, _T]):
     def with_converter(
         self, converter: Converter[_T, _C] | Type[Converter[_T, _C]]
     ) -> ConverterField[_F, _T, _C]:
+        """Add a converter to the field.
+
+        Args:
+            converter (Converter | Type[Converter]): The converter.
+
+        Returns:
+            ConverterField: The new field with the converter.
+        """
+
         if isinstance(converter, type) and issubclass(converter, Converter):
             converter = converter()
         f: ConverterField[_F, _T, _C] = ConverterField(

@@ -30,7 +30,24 @@ _T = TypeVar("_T", bound=SqlType)
 
 
 class Array(SqlType["list[_T]"]):
+    """SQL array type.
+
+    Example usage:
+    ```
+    list_of_names = Array(VarChar(32)).field()
+    game_board = Array(Array(Int(), size=16), size=16).nullablefield()
+    ```
+    """
+
     def __init__(self, subtype: _T, size: int | None = None):
+        """Create an array type.
+
+        Args:
+            subtype (SqlType): The subtype (can be another Array for multiple
+            dimensions).
+            size (int, optional): The size of the array. Defaults to None.
+        """
+
         self._subtype = subtype
         self._size = size
 
@@ -55,8 +72,20 @@ class Array(SqlType["list[_T]"]):
 
     @property
     def size(self) -> int | None:
+        """The size of the array.
+
+        Returns:
+            int | None: The size of the array.
+        """
+
         return self._size
 
     @property
     def subtype(self) -> _T:
+        """The arrays sub type.
+
+        Returns:
+            SqlType: The sub type.
+        """
+
         return self._subtype

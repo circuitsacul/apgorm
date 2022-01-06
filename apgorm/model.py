@@ -53,12 +53,42 @@ _T = TypeVar("_T", bound="Model")
 
 
 class Model:
+    """Base class for all models. To create a new model, subclass this class
+    and add it to your database like this:
+
+    ```
+    class User(Model):
+        username = VarChar(32).field()
+        ...
+
+        primary_key = (username,)
+
+    ...
+
+    class MyDatabase(Database):
+        users = User
+        ...
+    ```
+    """
+
     _tablename: str  # populated by Database
+    """The name of the table, populated by Database."""
     _database: Database  # populated by Database
+    """The database instance, populated by Database."""
 
     primary_key: tuple[BaseField, ...]
+    """The primary key for the model. All models MUST have a primary key."""
 
     def __init__(self, **values):
+        """Create an instance of the model. There are two reasons you might do this:
+         1. You used `Database.fetch...` directly instead of
+         `Model.fetch`, and you want to convert the result to a model.
+         2. You want to create a new model (`Model(**values).create()`).
+
+        If you wish to fetch an existing model, please use `Model.fetch` or
+        `Model.fetch_query`.
+        """
+
         self._all_fields: dict[str, BaseField] = {}
         self._all_constraints: dict[str, Constraint] = {}
 
@@ -129,9 +159,13 @@ class Model:
         return {f.name: f.v for f in self.primary_key}
 
     async def delete(self, con: Connection | None = None):
+        """Delete the model."""
+
         await self.delete_query(con=con).where(**self._pk_fields()).execute()
 
     async def save(self, con: Connection | None = None):
+        """Save any changed fields of the model."""
+
         changed_fields = self._get_changed_fields()
         if len(changed_fields) == 0:
             return
@@ -141,6 +175,8 @@ class Model:
         self._set_saved()
 
     async def create(self, con: Connection | None = None):
+        """Inser the model into the database."""
+
         q = self.insert_query(con=con)
         q.set(
             **{
@@ -170,6 +206,20 @@ class Model:
         /,
         **values,
     ) -> _T:
+        """Fetch an exiting model from the database.
+
+        Example:
+        ```
+        User.fetch(username="Circuit")
+        ```
+
+        Raises:
+            ModelNotFound: No model for the given parameters were found.
+
+        Returns:
+            Model: The model.
+        """
+
         res = await cls.fetch_query(con=con).where(**values).fetchone()
         if res is None:
             raise ModelNotFound(cls, values)
@@ -179,24 +229,32 @@ class Model:
     def fetch_query(
         cls: Type[_T], con: Connection | None = None
     ) -> FetchQueryBuilder[_T]:
+        """Returns a FetchQueryBuilder."""
+
         return FetchQueryBuilder(model=cls, con=con)
 
     @classmethod
     def delete_query(
         cls: Type[_T], con: Connection | None = None
     ) -> DeleteQueryBuilder[_T]:
+        """Returns a DeleteQueryBuilder."""
+
         return DeleteQueryBuilder(model=cls, con=con)
 
     @classmethod
     def update_query(
         cls: Type[_T], con: Connection | None = None
     ) -> UpdateQueryBuilder[_T]:
+        """Returns an UpdateQueryBuilder."""
+
         return UpdateQueryBuilder(model=cls, con=con)
 
     @classmethod
     def insert_query(
         cls: Type[_T], con: Connection | None = None
     ) -> InsertQueryBuilder[_T]:
+        """Returns an InsertQueryBuilder."""
+
         return InsertQueryBuilder(model=cls, con=con)
 
     def _set_saved(self):

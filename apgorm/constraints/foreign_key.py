@@ -49,6 +49,27 @@ class ForeignKey(Constraint):
         on_delete: Action = Action.CASCADE,
         on_update: Action = Action.CASCADE,
     ):
+        """Specify a ForeignKey constraint for a table.
+
+        Args:
+            fields (Sequence[Block | BaseField]): A list of fields or raw
+            field names on the current table.
+            ref_fields (Sequence[Block | BaseField]): A list of fields or raw
+            field names on the referenced table.
+            ref_table (Block, optional): If all of `ref_fields` are `Block`,
+            specify the raw tablename of the referenced table. Defaults to
+            None.
+            match_full (bool, optional): Whether or not a full match is
+            required. If False, MATCH SIMPLE is used instead. Defaults to
+            False.
+            on_delete (Action, optional): The action to perform if the
+            referenced row is deleted. Defaults to Action.CASCADE.
+            on_update (Action, optional): The action to perform if the
+            referenced row is updated. Defaults to Action.CASCADE.
+
+        Raises:
+            BadArgument: Bad arguments were sent to ForeignKey.
+        """
         self.fields = fields
         self.ref_fields = ref_fields
         self.ref_table = ref_table
