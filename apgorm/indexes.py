@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING, Sequence, Type
 
 from apgorm.exceptions import BadArgument
@@ -41,7 +42,7 @@ class _IndexType:
     unique: bool = False
 
 
-class IndexType:
+class IndexType(Enum):
     BTREE = _IndexType("BTREE", multi=True, unique=True)
     HASH = _IndexType("HASH")
     GIST = _IndexType("GIST", multi=True)
@@ -55,10 +56,10 @@ class Index:
         self,
         table: Type[Model],
         fields: Sequence[BaseField | Block] | BaseField | Block,
-        type_: _IndexType = IndexType.BTREE,
+        type_: IndexType = IndexType.BTREE,
         unique: bool = False,
     ):
-        self.type_ = type_
+        self.type_: _IndexType = type_.value
         if isinstance(fields, (Block, BaseField)):
             fields = [fields]
         self.fields = fields
@@ -68,10 +69,10 @@ class Index:
         if len(fields) == 0:
             raise BadArgument("Must specify at least one field for index.")
 
-        if (not type_.multi) and len(fields) > 1:
+        if (not self.type_.multi) and len(fields) > 1:
             raise BadArgument(f"{type_.name} indexes only support one column.")
 
-        if (not type_.unique) and unique:
+        if (not self.type_.unique) and unique:
             raise BadArgument(
                 f"{type_.name} indexes do not support uniqueness."
             )
