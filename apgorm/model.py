@@ -129,7 +129,7 @@ class Model:
         return pk
 
     @classmethod
-    def describe(cls) -> DescribeTable:
+    def _describe(cls) -> DescribeTable:
         fields, constraints = cls._special_attrs()
         unique: list[DescribeConstraint] = []
         check: list[DescribeConstraint] = []
@@ -137,19 +137,19 @@ class Model:
         exclude: list[DescribeConstraint] = []
         for c in constraints.values():
             if isinstance(c, Check):
-                check.append(c.describe())
+                check.append(c._describe())
             elif isinstance(c, ForeignKey):
-                fk.append(c.describe())
+                fk.append(c._describe())
             elif isinstance(c, Unique):
-                unique.append(c.describe())
+                unique.append(c._describe())
             elif isinstance(c, Exclude):
-                exclude.append(c.describe())
+                exclude.append(c._describe())
 
         return DescribeTable(
             name=cls._tablename,
-            fields=[f.describe() for f in fields.values()],
+            fields=[f._describe() for f in fields.values()],
             fk_constraints=fk,
-            pk_constraint=cls._primary_key().describe(),
+            pk_constraint=cls._primary_key()._describe(),
             unique_constraints=unique,
             check_constraints=check,
             exclude_constraints=exclude,

@@ -108,8 +108,8 @@ class Database:
         """
 
         return describe.Describe(
-            tables=[m.describe() for m in self._all_models],
-            indexes=[i.describe() for i in self.indexes or []],
+            tables=[m._describe() for m in self._all_models],
+            indexes=[i._describe() for i in self.indexes or []],
         )
 
     def load_all_migrations(self) -> list[Migration]:
