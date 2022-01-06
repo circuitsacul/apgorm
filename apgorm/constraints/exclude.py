@@ -41,6 +41,15 @@ class Exclude(Constraint):
         using: IndexType = IndexType.BTREE,
         where: Block[Bool] | None = None
     ):
+        """Specify an Exclusion constraint for a table.
+
+        Args:
+            using (IndexType, optional): The index to use. Defaults
+            to IndexType.BTREE.
+            where (Block[Bool], optional): Specify condition for
+            applying this constraint. Defaults to None.
+        """
+
         self.using: _IndexType = using.value
         self.elements = elements
         self.where = where

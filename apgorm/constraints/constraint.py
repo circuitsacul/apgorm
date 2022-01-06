@@ -25,12 +25,29 @@ from apgorm.sql.sql import Block
 
 
 class Constraint:
-    name: str  # populated by database
+    """The base class for all constraints."""
+
+    name: str
+    """The name of the constraint.
+
+    Populated by Database and will not exist until an instance
+    of Database has been created."""
 
     def creation_sql(self) -> Block:
+        """Returns the raw SQL for this constraint.
+
+        Returns:
+            Block: The raw SQL.
+        """
+
         raise NotImplementedError
 
     def describe(self) -> DescribeConstraint:
+        """Returns the description of this constraint.
+
+        Returns:
+            DescribeConstraint: The description.
+        """
         return DescribeConstraint(
             name=self.name,
             raw_sql=self.creation_sql().render_no_params(),
