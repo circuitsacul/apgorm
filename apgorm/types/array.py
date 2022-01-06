@@ -29,7 +29,7 @@ from .base_type import SqlType
 _T = TypeVar("_T", bound=SqlType)
 
 
-class Array(SqlType["list[_T]"]):
+class Array(SqlType["list[_T | None]"]):
     """SQL array type.
 
     Example usage:
