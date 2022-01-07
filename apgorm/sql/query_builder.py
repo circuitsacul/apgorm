@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
 from apgorm.field import BaseField
 
 from .generators.query import delete, insert, select, update
-from .sql import SQL, Block, and_, r
+from .sql import SQL, Block, and_, r, sql, wrap
 
 if TYPE_CHECKING:
     from apgorm.connection import Connection
@@ -43,6 +43,11 @@ class Query(Generic[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None):
         self.model = model
         self.con = con or model._database
+
+    def _get_block(self) -> Block:
+        """Convert the data in the query builder to a Block."""
+
+        raise NotImplementedError
 
 
 _S = TypeVar("_S", bound="FilterQueryBuilder")
@@ -115,14 +120,32 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self.ascending = ascending
         return self
 
-    def _fetch_query(self, limit: int | None = None) -> tuple[str, list[Any]]:
+    def _get_block(self, limit: int | None = None) -> Block:
         return select(
             from_=self.model,
             where=self.where_logic(),
             order_by=self.order_by_field,
             ascending=self.ascending,
             limit=limit,
-        ).render()
+        )
+
+    def exists(self) -> Block[Bool]:
+        """Returns this query wrapped in EXISTS (). Useful for subqueries:
+
+        ```
+        user = await User.fetch(name="Circuit")
+        games = await Game.fetch_query().where(
+            Player.fetch_query().where(
+                gameid=Game.id_, username=user.name.v
+            ).exists()
+        ).fetchmany()
+        ```
+
+        Returns:
+            Block[Bool]: The subquery.
+        """
+
+        return sql(r("EXISTS"), wrap(self._get_block()))
 
     async def fetchmany(self, limit: int | None = None) -> list[_T]:
         """Execute the query and return a list of models.
@@ -145,8 +168,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             # that allowing limit to be a string would create an SQL-injection
             # vulnerability.
             raise TypeError("Limit can only be an int.")
-        query, params = self._fetch_query(limit=limit)
-        res = await self.con.fetchmany(query, params)
+        res = await self.con.fetchmany(*self._get_block(limit).render())
         return [self.model(**r) for r in res]
 
     async def fetchone(self) -> _T | None:
@@ -156,8 +178,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             Model | None: Returns the model, or None if none were found.
         """
 
-        query, params = self._fetch_query()
-        res = await self.con.fetchrow(query, params)
+        res = await self.con.fetchrow(*self._get_block().render())
         if res is None:
             return None
         return self.model(**res)
@@ -169,10 +190,9 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             Model: The (next) model from the iterator.
         """
 
-        query, params = self._fetch_query()
         con = self.con if isinstance(self.con, Connection) else None
         async with self.model._database.cursor(
-            query, params, con=con
+            *self._get_block().render(), con=con
         ) as cursor:
             async for res in cursor:
                 yield self.model(**res)
@@ -181,11 +201,13 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
+    def _get_block(self) -> Block:
+        return delete(self.model, self.where_logic())
+
     async def execute(self):
         """Execute the deletion query."""
 
-        query, params = delete(self.model, self.where_logic()).render()
-        await self.model._database.execute(query, params)
+        await self.model._database.execute(*self._get_block().render())
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
@@ -212,15 +234,17 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    async def execute(self):
-        """Execute the query."""
-
-        query, params = update(
+    def _get_block(self) -> Block:
+        return update(
             self.model,
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
-        ).render()
-        await self.con.execute(query, params)
+        )
+
+    async def execute(self):
+        """Execute the query."""
+
+        await self.con.execute(*self._get_block().render())
 
 
 class InsertQueryBuilder(Query[_T]):
@@ -242,14 +266,18 @@ class InsertQueryBuilder(Query[_T]):
         self.fields_to_return.extend(fields)
         return self
 
-    async def execute(self) -> Any:
+    def _get_block(self) -> Block:
         value_names = [n for n in self.set_values.keys()]
         value_values = [v for v in self.set_values.values()]
 
-        query, params = insert(
+        return insert(
             self.model,
             value_names,
             value_values,
             return_fields=self.fields_to_return or None,
-        ).render()
-        return await self.con.fetchval(query, params)
+        )
+
+    async def execute(self) -> Any:
+        """Execute the query."""
+
+        return await self.con.fetchval(*self._get_block().render())

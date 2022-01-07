@@ -79,6 +79,11 @@ def sql(piece: SQL[_T2], /, *, wrap: bool = ...) -> Block[SqlType[_T2]]:
     ...
 
 
+@overload
+def sql(*pieces: SQL, wrap: bool = ...) -> Block:
+    ...
+
+
 def sql(*pieces: SQL, wrap: bool = False) -> Block:
     """Convenience function to wrap content in a Block.
 

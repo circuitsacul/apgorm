@@ -20,39 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import annotations
+import asyncio
 
-from typing import TYPE_CHECKING
+from .main import main
 
-from apgorm.sql.sql import Block, join, r
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:
-    from apgorm.field import BaseField
-
-
-class PrimaryKey(Constraint):
-    def __init__(self, *fields: BaseField | Block):
-        """Do not use. Specify primary keys like this instead:
-
-        ```
-        class Users(Model):
-            username = VarChar(32).field()
-
-            primary_key = (username,)
-        ```
-        """
-
-        self.fields = fields
-
-    def creation_sql(self) -> Block:
-        names = [f if isinstance(f, Block) else r(f.name) for f in self.fields]
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *names),
-            r(")"),
-            wrap=True,
-        )
+if __name__ == "__main__":
+    asyncio.run(main())
