@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from collections import UserString
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union, overload
 
 if TYPE_CHECKING:
     from apgorm.field import BaseField
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from apgorm.types.boolean import Bool
 
 _T = TypeVar("_T", covariant=True)
+_T2 = TypeVar("_T2")
 _SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
 _CAST_SQLT = TypeVar("_CAST_SQLT", bound="SqlType")
 _PARAM = TypeVar("_PARAM")
@@ -47,9 +48,9 @@ If used like `SQL[int]`, then it must have a python type of int.
 For example:
 
 ```
-integer: SQL[int] = p(1)  # works
-integer: SQL[int] = p(1).cast(BigInt())  # works
-integer: SQL[int] = p("hi")  # fails
+integer: SQL[int] = sql(1)  # works
+integer: SQL[int] = sql(1).cast(BigInt())  # works
+integer: SQL[int] = sql("hi")  # fails
 """
 
 CASTED = Union[
@@ -61,17 +62,50 @@ A type alias that allows for any field or raw sql with a specified
 SQL type. For example:
 
 ```
-bigint: CASTED[BigInt] = p(1).cast(BigInt())  # works
-bigint: CASTED[BigInt] = p(1)  # fails
-bigint: CASTED[BigInt] = p(1).cast(SmallInt())  # fails
+bigint: CASTED[BigInt] = sql(1).cast(BigInt())  # works
+bigint: CASTED[BigInt] = sql(1)  # fails
+bigint: CASTED[BigInt] = sql(1).cast(SmallInt())  # fails
 ```
 """
+
+
+@overload
+def sql(piece: CASTED[_SQLT], /, *, wrap: bool = ...) -> Block[_SQLT]:
+    ...
+
+
+@overload
+def sql(piece: SQL[_T2], /, *, wrap: bool = ...) -> Block[SqlType[_T2]]:
+    ...
+
+
+def sql(*pieces: SQL, wrap: bool = False) -> Block:
+    """Convenience function to wrap content in a Block.
+
+    It is safe to pass user input to this function.
+
+    Example:
+    ```
+    sql(
+        r("SELECT * FROM mytable WHERE id="),
+        5,
+        r("AND othercol="),
+        "hello",
+    ).render()
+    # "SELECT * FROM mytable WHERE id=$1 AND othercol=$2", [5, "hello"]
+    ```
+
+    Returns:
+        Block: The pieces wrapped in a Block.
+    """
+
+    return Block(*pieces, wrap=wrap)
 
 
 def wrap(*pieces: SQL) -> Block:
     """Return the SQL pieces as a Block, wrapping them in parantheses."""
 
-    return Block(*pieces, wrap=True)
+    return sql(*pieces, wrap=True)
 
 
 def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
@@ -94,19 +128,19 @@ def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
         new_values.append(v)
         if x != len(values) - 1:
             new_values.append(joiner)
-    return Block(*new_values, wrap=wrap)
+    return sql(*new_values, wrap=wrap)
 
 
 def or_(*pieces: SQL[bool]) -> Block[Bool]:
     """Shortcut for `join(r("OR"), value1, value2, ...)`."""
 
-    return join(r("OR"), *pieces)
+    return join(r("OR"), *pieces, wrap=True)
 
 
 def and_(*pieces: SQL[bool]) -> Block[Bool]:
     """Shortcut for `join(r("AND"), value1, value2, ...)`."""
 
-    return join(r("AND"), *pieces)
+    return join(r("AND"), *pieces, wrap=True)
 
 
 def r(string: str) -> Block:
@@ -122,11 +156,7 @@ def r(string: str) -> Block:
     ```
     """
 
-    return Block(Raw(string))
-
-
-def p(param: _PARAM) -> Parameter[_PARAM]:
-    return Parameter(param)
+    return sql(Raw(string))
 
 
 class Raw(UserString):
@@ -183,7 +213,9 @@ class Block(Comparable, Generic[_SQLT]):
     """Represents a list of raw sql and parameters."""
 
     def __init__(self, *pieces: SQL | Raw, wrap: bool = False):
-        """Create a Block.
+        """Create a Block. You may find it more convienient to use the `sql()`
+        helper function (or `wrap(sql())` if you want the result to be wrapped
+        in "( )").
 
         Kwargs:
             wrap (bool): Whether or not to add `( )` around the result.

@@ -39,8 +39,8 @@ from .sql import (
     and_,
     join,
     or_,
-    p,
     r,
+    sql,
     wrap,
 )
 
@@ -59,7 +59,7 @@ __all__ = (
     "SQL",
     "CASTED",
     "r",
-    "p",
+    "sql",
     "join",
     "wrap",
     "and_",
