@@ -235,10 +235,13 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
 
     # finalization
     migrations.extend(add_tables)
-    migrations.extend(drop_tables)
-    migrations.extend(add_fields)
 
     migrations.extend(drop_fk_constraints)
+
+    migrations.extend(drop_tables)
+
+    migrations.extend(add_fields)
+
     migrations.extend(drop_pk_constraints)
     migrations.extend(drop_unique_constraints)
     migrations.extend(drop_check_constraints)
@@ -247,6 +250,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(drop_indexes)
 
     migrations.extend(drop_fields)
+
     migrations.extend(field_not_nulls)
 
     migrations.extend(add_indexes)
