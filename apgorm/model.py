@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from .database import Database
 
 
-_T = TypeVar("_T", bound="Model")
+_SELF = TypeVar("_SELF", bound="Model")
 
 
 class Model:
@@ -178,8 +178,13 @@ class Model:
         await q.execute()
         self._set_saved()
 
-    async def create(self, con: Connection | None = None):
-        """Inser the model into the database."""
+    async def create(self: _SELF, con: Connection | None = None) -> _SELF:
+        """Insert the model into the database.
+
+        Returns:
+            Model: The model that was inserted. Useful if you want to write
+            `model = await Model(...).create()`
+        """
 
         q = self.insert_query(con=con)
         q.set(
@@ -203,18 +208,20 @@ class Model:
         elif len(fields_to_return) == 1:
             fields_to_return[0]._value = result
 
+        return self
+
     @classmethod
     async def fetch(
-        cls: Type[_T],
+        cls: Type[_SELF],
         con: Connection | None = None,
         /,
         **values,
-    ) -> _T:
+    ) -> _SELF:
         """Fetch an exiting model from the database.
 
         Example:
         ```
-        User.fetch(username="Circuit")
+        user = await User.fetch(username="Circuit")
         ```
 
         Raises:
@@ -231,32 +238,32 @@ class Model:
 
     @classmethod
     def fetch_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> FetchQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> FetchQueryBuilder[_SELF]:
         """Returns a FetchQueryBuilder."""
 
         return FetchQueryBuilder(model=cls, con=con)
 
     @classmethod
     def delete_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> DeleteQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> DeleteQueryBuilder[_SELF]:
         """Returns a DeleteQueryBuilder."""
 
         return DeleteQueryBuilder(model=cls, con=con)
 
     @classmethod
     def update_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> UpdateQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> UpdateQueryBuilder[_SELF]:
         """Returns an UpdateQueryBuilder."""
 
         return UpdateQueryBuilder(model=cls, con=con)
 
     @classmethod
     def insert_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> InsertQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> InsertQueryBuilder[_SELF]:
         """Returns an InsertQueryBuilder."""
 
         return InsertQueryBuilder(model=cls, con=con)
