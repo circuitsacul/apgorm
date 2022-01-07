@@ -26,4 +26,9 @@ from .base_type import SqlType
 
 
 class XML(SqlType[str]):
+    """Type for storing XML data.
+
+    https://www.postgresql.org/docs/14/datatype-xml.html
+    """
+
     sql = "XML"
