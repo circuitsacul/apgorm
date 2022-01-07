@@ -29,6 +29,12 @@ from .base_type import SqlType
 
 
 class CIDR(SqlType[Union[ipaddr.IPv4Network, ipaddr.IPv6Network]]):
+    """IPv4 and IPv6 networks. 7 or 19 bytes.
+
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-CIDR
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
+    """
+
     sql = "CIDR"
 
 
@@ -42,12 +48,28 @@ class INET(
         ]
     ]
 ):
+    """IPv4 and IPv6 hosts and networks. 7 or 19 bytes.
+
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
+    """
+
     sql = "INET"
 
 
 class MacAddr(SqlType[str]):
+    """MAC addresses. 6 bytes.
+
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR
+    """
+
     sql = "MACADDR"
 
 
 class MacAddr8(SqlType[str]):
+    """MAC address (EUI-64 format). 8 bytes.
+
+    https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR8
+    """
+
     sql = "MACADDR8"
