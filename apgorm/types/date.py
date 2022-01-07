@@ -29,7 +29,18 @@ from .base_type import SqlType
 
 
 class Timestamp(SqlType[datetime.datetime]):
+    """Date and time without time zone.
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     def __init__(self, precision: int | None = None):
+        """Create a Timestamp type.
+
+        Args:
+            precision (int, optional): Precision (0-6). Defaults to None.
+        """
+
         self._precision = precision
         self.sql = "TIMESTAMP"
         if precision is not None:
@@ -37,11 +48,28 @@ class Timestamp(SqlType[datetime.datetime]):
 
     @property
     def precision(self) -> int | None:
+        """The precision of the timestamp.
+
+        Returns:
+            int | None
+        """
+
         return self._precision
 
 
 class TimestampTZ(SqlType[datetime.datetime]):
+    """Date and time with time zone.
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     def __init__(self, precision: int | None = None):
+        """Create a TimestampTZ type.
+
+        Args:
+            precision (int, optional): Precision (0-6). Defaults to None.
+        """
+
         self._precision = precision
         self.sql = "TIMESTAMPTZ"
         if precision is not None:
@@ -49,11 +77,28 @@ class TimestampTZ(SqlType[datetime.datetime]):
 
     @property
     def precision(self) -> int | None:
+        """The precision of the timestamp.
+
+        Returns:
+            int | None
+        """
+
         return self._precision
 
 
 class Time(SqlType[datetime.time]):
+    """Time of day with no date or time zone.
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     def __init__(self, precision: int | None = None):
+        """Create a Time type.
+
+        Args:
+            precision (int, optional): Precision (0-6). Defaults to None.
+        """
+
         self._precision = precision
         self.sql = "TIME"
         if precision is not None:
@@ -61,11 +106,28 @@ class Time(SqlType[datetime.time]):
 
     @property
     def precision(self) -> int | None:
+        """The precision of the time.
+
+        Returns:
+            int | None
+        """
+
         return self._precision
 
 
 class TimeTZ(SqlType[datetime.time]):
+    """Time of day with time zone (no date).
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     def __init__(self, precision: int | None = None):
+        """Create a TimeTZ type.
+
+        Args:
+            precision (int, optional): Precision (0-6). Defaults to None.
+        """
+
         self._precision = precision
         self.sql = "TIMETZ"
         if precision is not None:
@@ -73,10 +135,21 @@ class TimeTZ(SqlType[datetime.time]):
 
     @property
     def precision(self) -> int | None:
+        """The precsion of the time.
+
+        Returns:
+            int | None
+        """
+
         return self._precision
 
 
 class Date(SqlType[datetime.date]):
+    """Date (no time of day).
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     sql = "DATE"
 
 
@@ -96,11 +169,25 @@ class IntervalField(Enum):
 
 
 class Interval(SqlType[datetime.timedelta]):
+    """Interval type. Essentially a time range (5 years or 2 minutes) but not
+    an actual date or time (05-9-2005).
+
+    https://www.postgresql.org/docs/14/datatype-datetime.html
+    """
+
     def __init__(
         self,
         interval_field: IntervalField | None = None,
         precision: int | None = None,
     ):
+        """Create an Interval type.
+
+        Args:
+            interval_field (IntervalField, optional): Restrict the fields of
+            the interval. Defaults to None.
+            precision (int, optional): Precision (0-6). Defaults to None.
+        """
+
         self._interval_field = interval_field
         self._precision = precision
 
@@ -112,8 +199,20 @@ class Interval(SqlType[datetime.timedelta]):
 
     @property
     def interval_field(self) -> IntervalField | None:
+        """The allowed fields for the interval.
+
+        Returns:
+            IntervalField | None
+        """
+
         return self._interval_field
 
     @property
     def precision(self) -> int | None:
+        """The precision of the interval.
+
+        Returns:
+            int | None
+        """
+
         return self._precision
