@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from .migration import Migration
 
 
-async def apply_migration(migration: Migration, db: Database):
+async def apply_migration(migration: Migration, db: Database) -> None:
     try:
         await db._migrations.fetch(id_=migration.migration_id)
     except (asyncpg.exceptions.UndefinedTableError, ModelNotFound):

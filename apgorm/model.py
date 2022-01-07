@@ -122,12 +122,12 @@ class Model:
         for c in all_constraints.values():
             self._all_constraints[c.name] = c
 
-    async def delete(self, con: Connection | None = None):
+    async def delete(self, con: Connection | None = None) -> None:
         """Delete the model."""
 
         await self.delete_query(con=con).where(**self._pk_fields()).execute()
 
-    async def save(self, con: Connection | None = None):
+    async def save(self, con: Connection | None = None) -> None:
         """Save any changed fields of the model."""
 
         changed_fields = self._get_changed_fields()
@@ -305,7 +305,7 @@ class Model:
     def _pk_fields(self) -> dict[str, Any]:
         return {f.name: f.v for f in self.primary_key}
 
-    def _set_saved(self):
+    def _set_saved(self) -> None:
         for f in self._all_fields.values():
             f.changed = False
 

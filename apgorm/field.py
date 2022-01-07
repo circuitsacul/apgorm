@@ -121,7 +121,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         n._validators = self._validators
         return n
 
-    def _validate(self, value: _C):
+    def _validate(self, value: _C) -> None:
         try:
             if not all([v(value) for v in self._validators]):
                 raise InvalidFieldValue(self, value)

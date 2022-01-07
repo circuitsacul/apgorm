@@ -234,7 +234,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    async def execute(self):
+    async def execute(self) -> None:
         """Execute the query."""
 
         await self.con.execute(*self._get_block().render())

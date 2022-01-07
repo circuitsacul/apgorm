@@ -189,21 +189,21 @@ class Database:
 
         return len(await self.load_unapplied_migrations()) > 0
 
-    async def apply_migrations(self):
+    async def apply_migrations(self) -> None:
         """Applies all migrations that need to be applied."""
 
         for m in await self.load_unapplied_migrations():
             await apply_migration(m, self)
 
     # database functions
-    async def connect(self, **connect_kwargs):
+    async def connect(self, **connect_kwargs) -> None:
         """Connect to a database. Any kwargs that can be passed to
         asyncpg.create_pool() can be used here.
         """
 
         self.pool = Pool(await asyncpg.create_pool(**connect_kwargs))
 
-    async def cleanup(self, timeout: float = 30):
+    async def cleanup(self, timeout: float = 30) -> None:
         """Close the connection.
 
         Args:
@@ -216,7 +216,7 @@ class Database:
         if self.pool is not None:
             await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
-    async def execute(self, query: str, args: list[Any]):
+    async def execute(self, query: str, args: list[Any]) -> None:
         """Execute SQL within a transaction."""
 
         assert self.pool is not None
