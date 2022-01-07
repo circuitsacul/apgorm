@@ -26,6 +26,14 @@ from .base_type import SqlType
 
 
 class Boolean(SqlType[bool]):
+    """Boolean type.
+
+    Note: Although the docs say that "null" is valid as a bool value, `col
+    bool not null` still refuses null values.
+
+    https://www.postgresql.org/docs/14/datatype-boolean.html
+    """
+
     sql = "BOOLEAN"
 
 
