@@ -120,15 +120,6 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self.ascending = ascending
         return self
 
-    def _get_block(self, limit: int | None = None) -> Block:
-        return select(
-            from_=self.model,
-            where=self.where_logic(),
-            order_by=self.order_by_field,
-            ascending=self.ascending,
-            limit=limit,
-        )
-
     def exists(self) -> Block[Bool]:
         """Returns this query wrapped in EXISTS (). Useful for subqueries:
 
@@ -197,17 +188,26 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             async for res in cursor:
                 yield self.model(**res)
 
+    def _get_block(self, limit: int | None = None) -> Block:
+        return select(
+            from_=self.model,
+            where=self.where_logic(),
+            order_by=self.order_by_field,
+            ascending=self.ascending,
+            limit=limit,
+        )
+
 
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
-
-    def _get_block(self) -> Block:
-        return delete(self.model, self.where_logic())
 
     async def execute(self):
         """Execute the deletion query."""
 
         await self.model._database.execute(*self._get_block().render())
+
+    def _get_block(self) -> Block:
+        return delete(self.model, self.where_logic())
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
@@ -234,17 +234,17 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
+    async def execute(self):
+        """Execute the query."""
+
+        await self.con.execute(*self._get_block().render())
+
     def _get_block(self) -> Block:
         return update(
             self.model,
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
         )
-
-    async def execute(self):
-        """Execute the query."""
-
-        await self.con.execute(*self._get_block().render())
 
 
 class InsertQueryBuilder(Query[_T]):
@@ -266,6 +266,11 @@ class InsertQueryBuilder(Query[_T]):
         self.fields_to_return.extend(fields)
         return self
 
+    async def execute(self) -> Any:
+        """Execute the query."""
+
+        return await self.con.fetchval(*self._get_block().render())
+
     def _get_block(self) -> Block:
         value_names = [n for n in self.set_values.keys()]
         value_values = [v for v in self.set_values.values()]
@@ -276,8 +281,3 @@ class InsertQueryBuilder(Query[_T]):
             value_values,
             return_fields=self.fields_to_return or None,
         )
-
-    async def execute(self) -> Any:
-        """Execute the query."""
-
-        return await self.con.fetchval(*self._get_block().render())
