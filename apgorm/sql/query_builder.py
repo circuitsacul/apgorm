@@ -202,6 +202,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         Example:
         ```
         builder.set(username="New Name")
+        ```
 
         Returns:
             UpdateQueryBuilder: Returns the query builder to allow for
