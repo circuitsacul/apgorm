@@ -109,6 +109,26 @@ class Numeric(SqlType[Decimal]):
         elif scale is not None:
             raise BadArgument("Cannot specify scale without precision.")
 
+    @property
+    def precision(self) -> int | None:
+        """The precision (total number of significant digits) of the type.
+
+        Returns:
+            int | None
+        """
+
+        return self._precision
+
+    @property
+    def scale(self) -> int | None:
+        """The scale (digits after the decimal point) of the type.
+
+        Returns:
+            int | None
+        """
+
+        return self._scale
+
 
 class Real(SqlType[float]):
     """4 byte floating-point number (inexact).
