@@ -125,7 +125,7 @@ class Model:
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
         pk.name = (
-            f"{cls._tablename}_"
+            f"_{cls._tablename}_"
             + "{}".format("_".join([f.name for f in cls.primary_key]))
             + "_primary_key"
         )
