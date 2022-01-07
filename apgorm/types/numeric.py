@@ -76,6 +76,16 @@ class Numeric(SqlType[Decimal]):
 
     Up to 131072 digits before the decimal point and 16383 digits after.
 
+    Args:
+        precision (int, optional): The total number of significant digits
+        (`55.55` has 4). Defaults to None.
+        scale (int, optional): The total number of digits after the
+        decimal. Specifying a precision without a scale sets the scale to
+        0. Defaults to None.
+
+    Raises:
+        BadArgument: You tried to specify a scale without a precision.
+
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
@@ -84,19 +94,6 @@ class Numeric(SqlType[Decimal]):
         precision: int | None = None,
         scale: int | None = None,
     ):
-        """Create a Numeric type.
-
-        Args:
-            precision (int, optional): The total number of significant digits
-            (`55.55` has 4). Defaults to None.
-            scale (int, optional): The total number of digits after the
-            decimal. Specifying a precision without a scale sets the scale to
-            0. Defaults to None.
-
-        Raises:
-            BadArgument: You tried to specify a scale without a precision.
-        """
-
         self._precision = precision
         self._scale = scale
 

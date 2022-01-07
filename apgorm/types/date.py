@@ -31,16 +31,13 @@ from .base_type import SqlType
 class Timestamp(SqlType[datetime.datetime]):
     """Date and time without time zone.
 
+    Args:
+        precision (int, optional): Precision (0-6). Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
     def __init__(self, precision: int | None = None):
-        """Create a Timestamp type.
-
-        Args:
-            precision (int, optional): Precision (0-6). Defaults to None.
-        """
-
         self._precision = precision
         self.sql = "TIMESTAMP"
         if precision is not None:
@@ -60,16 +57,13 @@ class Timestamp(SqlType[datetime.datetime]):
 class TimestampTZ(SqlType[datetime.datetime]):
     """Date and time with time zone.
 
+    Args:
+        precision (int, optional): Precision (0-6). Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
     def __init__(self, precision: int | None = None):
-        """Create a TimestampTZ type.
-
-        Args:
-            precision (int, optional): Precision (0-6). Defaults to None.
-        """
-
         self._precision = precision
         self.sql = "TIMESTAMPTZ"
         if precision is not None:
@@ -89,16 +83,13 @@ class TimestampTZ(SqlType[datetime.datetime]):
 class Time(SqlType[datetime.time]):
     """Time of day with no date or time zone.
 
+    Args:
+        precision (int, optional): Precision (0-6). Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
     def __init__(self, precision: int | None = None):
-        """Create a Time type.
-
-        Args:
-            precision (int, optional): Precision (0-6). Defaults to None.
-        """
-
         self._precision = precision
         self.sql = "TIME"
         if precision is not None:
@@ -118,16 +109,13 @@ class Time(SqlType[datetime.time]):
 class TimeTZ(SqlType[datetime.time]):
     """Time of day with time zone (no date).
 
+    Args:
+        precision (int, optional): Precision (0-6). Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
     def __init__(self, precision: int | None = None):
-        """Create a TimeTZ type.
-
-        Args:
-            precision (int, optional): Precision (0-6). Defaults to None.
-        """
-
         self._precision = precision
         self.sql = "TIMETZ"
         if precision is not None:
@@ -172,6 +160,11 @@ class Interval(SqlType[datetime.timedelta]):
     """Interval type. Essentially a time range (5 years or 2 minutes) but not
     an actual date or time (05-9-2005).
 
+    Args:
+        interval_field (IntervalField, optional): Restrict the fields of
+        the interval. Defaults to None.
+        precision (int, optional): Precision (0-6). Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
@@ -180,14 +173,6 @@ class Interval(SqlType[datetime.timedelta]):
         interval_field: IntervalField | None = None,
         precision: int | None = None,
     ):
-        """Create an Interval type.
-
-        Args:
-            interval_field (IntervalField, optional): Restrict the fields of
-            the interval. Defaults to None.
-            precision (int, optional): Precision (0-6). Defaults to None.
-        """
-
         self._interval_field = interval_field
         self._precision = precision
 

@@ -30,17 +30,14 @@ from .base_type import SqlType
 class Bit(SqlType[asyncpg.BitString]):
     """Fixed length string of 0's and 1's.
 
+    Args:
+        length (int, optional): The length of the bitstr. If None,
+        postgres uses 1. Defaults to None.
+
     https://www.postgresql.org/docs/14/datatype-bit.html
     """
 
     def __init__(self, length: int | None = None):
-        """Create a Bit type.
-
-        Args:
-            length (int, optional): The length of the bitstr. If None,
-            postgres uses 1. Defaults to None.
-        """
-
         self._length = length
         self.sql = "BIT"
         if length is not None:
