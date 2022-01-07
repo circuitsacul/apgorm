@@ -26,8 +26,18 @@ from .base_type import SqlType
 
 
 class Json(SqlType[str]):
+    """Stores JSON.
+
+    https://www.postgresql.org/docs/14/datatype-json.html
+    """
+
     sql = "JSON"
 
 
 class JsonB(SqlType[str]):
+    """Stores JSON.
+
+    https://www.postgresql.org/docs/14/datatype-json.html
+    """
+
     sql = "JSONB"
