@@ -83,21 +83,43 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
         self._validators: list[Validator] = []
 
-    def _get_default(self) -> _T | UNDEF:
-        if self._default is not UNDEF.UNDEF:
-            return self._default
-        if self._default_factory is not None:
-            return self._default_factory()
-        return UNDEF.UNDEF
+    @property
+    def v(self) -> _C:
+        """The current value of the field.
 
-    def _get_block(self) -> Block:
-        return r(self.full_name)
+        Raises:
+            UndefinedFieldValue: The field value is undefined.
+            Probably means that the model has not been created.
+        """
+
+        raise NotImplementedError
+
+    @v.setter
+    def v(self, other: _C):
+        raise NotImplementedError
+
+    @property
+    def full_name(self) -> str:
+        """The full name of the field (`tablename.fieldname`)."""
+
+        return f"{self.model._tablename}.{self.name}"
 
     def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
         """Add a validator to the value of this field."""
 
         self._validators.append(validator)
         return self
+
+    def copy(self) -> BaseField[_F, _T, _C]:
+        """Create a copy of the field."""
+
+        n = self.__class__(**self._copy_kwargs())
+        if hasattr(self, "name"):
+            n.name = self.name
+        if hasattr(self, "model"):
+            n.model = self.model
+        n._validators = self._validators
+        return n
 
     def _validate(self, value: _C):
         try:
@@ -115,26 +137,15 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             not_null=self.not_null,
         )
 
-    @property
-    def full_name(self) -> str:
-        """The full name of the field (`tablename.fieldname`)."""
+    def _get_default(self) -> _T | UNDEF:
+        if self._default is not UNDEF.UNDEF:
+            return self._default
+        if self._default_factory is not None:
+            return self._default_factory()
+        return UNDEF.UNDEF
 
-        return f"{self.model._tablename}.{self.name}"
-
-    @property
-    def v(self) -> _C:
-        """The current value of the field.
-
-        Raises:
-            UndefinedFieldValue: The field value is undefined.
-            Probably means that the model has not been created.
-        """
-
-        raise NotImplementedError
-
-    @v.setter
-    def v(self, other: _C):
-        raise NotImplementedError
+    def _get_block(self) -> Block:
+        return r(self.full_name)
 
     def _copy_kwargs(self) -> dict[str, Any]:
         return dict(
@@ -144,17 +155,6 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             not_null=self.not_null,
             use_repr=self.use_repr,
         )
-
-    def copy(self) -> BaseField[_F, _T, _C]:
-        """Create a copy of the field."""
-
-        n = self.__class__(**self._copy_kwargs())
-        if hasattr(self, "name"):
-            n.name = self.name
-        if hasattr(self, "model"):
-            n.model = self.model
-        n._validators = self._validators
-        return n
 
 
 class Field(BaseField[_F, _T, _T]):

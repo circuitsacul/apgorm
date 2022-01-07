@@ -122,46 +122,6 @@ class Model:
         for c in all_constraints.values():
             self._all_constraints[c.name] = c
 
-    @classmethod
-    def _primary_key(cls) -> PrimaryKey:
-        pk = PrimaryKey(*cls.primary_key)
-        pk.name = (
-            f"_{cls._tablename}_"
-            + "{}".format("_".join([f.name for f in cls.primary_key]))
-            + "_primary_key"
-        )
-        return pk
-
-    @classmethod
-    def _describe(cls) -> DescribeTable:
-        fields, constraints = cls._special_attrs()
-        unique: list[DescribeConstraint] = []
-        check: list[DescribeConstraint] = []
-        fk: list[DescribeConstraint] = []
-        exclude: list[DescribeConstraint] = []
-        for c in constraints.values():
-            if isinstance(c, Check):
-                check.append(c._describe())
-            elif isinstance(c, ForeignKey):
-                fk.append(c._describe())
-            elif isinstance(c, Unique):
-                unique.append(c._describe())
-            elif isinstance(c, Exclude):
-                exclude.append(c._describe())
-
-        return DescribeTable(
-            name=cls._tablename,
-            fields=[f._describe() for f in fields.values()],
-            fk_constraints=fk,
-            pk_constraint=cls._primary_key()._describe(),
-            unique_constraints=unique,
-            check_constraints=check,
-            exclude_constraints=exclude,
-        )
-
-    def _pk_fields(self) -> dict[str, Any]:
-        return {f.name: f.v for f in self.primary_key}
-
     async def delete(self, con: Connection | None = None):
         """Delete the model."""
 
@@ -268,12 +228,42 @@ class Model:
 
         return InsertQueryBuilder(model=cls, con=con)
 
-    def _set_saved(self):
-        for f in self._all_fields.values():
-            f.changed = False
+    @classmethod
+    def _primary_key(cls) -> PrimaryKey:
+        pk = PrimaryKey(*cls.primary_key)
+        pk.name = (
+            f"_{cls._tablename}_"
+            + "{}".format("_".join([f.name for f in cls.primary_key]))
+            + "_primary_key"
+        )
+        return pk
 
-    def _get_changed_fields(self) -> list[BaseField]:
-        return [f for f in self._all_fields.values() if f.changed]
+    @classmethod
+    def _describe(cls) -> DescribeTable:
+        fields, constraints = cls._special_attrs()
+        unique: list[DescribeConstraint] = []
+        check: list[DescribeConstraint] = []
+        fk: list[DescribeConstraint] = []
+        exclude: list[DescribeConstraint] = []
+        for c in constraints.values():
+            if isinstance(c, Check):
+                check.append(c._describe())
+            elif isinstance(c, ForeignKey):
+                fk.append(c._describe())
+            elif isinstance(c, Unique):
+                unique.append(c._describe())
+            elif isinstance(c, Exclude):
+                exclude.append(c._describe())
+
+        return DescribeTable(
+            name=cls._tablename,
+            fields=[f._describe() for f in fields.values()],
+            fk_constraints=fk,
+            pk_constraint=cls._primary_key()._describe(),
+            unique_constraints=unique,
+            check_constraints=check,
+            exclude_constraints=exclude,
+        )
 
     @classmethod
     def _special_attrs(
@@ -311,6 +301,16 @@ class Model:
         cls._all_constraints = constraints
 
         return fields, constraints
+
+    def _pk_fields(self) -> dict[str, Any]:
+        return {f.name: f.v for f in self.primary_key}
+
+    def _set_saved(self):
+        for f in self._all_fields.values():
+            f.changed = False
+
+    def _get_changed_fields(self) -> list[BaseField]:
+        return [f for f in self._all_fields.values() if f.changed]
 
     # magic methods
     def __repr__(self) -> str:
