@@ -22,10 +22,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
-from apgorm.exceptions import InvalidFieldValue, UndefinedFieldValue
+from apgorm.exceptions import (
+    BadArgument,
+    InvalidFieldValue,
+    UndefinedFieldValue,
+)
 from apgorm.migrations.describe import DescribeField
 from apgorm.sql.sql import Comparable, r
 from apgorm.undefined import UNDEF
@@ -58,12 +62,17 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         sql_type: _F,
         *,
         default: _T | UNDEF = UNDEF.UNDEF,
+        default_factory: Callable[[], _T] | None = None,
         not_null: bool = False,
         use_repr: bool = True,
     ):
         self.sql_type = sql_type
 
-        self.default = default
+        if (default is not UNDEF.UNDEF) and (default_factory is not None):
+            raise BadArgument("Cannot specify default and default_factory.")
+
+        self._default = default
+        self._default_factory = default_factory
 
         self.not_null = not_null
 
@@ -73,6 +82,13 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         self._value: _T | UNDEF = UNDEF.UNDEF
 
         self._validators: list[Validator] = []
+
+    def _get_default(self) -> _T | UNDEF:
+        if self._default is not UNDEF.UNDEF:
+            return self._default
+        if self._default_factory is not None:
+            return self._default_factory()
+        return UNDEF.UNDEF
 
     def _get_block(self) -> Block:
         return r(self.name)
@@ -123,7 +139,8 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
     def _copy_kwargs(self) -> dict[str, Any]:
         return dict(
             sql_type=self.sql_type,
-            default=self.default,
+            default=self._default,
+            default_factory=self._default_factory,
             not_null=self.not_null,
             use_repr=self.use_repr,
         )

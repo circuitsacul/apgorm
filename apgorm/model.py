@@ -103,8 +103,9 @@ class Model:
 
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
-                if f.default is not UNDEF.UNDEF:
-                    value = f.default
+                d = f._get_default()
+                if d is not UNDEF.UNDEF:
+                    value = d
                 else:
                     continue
             if isinstance(f, ConverterField):
