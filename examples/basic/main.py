@@ -25,7 +25,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import apgorm
-from apgorm.types.character import VarChar
+from apgorm.types import VarChar
 
 
 class User(apgorm.Model):

@@ -26,8 +26,7 @@ from enum import IntEnum
 from pathlib import Path
 
 import apgorm
-from apgorm.types.character import VarChar
-from apgorm.types.numeric import Int
+from apgorm.types import Int, VarChar
 
 
 class PlayerStatus(IntEnum):
