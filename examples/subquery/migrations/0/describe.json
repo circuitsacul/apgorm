@@ -12,7 +12,7 @@
             "fk_constraints": [],
             "pk_constraint": {
                 "name": "__migrations_id__primary_key",
-                "raw_sql": "CONSTRAINT __migrations_id__primary_key PRIMARY KEY ( _migrations.id_ )"
+                "raw_sql": "CONSTRAINT __migrations_id__primary_key PRIMARY KEY ( id_ )"
             },
             "unique_constraints": [],
             "check_constraints": [],
@@ -30,7 +30,7 @@
             "fk_constraints": [],
             "pk_constraint": {
                 "name": "_games_id__primary_key",
-                "raw_sql": "CONSTRAINT _games_id__primary_key PRIMARY KEY ( games.id_ )"
+                "raw_sql": "CONSTRAINT _games_id__primary_key PRIMARY KEY ( id_ )"
             },
             "unique_constraints": [],
             "check_constraints": [],
@@ -62,7 +62,7 @@
             ],
             "pk_constraint": {
                 "name": "_players_username_gameid_primary_key",
-                "raw_sql": "CONSTRAINT _players_username_gameid_primary_key PRIMARY KEY ( players.username , players.gameid )"
+                "raw_sql": "CONSTRAINT _players_username_gameid_primary_key PRIMARY KEY ( username , gameid )"
             },
             "unique_constraints": [],
             "check_constraints": [],
@@ -80,7 +80,7 @@
             "fk_constraints": [],
             "pk_constraint": {
                 "name": "_users_name_primary_key",
-                "raw_sql": "CONSTRAINT _users_name_primary_key PRIMARY KEY ( users.name )"
+                "raw_sql": "CONSTRAINT _users_name_primary_key PRIMARY KEY ( name )"
             },
             "unique_constraints": [],
             "check_constraints": [],
