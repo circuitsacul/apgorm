@@ -71,6 +71,9 @@ class Model:
     ```
     """
 
+    _all_fields: dict[str, BaseField]
+    _all_constraints: dict[str, Constraint]
+
     _tablename: str  # populated by Database
     """The name of the table, populated by Database."""
     _database: Database  # populated by Database
@@ -268,6 +271,9 @@ class Model:
     def _special_attrs(
         cls,
     ) -> tuple[dict[str, BaseField], dict[str, Constraint]]:
+        if hasattr(cls, "_all_fields") and hasattr(cls, "_all_constraints"):
+            return cls._all_fields, cls._all_constraints
+
         fields: dict[str, BaseField] = {}
         constraints: dict[str, Constraint] = {}
 
@@ -292,6 +298,9 @@ class Model:
                         ],
                     )
                 constraints[attr_name] = attr
+
+        cls._all_fields = fields
+        cls._all_constraints = constraints
 
         return fields, constraints
 
