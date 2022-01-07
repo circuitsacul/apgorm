@@ -95,8 +95,7 @@ class Model:
         self._all_fields: dict[str, BaseField] = {}
         self._all_constraints: dict[str, Constraint] = {}
 
-        all_fields, all_constraints = self._special_attrs()
-        for f in all_fields.values():
+        for f in self.all_fields().values():
             f = f.copy()
             self._all_fields[f.name] = f
             setattr(self, f.name, f)
@@ -119,7 +118,7 @@ class Model:
             [self._all_fields[f.name] for f in self.primary_key]
         )
 
-        for c in all_constraints.values():
+        for c in self.all_constraints().values():
             self._all_constraints[c.name] = c
 
     async def delete(self, con: Connection | None = None) -> None:
@@ -229,6 +228,30 @@ class Model:
         return InsertQueryBuilder(model=cls, con=con)
 
     @classmethod
+    def all_fields(cls) -> dict[str, BaseField]:
+        """Returns all fields as a dict.
+
+        After the first call, the result is cached.
+
+        Returns:
+            dict[str, BaseField]: The dictionary of fields.
+        """
+
+        return cls._special_attrs()[0]
+
+    @classmethod
+    def all_constraints(cls) -> dict[str, Constraint]:
+        """Returns all constraints as a dict.
+
+        After the first call, the result is cached.
+
+        Returns:
+            dict[str, Constraint]: The dictionary of constraints.
+        """
+
+        return cls._special_attrs()[1]
+
+    @classmethod
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
         pk.name = (
@@ -240,12 +263,11 @@ class Model:
 
     @classmethod
     def _describe(cls) -> DescribeTable:
-        fields, constraints = cls._special_attrs()
         unique: list[DescribeConstraint] = []
         check: list[DescribeConstraint] = []
         fk: list[DescribeConstraint] = []
         exclude: list[DescribeConstraint] = []
-        for c in constraints.values():
+        for c in cls.all_constraints().values():
             if isinstance(c, Check):
                 check.append(c._describe())
             elif isinstance(c, ForeignKey):
@@ -257,7 +279,7 @@ class Model:
 
         return DescribeTable(
             name=cls._tablename,
-            fields=[f._describe() for f in fields.values()],
+            fields=[f._describe() for f in cls.all_fields().values()],
             fk_constraints=fk,
             pk_constraint=cls._primary_key()._describe(),
             unique_constraints=unique,
