@@ -91,7 +91,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         return UNDEF.UNDEF
 
     def _get_block(self) -> Block:
-        return r(self.name)
+        return r(self.full_name)
 
     def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
         """Add a validator to the value of this field."""
