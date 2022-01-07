@@ -31,17 +31,31 @@ from apgorm.field import Field
 from .base_type import SqlType
 
 INT = Union["SmallInt", "Int", "BigInt"]
+"""All integral types (excluding serials)."""
 FLOAT = Union["Real", "DoublePrecision", "Numeric"]
+"""All floating-point types."""
 SERIAL = Union["SmallSerial", "Serial", "BigSerial"]
+"""All serial types."""
 
 NUMBER = Union[INT, FLOAT, SERIAL]
+"""All integral, floating-point, and serial types."""
 
 
 class SmallInt(SqlType[int]):
+    """Small integer, 2 bytes, -32768 to +32767.
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "SMALLINT"
 
 
 class Int(SqlType[int]):
+    """Integer, 4 bytes, -2147483648 to +2147483647.
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "INTEGER"
 
 
@@ -49,15 +63,40 @@ Integer = Int
 
 
 class BigInt(SqlType[int]):
+    """Big integer, 8 bytes, -9223372036854775808 to +9223372036854775807.
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "BIGINT"
 
 
 class Numeric(SqlType[Decimal]):
+    """Numeric (AKA decimal) type with a user specified precision and scale.
+
+    Up to 131072 digits before the decimal point and 16383 digits after.
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     def __init__(
         self,
         precision: int | None = None,
         scale: int | None = None,
     ):
+        """Create a Numeric type.
+
+        Args:
+            precision (int, optional): The total number of significant digits
+            (`55.55` has 4). Defaults to None.
+            scale (int, optional): The total number of digits after the
+            decimal. Specifying a precision without a scale sets the scale to
+            0. Defaults to None.
+
+        Raises:
+            BadArgument: You tried to specify a scale without a precision.
+        """
+
         self._precision = precision
         self._scale = scale
 
@@ -72,10 +111,20 @@ class Numeric(SqlType[Decimal]):
 
 
 class Real(SqlType[float]):
+    """4 byte floating-point number (inexact).
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "REAL"
 
 
 class DoublePrecision(SqlType[float]):
+    """8 byte floating-point number (inexact).
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "DOUBLE PRECISION"
 
 
@@ -105,12 +154,36 @@ class _BaseSerial(SqlType[int]):
 
 
 class SmallSerial(_BaseSerial):
+    """Small autoincrementing integer. You cannot cast to this type.
+
+    Accepts any value accepted by SmallInt, but the default values are
+    positive only (starting at 1).
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "SMALLSERIAL"
 
 
 class Serial(_BaseSerial):
+    """Autoincrementing integer. You cannot cast to this type.
+
+    Accepts any value accepted by Int, but the default values are positive
+    only (starting at 1).
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "SERIAL"
 
 
 class BigSerial(_BaseSerial):
+    """Large autoincrementing integer. You cannot cast to this type.
+
+    Accepts any value accepted by BigInt, but the default values are positive
+    only (starting at 1).
+
+    https://www.postgresql.org/docs/14/datatype-numeric.html
+    """
+
     sql = "BIGSERIAL"
