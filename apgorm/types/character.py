@@ -38,15 +38,15 @@ class VarChar(SqlType[str]):
 
 
 class Char(SqlType[str]):
-    def __init__(self, max_length: int | None = None):
-        self._max_length = max_length
+    def __init__(self, length: int | None = None):
+        self._length = length
         self.sql = "CHAR"
-        if max_length is not None:
-            self.sql += f"({max_length})"
+        if length is not None:
+            self.sql += f"({length})"
 
     @property
-    def max_length(self) -> int | None:
-        return self._max_length
+    def length(self) -> int | None:
+        return self._length
 
 
 class Text(SqlType[str]):
