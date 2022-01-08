@@ -22,12 +22,21 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Callable,
+    Generic,
+    Type,
+    TypeVar,
+)
 
 from apgorm.field import BaseField
+from apgorm.lazy_list import LazyList
 
 from .generators.query import delete, insert, select, update
-from .sql import SQL, Block, and_, r
+from .sql import SQL, Block, and_, r, sql, wrap
 
 if TYPE_CHECKING:
     from apgorm.connection import Connection
@@ -37,12 +46,24 @@ if TYPE_CHECKING:
 _T = TypeVar("_T", bound="Model")
 
 
+def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
+    def converter(values: dict[str, Any]) -> _T:
+        return model(**values)
+
+    return converter
+
+
 class Query(Generic[_T]):
     """Base class for query builders."""
 
     def __init__(self, model: Type[_T], con: Connection | None = None):
         self.model = model
         self.con = con or model._database
+
+    def _get_block(self) -> Block:
+        """Convert the data in the query builder to a Block."""
+
+        raise NotImplementedError
 
 
 _S = TypeVar("_S", bound="FilterQueryBuilder")
@@ -115,16 +136,25 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self.ascending = ascending
         return self
 
-    def _fetch_query(self, limit: int | None = None) -> tuple[str, list[Any]]:
-        return select(
-            from_=self.model,
-            where=self.where_logic(),
-            order_by=self.order_by_field,
-            ascending=self.ascending,
-            limit=limit,
-        ).render()
+    def exists(self) -> Block[Bool]:
+        """Returns this query wrapped in EXISTS (). Useful for subqueries:
 
-    async def fetchmany(self, limit: int | None = None) -> list[_T]:
+        ```
+        user = await User.fetch(name="Circuit")
+        games = await Game.fetch_query().where(
+            Player.fetch_query().where(
+                gameid=Game.id_, username=user.name.v
+            ).exists()
+        ).fetchmany()
+        ```
+
+        Returns:
+            Block[Bool]: The subquery.
+        """
+
+        return sql(r("EXISTS"), wrap(self._get_block()))
+
+    async def fetchmany(self, limit: int | None = None) -> LazyList[dict, _T]:
         """Execute the query and return a list of models.
 
         Args:
@@ -145,9 +175,8 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             # that allowing limit to be a string would create an SQL-injection
             # vulnerability.
             raise TypeError("Limit can only be an int.")
-        query, params = self._fetch_query(limit=limit)
-        res = await self.con.fetchmany(query, params)
-        return [self.model(**r) for r in res]
+        res = await self.con.fetchmany(*self._get_block(limit).render())
+        return LazyList(res, _dict_model_converter(self.model))
 
     async def fetchone(self) -> _T | None:
         """Fetch the first model found.
@@ -156,8 +185,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             Model | None: Returns the model, or None if none were found.
         """
 
-        query, params = self._fetch_query()
-        res = await self.con.fetchrow(query, params)
+        res = await self.con.fetchrow(*self._get_block().render())
         if res is None:
             return None
         return self.model(**res)
@@ -169,23 +197,47 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             Model: The (next) model from the iterator.
         """
 
-        query, params = self._fetch_query()
         con = self.con if isinstance(self.con, Connection) else None
         async with self.model._database.cursor(
-            query, params, con=con
+            *self._get_block().render(), con=con
         ) as cursor:
             async for res in cursor:
                 yield self.model(**res)
+
+    def _get_block(self, limit: int | None = None) -> Block:
+        return select(
+            from_=self.model,
+            where=self.where_logic(),
+            order_by=self.order_by_field,
+            ascending=self.ascending,
+            limit=limit,
+        )
 
 
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    async def execute(self):
-        """Execute the deletion query."""
+    async def execute(self) -> LazyList[dict, _T]:
+        """Execute the deletion query.
 
-        query, params = delete(self.model, self.where_logic()).render()
-        await self.model._database.execute(query, params)
+        Args:
+            return_models (bool): If True, will return the models that were
+            deleted.
+
+        Returns:
+            list[Model] | None: List of models deleted if return_models is
+            True.
+        """
+
+        res = await self.con.fetchmany(*self._get_block().render())
+        return LazyList(res, _dict_model_converter(self.model))
+
+    def _get_block(self) -> Block:
+        return delete(
+            self.model,
+            self.where_logic(),
+            list(self.model.all_fields.values()),
+        )
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
@@ -202,6 +254,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         Example:
         ```
         builder.set(username="New Name")
+        ```
 
         Returns:
             UpdateQueryBuilder: Returns the query builder to allow for
@@ -211,15 +264,27 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    async def execute(self):
-        """Execute the query."""
+    async def execute(self) -> LazyList[dict, _T]:
+        """Execute the query.
 
-        query, params = update(
+        Args:
+            return_models (bool): If True, will return list of models updated.
+
+        Returns:
+            list[Model] | None: List of updated models if return_models is
+            True.
+        """
+
+        res = await self.con.fetchmany(*self._get_block().render())
+        return LazyList(res, _dict_model_converter(self.model))
+
+    def _get_block(self) -> Block:
+        return update(
             self.model,
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
-        ).render()
-        await self.con.execute(query, params)
+            return_fields=list(self.model.all_fields.values()),
+        )
 
 
 class InsertQueryBuilder(Query[_T]):
@@ -229,26 +294,40 @@ class InsertQueryBuilder(Query[_T]):
         super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
-        self.fields_to_return: list[Block | BaseField] = []
 
     def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
+        """Specify values to be set in the database.
+
+        ```
+        await User.insert_query().set(username="Circuit").execute()
+        ```
+
+        Returns:
+            InsertQueryBuilder: Returns the query builder to allow for
+            chaining.
+        """
+
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    def return_fields(
-        self, *fields: Block | BaseField
-    ) -> InsertQueryBuilder[_T]:
-        self.fields_to_return.extend(fields)
-        return self
+    async def execute(self) -> _T:
+        """Execute the query.
 
-    async def execute(self) -> Any:
+        Returns:
+            Model: The model that was inserted.
+        """
+
+        return self.model(
+            **await self.con.fetchrow(*self._get_block().render())
+        )
+
+    def _get_block(self) -> Block:
         value_names = [n for n in self.set_values.keys()]
         value_values = [v for v in self.set_values.values()]
 
-        query, params = insert(
+        return insert(
             self.model,
             value_names,
             value_values,
-            return_fields=self.fields_to_return or None,
-        ).render()
-        return await self.con.fetchval(query, params)
+            return_fields=list(self.model.all_fields.values()),
+        )

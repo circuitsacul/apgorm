@@ -22,7 +22,7 @@
 
 from __future__ import annotations, print_function
 
-from typing import TYPE_CHECKING, Any, Type, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Type, TypeVar
 
 from apgorm.exceptions import ModelNotFound, SpecifiedPrimaryKey
 from apgorm.field import BaseField, ConverterField
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from .database import Database
 
 
-_T = TypeVar("_T", bound="Model")
+_SELF = TypeVar("_SELF", bound="Model")
 
 
 class Model:
@@ -71,8 +71,8 @@ class Model:
     ```
     """
 
-    _all_fields: dict[str, BaseField]
-    _all_constraints: dict[str, Constraint]
+    all_fields: dict[str, BaseField]
+    all_constraints: dict[str, Constraint]
 
     _tablename: str  # populated by Database
     """The name of the table, populated by Database."""
@@ -92,19 +92,18 @@ class Model:
         `Model.fetch_query`.
         """
 
-        self._all_fields: dict[str, BaseField] = {}
-        self._all_constraints: dict[str, Constraint] = {}
+        copied_fields: dict[str, BaseField] = {}
 
-        all_fields, all_constraints = self._special_attrs()
-        for f in all_fields.values():
+        for f in self.all_fields.values():
             f = f.copy()
-            self._all_fields[f.name] = f
+            copied_fields[f.name] = f
             setattr(self, f.name, f)
 
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
-                if f.default is not UNDEF.UNDEF:
-                    value = f.default
+                d = f._get_default()
+                if d is not UNDEF.UNDEF:
+                    value = d
                 else:
                     continue
             if isinstance(f, ConverterField):
@@ -115,105 +114,72 @@ class Model:
         # carry the copies of the fields over to primary_key so that
         # Model.field is Model.primary_key[index of that field]
         self.primary_key = tuple(
-            [self._all_fields[f.name] for f in self.primary_key]
+            [copied_fields[f.name] for f in self.primary_key]
         )
 
-        for c in all_constraints.values():
-            self._all_constraints[c.name] = c
+        self.all_fields = copied_fields
 
-    @classmethod
-    def _primary_key(cls) -> PrimaryKey:
-        pk = PrimaryKey(*cls.primary_key)
-        pk.name = (
-            f"_{cls._tablename}_"
-            + "{}".format("_".join([f.name for f in cls.primary_key]))
-            + "_primary_key"
+    async def delete(self: _SELF, con: Connection | None = None) -> _SELF:
+        """Delete the model. Does not update the values of this model,
+        but the returned model will have updated values.
+
+        Returns:
+            Model: The deleted model (with updated values).
+        """
+
+        deleted = (
+            await self.delete_query(con=con)
+            .where(**self._pk_fields())
+            .execute()
         )
-        return pk
+        return deleted[0]
 
-    @classmethod
-    def _describe(cls) -> DescribeTable:
-        fields, constraints = cls._special_attrs()
-        unique: list[DescribeConstraint] = []
-        check: list[DescribeConstraint] = []
-        fk: list[DescribeConstraint] = []
-        exclude: list[DescribeConstraint] = []
-        for c in constraints.values():
-            if isinstance(c, Check):
-                check.append(c._describe())
-            elif isinstance(c, ForeignKey):
-                fk.append(c._describe())
-            elif isinstance(c, Unique):
-                unique.append(c._describe())
-            elif isinstance(c, Exclude):
-                exclude.append(c._describe())
-
-        return DescribeTable(
-            name=cls._tablename,
-            fields=[f._describe() for f in fields.values()],
-            fk_constraints=fk,
-            pk_constraint=cls._primary_key()._describe(),
-            unique_constraints=unique,
-            check_constraints=check,
-            exclude_constraints=exclude,
-        )
-
-    def _pk_fields(self) -> dict[str, Any]:
-        return {f.name: f.v for f in self.primary_key}
-
-    async def delete(self, con: Connection | None = None):
-        """Delete the model."""
-
-        await self.delete_query(con=con).where(**self._pk_fields()).execute()
-
-    async def save(self, con: Connection | None = None):
-        """Save any changed fields of the model."""
+    async def save(self, con: Connection | None = None) -> None:
+        """Save any changed fields of the model. Updates the values
+        of this model."""
 
         changed_fields = self._get_changed_fields()
         if len(changed_fields) == 0:
             return
         q = self.update_query(con=con).where(**self._pk_fields())
         q.set(**{f.name: f._value for f in changed_fields})
-        await q.execute()
+        result = await q.execute()
+        self._update_from_model(result[0])
         self._set_saved()
 
-    async def create(self, con: Connection | None = None):
-        """Inser the model into the database."""
+    async def create(self: _SELF, con: Connection | None = None) -> _SELF:
+        """Insert the model into the database. Updates the values on this
+        model.
+
+        Returns:
+            Model: The model that was inserted. Useful if you want to write
+            `model = await Model(...).create()`
+        """
 
         q = self.insert_query(con=con)
         q.set(
             **{
                 f.name: f._value
-                for f in self._all_fields.values()
+                for f in self.all_fields.values()
                 if f._value is not UNDEF.UNDEF
             }
         )
-        q.return_fields(
-            *[f for f in self._all_fields.values() if f._value is UNDEF.UNDEF]
-        )
-        result = await q.execute()
+        self._update_from_model(await q.execute())
 
-        fields_to_return = cast("list[BaseField]", q.fields_to_return)
-        assert all([isinstance(f, BaseField) for f in fields_to_return])
-
-        if len(fields_to_return) > 1:
-            for f, v in zip(fields_to_return, result):
-                f._value = v
-        elif len(fields_to_return) == 1:
-            fields_to_return[0]._value = result
+        return self
 
     @classmethod
     async def fetch(
-        cls: Type[_T],
+        cls: Type[_SELF],
         con: Connection | None = None,
         /,
         **values,
-    ) -> _T:
+    ) -> _SELF:
         """Fetch an exiting model from the database.
 
         Example:
         ```
-        User.fetch(username="Circuit")
+        user = await User.fetch(username="Circuit")
         ```
 
         Raises:
@@ -230,50 +196,80 @@ class Model:
 
     @classmethod
     def fetch_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> FetchQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> FetchQueryBuilder[_SELF]:
         """Returns a FetchQueryBuilder."""
 
         return FetchQueryBuilder(model=cls, con=con)
 
     @classmethod
     def delete_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> DeleteQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> DeleteQueryBuilder[_SELF]:
         """Returns a DeleteQueryBuilder."""
 
         return DeleteQueryBuilder(model=cls, con=con)
 
     @classmethod
     def update_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> UpdateQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> UpdateQueryBuilder[_SELF]:
         """Returns an UpdateQueryBuilder."""
 
         return UpdateQueryBuilder(model=cls, con=con)
 
     @classmethod
     def insert_query(
-        cls: Type[_T], con: Connection | None = None
-    ) -> InsertQueryBuilder[_T]:
+        cls: Type[_SELF], con: Connection | None = None
+    ) -> InsertQueryBuilder[_SELF]:
         """Returns an InsertQueryBuilder."""
 
         return InsertQueryBuilder(model=cls, con=con)
 
-    def _set_saved(self):
-        for f in self._all_fields.values():
-            f.changed = False
+    def _update_from_model(self: _SELF, updated: _SELF) -> None:
+        for f in updated.all_fields.values():
+            self.all_fields[f.name]._value = f._value
 
-    def _get_changed_fields(self) -> list[BaseField]:
-        return [f for f in self._all_fields.values() if f.changed]
+    @classmethod
+    def _primary_key(cls) -> PrimaryKey:
+        pk = PrimaryKey(*cls.primary_key)
+        pk.name = (
+            f"_{cls._tablename}_"
+            + "{}".format("_".join([f.name for f in cls.primary_key]))
+            + "_primary_key"
+        )
+        return pk
+
+    @classmethod
+    def _describe(cls) -> DescribeTable:
+        unique: list[DescribeConstraint] = []
+        check: list[DescribeConstraint] = []
+        fk: list[DescribeConstraint] = []
+        exclude: list[DescribeConstraint] = []
+        for c in cls.all_constraints.values():
+            if isinstance(c, Check):
+                check.append(c._describe())
+            elif isinstance(c, ForeignKey):
+                fk.append(c._describe())
+            elif isinstance(c, Unique):
+                unique.append(c._describe())
+            elif isinstance(c, Exclude):
+                exclude.append(c._describe())
+
+        return DescribeTable(
+            name=cls._tablename,
+            fields=[f._describe() for f in cls.all_fields.values()],
+            fk_constraints=fk,
+            pk_constraint=cls._primary_key()._describe(),
+            unique_constraints=unique,
+            check_constraints=check,
+            exclude_constraints=exclude,
+        )
 
     @classmethod
     def _special_attrs(
         cls,
     ) -> tuple[dict[str, BaseField], dict[str, Constraint]]:
-        if hasattr(cls, "_all_fields") and hasattr(cls, "_all_constraints"):
-            return cls._all_fields, cls._all_constraints
-
         fields: dict[str, BaseField] = {}
         constraints: dict[str, Constraint] = {}
 
@@ -299,10 +295,20 @@ class Model:
                     )
                 constraints[attr_name] = attr
 
-        cls._all_fields = fields
-        cls._all_constraints = constraints
+        cls.all_fields = fields
+        cls.all_constraints = constraints
 
         return fields, constraints
+
+    def _pk_fields(self) -> dict[str, Any]:
+        return {f.name: f.v for f in self.primary_key}
+
+    def _set_saved(self) -> None:
+        for f in self.all_fields.values():
+            f.changed = False
+
+    def _get_changed_fields(self) -> list[BaseField]:
+        return [f for f in self.all_fields.values() if f.changed]
 
     # magic methods
     def __repr__(self) -> str:
@@ -311,7 +317,7 @@ class Model:
             + " ".join(
                 [
                     f"{f.name}:{f.v!r}"
-                    for f in self._all_fields.values()
+                    for f in self.all_fields.values()
                     if f.use_repr and f._value is not UNDEF.UNDEF
                 ]
             )

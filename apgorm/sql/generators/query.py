@@ -66,11 +66,17 @@ def select(
 def delete(
     from_: Model | Type[Model] | Block,
     where: Block[Bool] | None = None,
+    return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block:
     tablename = from_ if isinstance(from_, Block) else r(from_._tablename)
     sql = Block[Any](r("DELETE FROM"), tablename)
     if where is not None:
         sql += Block(r("WHERE"), where)
+    if return_fields is not None:
+        sql += Block(
+            r("RETURNING"),
+            join(r(","), *return_fields),
+        )
     return wrap(sql)
 
 
@@ -78,6 +84,7 @@ def update(
     table: Model | Type[Model] | Block,
     values: dict[SQL, SQL],
     where: Block[Bool] | None = None,
+    return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block:
     tablename = table if isinstance(table, Block) else r(table._tablename)
     sql = Block[Any](r("UPDATE"), tablename, r("SET"))
@@ -91,6 +98,12 @@ def update(
     if where is not None:
         sql += Block(r("WHERE"), where)
 
+    if return_fields is not None:
+        sql += Block(
+            r("RETURNING"),
+            join(r(","), *return_fields),
+        )
+
     return wrap(sql)
 
 
@@ -98,10 +111,7 @@ def insert(
     into: Model | Type[Model] | Block,
     fields: Sequence[BaseField | Block],
     values: Sequence[SQL],
-    return_fields: Sequence[BaseField | Block]
-    | BaseField
-    | Block
-    | None = None,
+    return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block[Any]:
     tablename = into if isinstance(into, Block) else r(into._tablename)
 
@@ -119,6 +129,6 @@ def insert(
         if isinstance(return_fields, (BaseField, Block)):
             sql += return_fields
         else:
-            sql += join(r(","), *return_fields, wrap=True)
+            sql += join(r(","), *return_fields)
 
     return wrap(sql)

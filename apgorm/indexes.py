@@ -116,6 +116,11 @@ class Index:
     def creation_sql(self) -> Block:
         """The raw sql for the index."""
 
+        names = [
+            wrap(f) if isinstance(f, Block) else wrap(r(f.name))
+            for f in self.fields
+        ]
+
         return Block(
             (r("UNIQUE INDEX") if self.unique else r("INDEX")),
             r(self.get_name()),
@@ -124,7 +129,7 @@ class Index:
             r("USING"),
             r(self.type_.name),
             r("("),
-            join(r(","), *[wrap(f) for f in self.fields]),
+            join(r(","), *names),
             r(")"),
         )
 

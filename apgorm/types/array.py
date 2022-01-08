@@ -32,22 +32,21 @@ _T = TypeVar("_T")
 class Array(SqlType["list[_T | None]"]):
     """SQL array type.
 
-    Example usage:
+    Args:
+        subtype (SqlType): The subtype (can be another Array for multiple
+        dimensions).
+        size (int, optional): The size of the array. Defaults to None.
+
+    Example:
     ```
-    list_of_names = Array(VarChar(32)).field()
-    game_board = Array(Array(Int(), size=16), size=16).nullablefield()
+        list_of_names = Array(VarChar(32)).field()
+        game_board = Array(Array(Int(), size=16), size=16).nullablefield()
     ```
+
+    https://www.postgresql.org/docs/14/arrays.html
     """
 
     def __init__(self, subtype: SqlType[_T], size: int | None = None):
-        """Create an array type.
-
-        Args:
-            subtype (SqlType): The subtype (can be another Array for multiple
-            dimensions).
-            size (int, optional): The size of the array. Defaults to None.
-        """
-
         self._subtype = subtype
         self._size = size
 

@@ -26,7 +26,7 @@ from pathlib import Path
 
 import apgorm
 from apgorm.exceptions import InvalidFieldValue
-from apgorm.types.character import VarChar
+from apgorm.types import VarChar
 
 
 class User(apgorm.Model):

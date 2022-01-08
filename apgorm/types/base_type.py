@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 from apgorm.field import Field
 from apgorm.undefined import UNDEF
@@ -40,6 +40,7 @@ class SqlType(Generic[_T]):
     def field(
         self: _S,
         default: _T | UNDEF = UNDEF.UNDEF,
+        default_factory: Callable[[], _T] | None = None,
         use_repr: bool = True,
     ) -> Field[_S, _T]:
         """Generate a field using this type."""
@@ -47,6 +48,7 @@ class SqlType(Generic[_T]):
         return Field(
             sql_type=self,
             default=default,
+            default_factory=default_factory,
             not_null=True,
             use_repr=use_repr,
         )
@@ -54,6 +56,7 @@ class SqlType(Generic[_T]):
     def nullablefield(
         self: _S,
         default: _T | None | UNDEF = UNDEF.UNDEF,
+        default_factory: Callable[[], _T] | None = None,
         use_repr: bool = True,
     ) -> Field[_S, _T | None]:
         """Generate a nullable field using this type."""
@@ -61,6 +64,7 @@ class SqlType(Generic[_T]):
         return Field(
             sql_type=self,
             default=default,
+            default_factory=default_factory,
             not_null=False,
             use_repr=use_repr,
         )

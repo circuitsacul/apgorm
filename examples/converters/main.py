@@ -26,8 +26,7 @@ from enum import IntEnum
 from pathlib import Path
 
 import apgorm
-from apgorm.types.character import VarChar
-from apgorm.types.numeric import Int
+from apgorm.types import Int, VarChar
 
 
 class PlayerStatus(IntEnum):
@@ -57,8 +56,9 @@ class Database(apgorm.Database):
 
 
 async def _main():
-    player = Player(username="Circuit", status=PlayerStatus.NOT_FINISHED)
-    await player.create()
+    player = await Player(
+        username="Circuit", status=PlayerStatus.NOT_FINISHED
+    ).create()
     print("Created player", player)
 
     print("player.status.v:", player.status.v)  # PlayerStatus.NOT_FINISHED

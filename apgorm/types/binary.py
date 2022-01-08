@@ -26,4 +26,9 @@ from .base_type import SqlType
 
 
 class ByteA(SqlType[bytes]):
+    """Variable-length binary string.
+
+    https://www.postgresql.org/docs/14/datatype-binary.html
+    """
+
     sql = "BYTEA"

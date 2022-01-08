@@ -31,6 +31,7 @@ import asyncpg
 from asyncpg.cursor import CursorFactory
 
 from apgorm.exceptions import NoMigrationsToCreate
+from apgorm.lazy_list import LazyList
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
@@ -89,12 +90,13 @@ class Database:
             attr._tablename = attr_name
             self._all_models.append(attr)
 
-            fields, constraints = attr._special_attrs()
-            for name, field in fields.items():
+            all_fields, all_constraints = attr._special_attrs()
+
+            for name, field in all_fields.items():
                 field.model = attr
                 field.name = name
 
-            for name, constraint in constraints.items():
+            for name, constraint in all_constraints.items():
                 constraint.name = name
 
         self.pool: Pool | None = None
@@ -189,21 +191,21 @@ class Database:
 
         return len(await self.load_unapplied_migrations()) > 0
 
-    async def apply_migrations(self):
+    async def apply_migrations(self) -> None:
         """Applies all migrations that need to be applied."""
 
         for m in await self.load_unapplied_migrations():
             await apply_migration(m, self)
 
     # database functions
-    async def connect(self, **connect_kwargs):
+    async def connect(self, **connect_kwargs) -> None:
         """Connect to a database. Any kwargs that can be passed to
         asyncpg.create_pool() can be used here.
         """
 
         self.pool = Pool(await asyncpg.create_pool(**connect_kwargs))
 
-    async def cleanup(self, timeout: float = 30):
+    async def cleanup(self, timeout: float = 30) -> None:
         """Close the connection.
 
         Args:
@@ -216,16 +218,16 @@ class Database:
         if self.pool is not None:
             await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
-    async def execute(self, query: str, args: list[Any]):
+    async def execute(self, query: str, params: list[Any]) -> None:
         """Execute SQL within a transaction."""
 
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                await con.execute(query, args)
+                await con.execute(query, params)
 
     async def fetchrow(
-        self, query: str, args: list[Any]
+        self, query: str, params: list[Any]
     ) -> dict[str, Any] | None:
         """Fetch the first matching row.
 
@@ -236,33 +238,33 @@ class Database:
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchrow(query, args)
+                return await con.fetchrow(query, params)
 
     async def fetchmany(
-        self, query: str, args: list[Any]
-    ) -> list[dict[str, Any]]:
+        self, query: str, params: list[Any]
+    ) -> LazyList[asyncpg.Record, dict[str, Any]]:
         """Fetch all matching rows.
 
         Returns:
-            list[dict]: All matching rows.
+            LazyList[asyncpg.Record, dict]: All matching rows.
         """
 
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchmany(query, args)
+                return await con.fetchmany(query, params)
 
-    async def fetchval(self, query: str, args: list[Any]) -> Any:
+    async def fetchval(self, query: str, params: list[Any]) -> Any:
         """Fetch a single value."""
 
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchval(query, args)
+                return await con.fetchval(query, params)
 
     @asynccontextmanager
     async def cursor(
-        self, query: str, args: list[Any], con: Connection | None = None
+        self, query: str, params: list[Any], con: Connection | None = None
     ) -> AsyncGenerator[CursorFactory, None]:
         """Yields a CursorFactory, but inside a transaction.
 
@@ -275,10 +277,10 @@ class Database:
         """
 
         if con:
-            yield con.cursor(query, args)
+            yield con.cursor(query, params)
 
         else:
             assert self.pool is not None
             async with self.pool.acquire() as con:
                 async with con.transaction():
-                    yield con.cursor(query, args)
+                    yield con.cursor(query, params)

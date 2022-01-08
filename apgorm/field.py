@@ -22,10 +22,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, Type, TypeVar
 
 from apgorm.converter import Converter
-from apgorm.exceptions import InvalidFieldValue, UndefinedFieldValue
+from apgorm.exceptions import (
+    BadArgument,
+    InvalidFieldValue,
+    UndefinedFieldValue,
+)
 from apgorm.migrations.describe import DescribeField
 from apgorm.sql.sql import Comparable, r
 from apgorm.undefined import UNDEF
@@ -58,12 +62,17 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         sql_type: _F,
         *,
         default: _T | UNDEF = UNDEF.UNDEF,
+        default_factory: Callable[[], _T] | None = None,
         not_null: bool = False,
         use_repr: bool = True,
     ):
         self.sql_type = sql_type
 
-        self.default = default
+        if (default is not UNDEF.UNDEF) and (default_factory is not None):
+            raise BadArgument("Cannot specify default and default_factory.")
+
+        self._default = default
+        self._default_factory = default_factory
 
         self.not_null = not_null
 
@@ -73,37 +82,6 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         self._value: _T | UNDEF = UNDEF.UNDEF
 
         self._validators: list[Validator] = []
-
-    def _get_block(self) -> Block:
-        return r(self.name)
-
-    def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
-        """Add a validator to the value of this field."""
-
-        self._validators.append(validator)
-        return self
-
-    def _validate(self, value: _C):
-        try:
-            if not all([v(value) for v in self._validators]):
-                raise InvalidFieldValue(self, value)
-        except InvalidFieldValue:
-            raise
-        except Exception as e:
-            raise InvalidFieldValue(self, value, exc=e)
-
-    def _describe(self) -> DescribeField:
-        return DescribeField(
-            name=self.name,
-            type_=self.sql_type.sql,
-            not_null=self.not_null,
-        )
-
-    @property
-    def full_name(self) -> str:
-        """The full name of the field (`tablename.fieldname`)."""
-
-        return f"{self.model._tablename}.{self.name}"
 
     @property
     def v(self) -> _C:
@@ -120,13 +98,17 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
     def v(self, other: _C):
         raise NotImplementedError
 
-    def _copy_kwargs(self) -> dict[str, Any]:
-        return dict(
-            sql_type=self.sql_type,
-            default=self.default,
-            not_null=self.not_null,
-            use_repr=self.use_repr,
-        )
+    @property
+    def full_name(self) -> str:
+        """The full name of the field (`tablename.fieldname`)."""
+
+        return f"{self.model._tablename}.{self.name}"
+
+    def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
+        """Add a validator to the value of this field."""
+
+        self._validators.append(validator)
+        return self
 
     def copy(self) -> BaseField[_F, _T, _C]:
         """Create a copy of the field."""
@@ -138,6 +120,41 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             n.model = self.model
         n._validators = self._validators
         return n
+
+    def _validate(self, value: _C) -> None:
+        try:
+            if not all([v(value) for v in self._validators]):
+                raise InvalidFieldValue(self, value)
+        except InvalidFieldValue:
+            raise
+        except Exception as e:
+            raise InvalidFieldValue(self, value, exc=e)
+
+    def _describe(self) -> DescribeField:
+        return DescribeField(
+            name=self.name,
+            type_=self.sql_type.sql,
+            not_null=self.not_null,
+        )
+
+    def _get_default(self) -> _T | UNDEF:
+        if self._default is not UNDEF.UNDEF:
+            return self._default
+        if self._default_factory is not None:
+            return self._default_factory()
+        return UNDEF.UNDEF
+
+    def _get_block(self) -> Block:
+        return r(self.full_name)
+
+    def _copy_kwargs(self) -> dict[str, Any]:
+        return dict(
+            sql_type=self.sql_type,
+            default=self._default,
+            default_factory=self._default_factory,
+            not_null=self.not_null,
+            use_repr=self.use_repr,
+        )
 
 
 class Field(BaseField[_F, _T, _T]):

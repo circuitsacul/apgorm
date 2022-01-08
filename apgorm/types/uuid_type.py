@@ -28,4 +28,9 @@ from .base_type import SqlType
 
 
 class UUID(SqlType[uuid.UUID]):
+    """Universally Unique Identifier (AKA GUID).
+
+    https://www.postgresql.org/docs/14/datatype-uuid.html
+    """
+
     sql = "UUID"

@@ -25,7 +25,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import apgorm
-from apgorm.types.character import VarChar
+from apgorm.types import VarChar
 
 
 class User(apgorm.Model):
@@ -40,9 +40,10 @@ class Database(apgorm.Database):
 
 
 async def _main():
+    await User.delete_query().execute()
+
     # create a user
-    user = User(username="Circuit")
-    await user.create()
+    user = await User(username="Circuit").create()
     print("Created", user)
 
     # get the user
@@ -81,9 +82,6 @@ async def _main():
         "Users after setting nicknames:",
         await User.fetch_query().fetchmany(),
     )
-
-    # delete all users
-    await User.delete_query().execute()
 
 
 async def main():
