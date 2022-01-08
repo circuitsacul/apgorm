@@ -296,6 +296,17 @@ class InsertQueryBuilder(Query[_T]):
         self.set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
+        """Specify values to be set in the database.
+
+        ```
+        await User.insert_query().set(username="Circuit").execute()
+        ```
+
+        Returns:
+            InsertQueryBuilder: Returns the query builder to allow for
+            chaining.
+        """
+
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
