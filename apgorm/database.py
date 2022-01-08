@@ -218,16 +218,16 @@ class Database:
         if self.pool is not None:
             await asyncio.wait_for(self.pool.close(), timeout=timeout)
 
-    async def execute(self, query: str, args: list[Any]) -> None:
+    async def execute(self, query: str, params: list[Any]) -> None:
         """Execute SQL within a transaction."""
 
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                await con.execute(query, args)
+                await con.execute(query, params)
 
     async def fetchrow(
-        self, query: str, args: list[Any]
+        self, query: str, params: list[Any]
     ) -> dict[str, Any] | None:
         """Fetch the first matching row.
 
@@ -238,10 +238,10 @@ class Database:
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchrow(query, args)
+                return await con.fetchrow(query, params)
 
     async def fetchmany(
-        self, query: str, args: list[Any]
+        self, query: str, params: list[Any]
     ) -> LazyList[asyncpg.Record, dict[str, Any]]:
         """Fetch all matching rows.
 
@@ -252,19 +252,19 @@ class Database:
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchmany(query, args)
+                return await con.fetchmany(query, params)
 
-    async def fetchval(self, query: str, args: list[Any]) -> Any:
+    async def fetchval(self, query: str, params: list[Any]) -> Any:
         """Fetch a single value."""
 
         assert self.pool is not None
         async with self.pool.acquire() as con:
             async with con.transaction():
-                return await con.fetchval(query, args)
+                return await con.fetchval(query, params)
 
     @asynccontextmanager
     async def cursor(
-        self, query: str, args: list[Any], con: Connection | None = None
+        self, query: str, params: list[Any], con: Connection | None = None
     ) -> AsyncGenerator[CursorFactory, None]:
         """Yields a CursorFactory, but inside a transaction.
 
@@ -277,10 +277,10 @@ class Database:
         """
 
         if con:
-            yield con.cursor(query, args)
+            yield con.cursor(query, params)
 
         else:
             assert self.pool is not None
             async with self.pool.acquire() as con:
                 async with con.transaction():
-                    yield con.cursor(query, args)
+                    yield con.cursor(query, params)
