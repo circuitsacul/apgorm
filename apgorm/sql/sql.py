@@ -169,7 +169,7 @@ class Raw(UserString):
 
 
 class Parameter(Generic[_T]):
-    def __init__(self, value: _T):
+    def __init__(self, value: _T) -> None:
         self.value = value
 
 
@@ -217,7 +217,7 @@ class Comparable:
 class Block(Comparable, Generic[_SQLT]):
     """Represents a list of raw sql and parameters."""
 
-    def __init__(self, *pieces: SQL | Raw, wrap: bool = False):
+    def __init__(self, *pieces: SQL | Raw, wrap: bool = False) -> None:
         """Create a Block. You may find it more convienient to use the `sql()`
         helper function (or `wrap(sql())` if you want the result to be wrapped
         in "( )").
@@ -297,7 +297,7 @@ class Block(Comparable, Generic[_SQLT]):
 
 
 class Renderer:
-    def __init__(self):
+    def __init__(self) -> None:
         self._curr_value_id: int = 0
 
     @property

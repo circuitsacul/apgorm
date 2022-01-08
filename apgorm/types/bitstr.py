@@ -37,7 +37,7 @@ class Bit(SqlType[asyncpg.BitString]):
     https://www.postgresql.org/docs/14/datatype-bit.html
     """
 
-    def __init__(self, length: int | None = None):
+    def __init__(self, length: int | None = None) -> None:
         self._length = length
         self.sql = "BIT"
         if length is not None:
@@ -60,7 +60,7 @@ class VarBit(SqlType[asyncpg.BitString]):
     https://www.postgresql.org/docs/14/datatype-bit.html
     """
 
-    def __init__(self, max_length: int | None = None):
+    def __init__(self, max_length: int | None = None) -> None:
         """Create a VarBit type.
 
         Args:

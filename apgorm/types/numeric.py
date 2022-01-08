@@ -93,7 +93,7 @@ class Numeric(SqlType[Decimal]):
         self,
         precision: int | None = None,
         scale: int | None = None,
-    ):
+    ) -> None:
         self._precision = precision
         self._scale = scale
 

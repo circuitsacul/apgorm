@@ -40,7 +40,7 @@ class Exclude(Constraint):
         *elements: tuple[BaseField | Block, str],
         using: IndexType = IndexType.BTREE,
         where: Block[Bool] | None = None
-    ):
+    ) -> None:
         """Specify an Exclusion constraint for a table.
 
         Args:

@@ -44,8 +44,7 @@ if await db.must_apply_migrations():
 
 Basic create, fetch, update, and delete:
 ```py
-user = User(username="Circuit")
-await user.create()
+user = await User(username="Circuit").create()
 print("Created user", user)
 
 assert user == await User.fetch(username="Circuit")

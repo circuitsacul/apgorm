@@ -37,7 +37,7 @@ class Timestamp(SqlType[datetime.datetime]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    def __init__(self, precision: int | None = None):
+    def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self.sql = "TIMESTAMP"
         if precision is not None:
@@ -63,7 +63,7 @@ class TimestampTZ(SqlType[datetime.datetime]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    def __init__(self, precision: int | None = None):
+    def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self.sql = "TIMESTAMPTZ"
         if precision is not None:
@@ -89,7 +89,7 @@ class Time(SqlType[datetime.time]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    def __init__(self, precision: int | None = None):
+    def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self.sql = "TIME"
         if precision is not None:
@@ -115,7 +115,7 @@ class TimeTZ(SqlType[datetime.time]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    def __init__(self, precision: int | None = None):
+    def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self.sql = "TIMETZ"
         if precision is not None:
@@ -172,7 +172,7 @@ class Interval(SqlType[datetime.timedelta]):
         self,
         interval_field: IntervalField | None = None,
         precision: int | None = None,
-    ):
+    ) -> None:
         self._interval_field = interval_field
         self._precision = precision
 

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class PrimaryKey(Constraint):
-    def __init__(self, *fields: BaseField | Block):
+    def __init__(self, *fields: BaseField | Block) -> None:
         """Do not use. Specify primary keys like this instead:
 
         ```

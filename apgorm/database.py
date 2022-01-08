@@ -64,7 +64,7 @@ class Database:
     indexes: Sequence[Index] | None = None
     """A list of indexes for the database."""
 
-    def __init__(self, migrations_folder: Path):
+    def __init__(self, migrations_folder: Path) -> None:
         """Initialize the database.
 
         Args:

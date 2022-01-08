@@ -82,7 +82,7 @@ class Model:
     primary_key: tuple[BaseField, ...]
     """The primary key for the model. All models MUST have a primary key."""
 
-    def __init__(self, **values):
+    def __init__(self, **values) -> None:
         """Create an instance of the model. There are two reasons you might do this:
          1. You used `Database.fetch...` directly instead of
          `Model.fetch`, and you want to convert the result to a model.
