@@ -65,7 +65,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         default_factory: Callable[[], _T] | None = None,
         not_null: bool = False,
         use_repr: bool = True,
-    ):
+    ) -> None:
         self.sql_type = sql_type
 
         if (default is not UNDEF.UNDEF) and (default_factory is not None):
@@ -195,7 +195,7 @@ class Field(BaseField[_F, _T, _T]):
 
 
 class ConverterField(BaseField[_F, _T, _C]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.converter: Converter[_T, _C] = kwargs.pop("converter")
         super().__init__(*args, **kwargs)
 

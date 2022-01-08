@@ -41,14 +41,14 @@ class MigrationException(ApgormBaseException):
 class NoMigrationsToCreate(MigrationException):
     """The migration for the given id was not found."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("There are no migrations to create.")
 
 
 class MigrationAlreadyApplied(MigrationException):
     """The migration has already been applied."""
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         super().__init__(f"The migration at {path} has already been applied.")
 
 
@@ -62,7 +62,7 @@ class UndefinedFieldValue(ApgormException):
 
     Usually means that the model has not been created."""
 
-    def __init__(self, field: BaseField):
+    def __init__(self, field: BaseField) -> None:
         self.field = field
 
         super().__init__(
@@ -80,7 +80,7 @@ class InvalidFieldValue(ApgormException):
         field: BaseField,
         value: Any,
         exc: Exception | None = None,
-    ):
+    ) -> None:
         self.orig = exc
         super().__init__(
             f"{value!r} failed the validator for {field.full_name}."
@@ -91,7 +91,7 @@ class SpecifiedPrimaryKey(ApgormException):
     """You tried to create a primary key constraint by using PrimaryKey
     instead of Model.primary_key."""
 
-    def __init__(self, cls: str, fields: Sequence[str]):
+    def __init__(self, cls: str, fields: Sequence[str]) -> None:
         super().__init__(
             f"You tried to specify a primary key on {cls} by using "
             f"the PrimaryKey constraint. Please use {cls}.primary_key "
@@ -102,7 +102,7 @@ class SpecifiedPrimaryKey(ApgormException):
 class BadArgument(ApgormException):
     """Bad arguments were passed."""
 
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         self.message = message
 
         super().__init__(message)
@@ -116,7 +116,7 @@ class SqlException(ApgormBaseException):
 class ModelNotFound(SqlException):
     """A model for the given parameters was not found."""
 
-    def __init__(self, model: Type[Model], values: dict[str, Any]):
+    def __init__(self, model: Type[Model], values: dict[str, Any]) -> None:
         self.model = model
         self.values = values
 

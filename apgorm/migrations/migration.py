@@ -29,7 +29,9 @@ from .describe import Describe
 
 
 class Migration:
-    def __init__(self, describe: Describe, migrations: str, path: Path):
+    def __init__(
+        self, describe: Describe, migrations: str, path: Path
+    ) -> None:
         self.describe = describe
         self.migrations = migrations
         self.path = path

@@ -32,7 +32,7 @@ from apgorm.lazy_list import LazyList
 
 
 class PoolAcquireContext:
-    def __init__(self, pac: asyncpg.pool.PoolAcquireContext):
+    def __init__(self, pac: asyncpg.pool.PoolAcquireContext) -> None:
         self.pac = pac
 
     async def __aenter__(self) -> Connection:
@@ -46,7 +46,7 @@ class PoolAcquireContext:
 
 
 class Pool:
-    def __init__(self, pool: asyncpg.Pool):
+    def __init__(self, pool: asyncpg.Pool) -> None:
         self.pool = pool
 
     def acquire(self) -> PoolAcquireContext:
@@ -57,7 +57,7 @@ class Pool:
 
 
 class Connection:
-    def __init__(self, con: asyncpg.Connection):
+    def __init__(self, con: asyncpg.Connection) -> None:
         self.con = con
 
     def transaction(self) -> Transaction:

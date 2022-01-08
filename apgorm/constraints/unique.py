@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class Unique(Constraint):
-    def __init__(self, *fields: BaseField | Block):
+    def __init__(self, *fields: BaseField | Block) -> None:
         """Specify a unique constraint for a table.
 
         ```

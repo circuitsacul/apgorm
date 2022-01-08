@@ -56,7 +56,7 @@ def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
 class Query(Generic[_T]):
     """Base class for query builders."""
 
-    def __init__(self, model: Type[_T], con: Connection | None = None):
+    def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         self.model = model
         self.con = con or model._database
 
@@ -72,7 +72,7 @@ _S = TypeVar("_S", bound="FilterQueryBuilder")
 class FilterQueryBuilder(Query[_T]):
     """Base class for query builders that have "where logic"."""
 
-    def __init__(self, model: Type[_T], con: Connection | None = None):
+    def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
         self.filters: list[Block[Bool]] = []
@@ -110,7 +110,7 @@ class FilterQueryBuilder(Query[_T]):
 class FetchQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for fetching models."""
 
-    def __init__(self, model: Type[_T], con: Connection | None = None):
+    def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
         self.order_by_field: BaseField | Block | None = None
@@ -243,7 +243,7 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for updating models."""
 
-    def __init__(self, model: Type[_T], con: Connection | None = None):
+    def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
@@ -290,7 +290,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
 class InsertQueryBuilder(Query[_T]):
     """Query builder for creating a model."""
 
-    def __init__(self, model: Type[_T], con: Connection | None = None):
+    def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}

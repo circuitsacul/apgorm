@@ -53,7 +53,7 @@ class ForeignKey(Constraint):
         match_full: bool = False,
         on_delete: Action = Action.CASCADE,
         on_update: Action = Action.CASCADE,
-    ):
+    ) -> None:
         """Specify a ForeignKey constraint for a table.
 
         Args:

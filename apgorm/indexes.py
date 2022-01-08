@@ -62,7 +62,7 @@ class Index:
         fields: Sequence[BaseField | Block] | BaseField | Block,
         type_: IndexType = IndexType.BTREE,
         unique: bool = False,
-    ):
+    ) -> None:
         """Create an index. Must be added to Database.indexes before the
         database is initialized. For example:
         ```

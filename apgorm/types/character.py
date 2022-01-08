@@ -35,7 +35,7 @@ class VarChar(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-character.html
     """
 
-    def __init__(self, max_length: int | None = None):
+    def __init__(self, max_length: int | None = None) -> None:
         self._max_length = max_length
         self.sql = "VARCHAR"
         if max_length is not None:
@@ -63,7 +63,7 @@ class Char(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-character.html
     """
 
-    def __init__(self, length: int | None = None):
+    def __init__(self, length: int | None = None) -> None:
         self._length = length
         self.sql = "CHAR"
         if length is not None:

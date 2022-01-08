@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class Check(Constraint):
-    def __init__(self, check: Block[Bool]):
+    def __init__(self, check: Block[Bool]) -> None:
         """Specify a check constraint for a table.
 
         Args:

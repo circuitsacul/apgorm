@@ -46,7 +46,7 @@ class Array(SqlType["list[_T | None]"]):
     https://www.postgresql.org/docs/14/arrays.html
     """
 
-    def __init__(self, subtype: SqlType[_T], size: int | None = None):
+    def __init__(self, subtype: SqlType[_T], size: int | None = None) -> None:
         self._subtype = subtype
         self._size = size
 
