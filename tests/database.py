@@ -23,13 +23,15 @@
 from __future__ import annotations
 
 import datetime
+import uuid
 from decimal import Decimal
+from ipaddress import IPv4Address, IPv4Network
 
 import asyncpg
 from asyncpg import BitString
 
 import apgorm
-from apgorm.types import (  # json; monetary; network; uuid_type; xml
+from apgorm.types import (
     array,
     binary,
     bitstr,
@@ -37,7 +39,12 @@ from apgorm.types import (  # json; monetary; network; uuid_type; xml
     character,
     date,
     geometric,
+    json_type,
+    monetary,
+    network,
     numeric,
+    uuid_type,
+    xml_type,
 )
 
 
@@ -51,10 +58,12 @@ class PrimaryModel(apgorm.Model):
     bytea = binary.ByteA().field(default=b"hello, world")
 
     # bitstr
-    bit5 = bitstr.Bit(5).field(default=BitString(b"hello"))
-    bit1 = bitstr.Bit().field(default=BitString(b"h"))
-    varbit5 = bitstr.VarBit(5).field(default=BitString(b"hi"))
-    varbit_ul = bitstr.VarBit().field(default=BitString(b"hello, world"))
+    bit5 = bitstr.Bit(5).field(default=BitString.frombytes(b"01001"))
+    bit1 = bitstr.Bit().field(default=BitString.frombytes(b"1"))
+    varbit5 = bitstr.VarBit(5).field(default=BitString.frombytes(b"10"))
+    varbit_ul = bitstr.VarBit().field(
+        default=BitString.frombytes(b"100001111")
+    )
 
     # bool
     bool_field = boolean.Boolean().field(default=True)
@@ -83,7 +92,20 @@ class PrimaryModel(apgorm.Model):
     )
     box = geometric.Box().field(default=asyncpg.Box((0, 0), (5, 5)))
 
-    # integer types
+    # json type
+    json = json_type.Json().field(default="{}")
+    jsonb = json_type.JsonB().field(default="{}")
+
+    # money types
+    money = monetary.Money().field(default="$5")
+
+    # network types
+    cidr = network.CIDR().field(default=IPv4Network("192.0.2.0/27"))
+    inet = network.INET().field(default=IPv4Address("192.0.2.0"))
+    macaddr = network.MacAddr().field(default="08:00:2b:01:02:03")
+    macaddr8 = network.MacAddr8().field(default="08:00:2b:01:02:03:04:05")
+
+    # number types
     serial = numeric.Serial().field()
     smallserial = numeric.SmallSerial().field()
     bigserial = numeric.BigSerial().field()
@@ -98,6 +120,15 @@ class PrimaryModel(apgorm.Model):
     decimal_6p = numeric.Numeric(6).field(default=Decimal())
     decimal_6p_2s = numeric.Numeric(6, 2).field(default=Decimal())
 
+    # uuid
+    guid = uuid_type.UUID().field(
+        default=uuid.UUID("{12345678-1234-5678-1234-567812345678}")
+    )
+
+    # xml
+    xml = xml_type.XML().field(default="<foo>bar</foo>")
+
+    # primary key
     primary_key = (
         serial,
         smallserial,
@@ -112,5 +143,5 @@ class Referenced(apgorm.Model):
 
 
 class Database(apgorm.Database):
-    primary = PrimaryModel
-    referenced = Referenced
+    primary_table = PrimaryModel
+    referenced_table = Referenced
