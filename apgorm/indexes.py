@@ -48,7 +48,7 @@ class IndexType(Enum):
     BTREE = _IndexType("BTREE", multi=True, unique=True)
     HASH = _IndexType("HASH")
     GIST = _IndexType("GIST", multi=True)
-    SP_GIST = _IndexType("SPGIST")
+    SPGIST = _IndexType("SPGIST")
     GIN = _IndexType("GIN", multi=True)
     BRIN = _IndexType("BRIN", multi=True)
 
