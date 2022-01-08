@@ -31,6 +31,7 @@ import asyncpg
 from asyncpg.cursor import CursorFactory
 
 from apgorm.exceptions import NoMigrationsToCreate
+from apgorm.lazy_list import LazyList
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
@@ -241,11 +242,11 @@ class Database:
 
     async def fetchmany(
         self, query: str, args: list[Any]
-    ) -> list[dict[str, Any]]:
+    ) -> LazyList[asyncpg.Record, dict[str, Any]]:
         """Fetch all matching rows.
 
         Returns:
-            list[dict]: All matching rows.
+            LazyList[asyncpg.Record, dict]: All matching rows.
         """
 
         assert self.pool is not None

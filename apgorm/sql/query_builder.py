@@ -24,15 +24,16 @@ from __future__ import annotations
 
 from typing import (
     TYPE_CHECKING,
+    Any,
     AsyncGenerator,
+    Callable,
     Generic,
-    Literal,
     Type,
     TypeVar,
-    overload,
 )
 
 from apgorm.field import BaseField
+from apgorm.lazy_list import LazyList
 
 from .generators.query import delete, insert, select, update
 from .sql import SQL, Block, and_, r, sql, wrap
@@ -43,6 +44,13 @@ if TYPE_CHECKING:
     from apgorm.types.boolean import Bool
 
 _T = TypeVar("_T", bound="Model")
+
+
+def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
+    def converter(values: dict[str, Any]) -> _T:
+        return model(**values)
+
+    return converter
 
 
 class Query(Generic[_T]):
@@ -146,7 +154,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
         return sql(r("EXISTS"), wrap(self._get_block()))
 
-    async def fetchmany(self, limit: int | None = None) -> list[_T]:
+    async def fetchmany(self, limit: int | None = None) -> LazyList[dict, _T]:
         """Execute the query and return a list of models.
 
         Args:
@@ -168,7 +176,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             # vulnerability.
             raise TypeError("Limit can only be an int.")
         res = await self.con.fetchmany(*self._get_block(limit).render())
-        return [self.model(**r) for r in res]
+        return LazyList(res, _dict_model_converter(self.model))
 
     async def fetchone(self) -> _T | None:
         """Fetch the first model found.
@@ -209,15 +217,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    @overload
-    async def execute(self, return_models: Literal[True]) -> list[_T]:
-        ...
-
-    @overload
-    async def execute(self, return_models: Literal[False] = ...) -> None:
-        ...
-
-    async def execute(self, return_models: bool = False) -> list[_T] | None:
+    async def execute(self) -> LazyList[dict, _T]:
         """Execute the deletion query.
 
         Args:
@@ -229,24 +229,14 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
             True.
         """
 
-        query = self._get_block(return_fields=return_models)
+        res = await self.con.fetchmany(*self._get_block().render())
+        return LazyList(res, _dict_model_converter(self.model))
 
-        if return_models:
-            res = await self.con.fetchmany(*query.render())
-            return [self.model(**d) for d in res]
-
-        return await self.con.execute(*query.render())
-
-    def _get_block(self, return_fields: bool = False) -> Block:
-        fields: list[BaseField] | None
-        if return_fields:
-            fields = list(self.model.all_fields.values())
-        else:
-            fields = None
+    def _get_block(self) -> Block:
         return delete(
             self.model,
             self.where_logic(),
-            fields,
+            list(self.model.all_fields.values()),
         )
 
 
@@ -274,15 +264,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    @overload
-    async def execute(self, return_models: Literal[True]) -> list[_T]:
-        ...
-
-    @overload
-    async def execute(self, return_models: Literal[False] = ...) -> None:
-        ...
-
-    async def execute(self, return_models: bool = False) -> list[_T] | None:
+    async def execute(self) -> LazyList[dict, _T]:
         """Execute the query.
 
         Args:
@@ -293,24 +275,15 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
             True.
         """
 
-        query = self._get_block(return_fields=return_models)
+        res = await self.con.fetchmany(*self._get_block().render())
+        return LazyList(res, _dict_model_converter(self.model))
 
-        if return_models:
-            res = await self.con.fetchmany(*query.render())
-            return [self.model(**d) for d in res]
-        return await self.con.execute(*query.render())
-
-    def _get_block(self, return_fields: bool = False) -> Block:
-        fields: list[BaseField] | None
-        if return_fields:
-            fields = list(self.model.all_fields.values())
-        else:
-            fields = None
+    def _get_block(self) -> Block:
         return update(
             self.model,
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
-            return_fields=fields,
+            return_fields=list(self.model.all_fields.values()),
         )
 
 

@@ -28,6 +28,8 @@ import asyncpg
 from asyncpg.cursor import CursorFactory
 from asyncpg.transaction import Transaction
 
+from apgorm.lazy_list import LazyList
+
 
 class PoolAcquireContext:
     def __init__(self, pac: asyncpg.pool.PoolAcquireContext):
@@ -71,8 +73,10 @@ class Connection:
         assert res is None or isinstance(res, dict)
         return res
 
-    async def fetchmany(self, query: str, params: list[Any]) -> list[dict]:
-        return [dict(r) for r in await self.con.fetch(query, *params)]
+    async def fetchmany(
+        self, query: str, params: list[Any]
+    ) -> LazyList[asyncpg.Record, dict[str, Any]]:
+        return LazyList(await self.con.fetch(query, *params), dict)
 
     async def fetchval(self, query: str, params: list[Any]) -> Any:
         return await self.con.fetchval(query, *params)

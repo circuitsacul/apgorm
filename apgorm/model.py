@@ -130,7 +130,7 @@ class Model:
         deleted = (
             await self.delete_query(con=con)
             .where(**self._pk_fields())
-            .execute(return_models=True)
+            .execute()
         )
         return deleted[0]
 
@@ -143,7 +143,7 @@ class Model:
             return
         q = self.update_query(con=con).where(**self._pk_fields())
         q.set(**{f.name: f._value for f in changed_fields})
-        result = await q.execute(return_models=True)
+        result = await q.execute()
         self._update_from_model(result[0])
         self._set_saved()
 
