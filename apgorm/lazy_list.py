@@ -54,13 +54,13 @@ class LazyList(Generic[_IN, _OUT]):
         ...
 
     @overload
-    def __getitem__(self, index: slice) -> list[_OUT]:
+    def __getitem__(self, index: slice) -> LazyList[_IN, _OUT]:
         ...
 
-    def __getitem__(self, index: int | slice) -> list[_OUT] | _OUT:
+    def __getitem__(self, index: int | slice) -> LazyList[_IN, _OUT] | _OUT:
         if isinstance(index, int):
             return self._convert([self._data[index]])[0]
-        return self._convert(self._data[index])
+        return LazyList(self._data[index], self._converter)
 
     def __iter__(self) -> Generator[_OUT, None, None]:
         for r in self._data:
@@ -74,10 +74,10 @@ class LazyList(Generic[_IN, _OUT]):
 
     def __repr__(self) -> str:
         if len(self) > 5:
-            ddd = ", ..."
+            ddd = ", ..., {}".format(repr(self[-1]))
         else:
             ddd = ""
         return "LazyList([{}{}])".format(
-            ", ".join([repr(c) for c in self._convert(self._data[0:5])]),
+            ", ".join([repr(c) for c in list(self[0:5])]),
             ddd,
         )
