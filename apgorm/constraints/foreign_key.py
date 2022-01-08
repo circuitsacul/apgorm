@@ -34,9 +34,14 @@ from .constraint import Constraint
 
 
 class Action(Enum):
+    """Action for ON UPDATE or ON DELETE of ForeignKey."""
+
     CASCADE = "CASCADE"
+    """Carry the changes"""
     RESTRICT = "RESTRICT"
+    """Prevent the changes"""
     NO_ACTION = "NO ACTION"
+    """Do nothing"""
 
 
 class ForeignKey(Constraint):
