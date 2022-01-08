@@ -31,7 +31,6 @@ from tests.database import Database
 
 @pytest.fixture(scope="module")
 async def db():
-    print("CREATING DB")
     migrations = Path("tests/migrations")
     if migrations.exists():
         shutil.rmtree(migrations)
