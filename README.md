@@ -4,10 +4,11 @@ An asynchronous ORM wrapped around asyncpg. Examples can be found under `example
 Please note that this library is not for those learning SQL or Postgres. Although the basic usage of apgorm is straightforward, you will run into problems, especially with migrations, if you don't understand regular SQL well.
 
 ## Features
- - Fully type-checked
  - Fairly straightforward and easy-to-use
  - Migration support
  - Protection against SQL-injection
+ - Fully type-checked
+ - Tests
 
 ## Limitations
  - There are limitations on what the name of a column can be. For example, you cannot have a column named `_tablename` since that is used to declare the name of the model.
