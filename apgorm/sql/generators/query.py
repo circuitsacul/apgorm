@@ -73,7 +73,10 @@ def delete(
     if where is not None:
         sql += Block(r("WHERE"), where)
     if return_fields is not None:
-        sql += Block(r("RETURNING"), join(r(","), *return_fields, wrap=True))
+        sql += Block(
+            r("RETURNING"),
+            join(r(","), *return_fields),
+        )
     return wrap(sql)
 
 
@@ -96,7 +99,10 @@ def update(
         sql += Block(r("WHERE"), where)
 
     if return_fields is not None:
-        sql += Block(r("RETURNING"), join(r(","), *return_fields, wrap=True))
+        sql += Block(
+            r("RETURNING"),
+            join(r(","), *return_fields),
+        )
 
     return wrap(sql)
 
@@ -123,6 +129,6 @@ def insert(
         if isinstance(return_fields, (BaseField, Block)):
             sql += return_fields
         else:
-            sql += join(r(","), *return_fields, wrap=True)
+            sql += join(r(","), *return_fields)
 
     return wrap(sql)

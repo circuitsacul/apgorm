@@ -89,11 +89,13 @@ class Database:
             attr._tablename = attr_name
             self._all_models.append(attr)
 
-            for name, field in attr.all_fields().items():
+            all_fields, all_constraints = attr._special_attrs()
+
+            for name, field in all_fields.items():
                 field.model = attr
                 field.name = name
 
-            for name, constraint in attr.all_constraints().items():
+            for name, constraint in all_constraints.items():
                 constraint.name = name
 
         self.pool: Pool | None = None

@@ -22,7 +22,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Generic, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    AsyncGenerator,
+    Generic,
+    Literal,
+    Type,
+    TypeVar,
+    overload,
+)
 
 from apgorm.field import BaseField
 
@@ -201,13 +209,45 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    async def execute(self):
-        """Execute the deletion query."""
+    @overload
+    async def execute(self, return_models: Literal[True]) -> list[_T]:
+        ...
 
-        await self.model._database.execute(*self._get_block().render())
+    @overload
+    async def execute(self, return_models: Literal[False] = ...) -> None:
+        ...
 
-    def _get_block(self) -> Block:
-        return delete(self.model, self.where_logic())
+    async def execute(self, return_models: bool = False) -> list[_T] | None:
+        """Execute the deletion query.
+
+        Args:
+            return_models (bool): If True, will return the models that were
+            deleted.
+
+        Returns:
+            list[Model] | None: List of models deleted if return_models is
+            True.
+        """
+
+        query = self._get_block(return_fields=return_models)
+
+        if return_models:
+            res = await self.con.fetchmany(*query.render())
+            return [self.model(**d) for d in res]
+
+        return await self.con.execute(*query.render())
+
+    def _get_block(self, return_fields: bool = False) -> Block:
+        fields: list[BaseField] | None
+        if return_fields:
+            fields = list(self.model.all_fields.values())
+        else:
+            fields = None
+        return delete(
+            self.model,
+            self.where_logic(),
+            fields,
+        )
 
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
@@ -234,16 +274,43 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    async def execute(self) -> None:
-        """Execute the query."""
+    @overload
+    async def execute(self, return_models: Literal[True]) -> list[_T]:
+        ...
 
-        await self.con.execute(*self._get_block().render())
+    @overload
+    async def execute(self, return_models: Literal[False] = ...) -> None:
+        ...
 
-    def _get_block(self) -> Block:
+    async def execute(self, return_models: bool = False) -> list[_T] | None:
+        """Execute the query.
+
+        Args:
+            return_models (bool): If True, will return list of models updated.
+
+        Returns:
+            list[Model] | None: List of updated models if return_models is
+            True.
+        """
+
+        query = self._get_block(return_fields=return_models)
+
+        if return_models:
+            res = await self.con.fetchmany(*query.render())
+            return [self.model(**d) for d in res]
+        return await self.con.execute(*query.render())
+
+    def _get_block(self, return_fields: bool = False) -> Block:
+        fields: list[BaseField] | None
+        if return_fields:
+            fields = list(self.model.all_fields.values())
+        else:
+            fields = None
         return update(
             self.model,
             {k: v for k, v in self.set_values.items()},
             where=self.where_logic(),
+            return_fields=fields,
         )
 
 
@@ -254,22 +321,21 @@ class InsertQueryBuilder(Query[_T]):
         super().__init__(model, con)
 
         self.set_values: dict[Block, SQL] = {}
-        self.fields_to_return: list[Block | BaseField] = []
 
     def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
         self.set_values.update({r(k): v for k, v in values.items()})
         return self
 
-    def return_fields(
-        self, *fields: Block | BaseField
-    ) -> InsertQueryBuilder[_T]:
-        self.fields_to_return.extend(fields)
-        return self
+    async def execute(self) -> _T:
+        """Execute the query.
 
-    async def execute(self) -> Any:
-        """Execute the query."""
+        Returns:
+            Model: The model that was inserted.
+        """
 
-        return await self.con.fetchval(*self._get_block().render())
+        return self.model(
+            **await self.con.fetchrow(*self._get_block().render())
+        )
 
     def _get_block(self) -> Block:
         value_names = [n for n in self.set_values.keys()]
@@ -279,5 +345,5 @@ class InsertQueryBuilder(Query[_T]):
             self.model,
             value_names,
             value_values,
-            return_fields=self.fields_to_return or None,
+            return_fields=list(self.model.all_fields.values()),
         )

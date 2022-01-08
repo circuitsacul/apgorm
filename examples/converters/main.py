@@ -56,8 +56,9 @@ class Database(apgorm.Database):
 
 
 async def _main():
-    player = Player(username="Circuit", status=PlayerStatus.NOT_FINISHED)
-    await player.create()
+    player = await Player(
+        username="Circuit", status=PlayerStatus.NOT_FINISHED
+    ).create()
     print("Created player", player)
 
     print("player.status.v:", player.status.v)  # PlayerStatus.NOT_FINISHED
