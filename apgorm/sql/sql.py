@@ -34,7 +34,6 @@ _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
 _SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
 _CAST_SQLT = TypeVar("_CAST_SQLT", bound="SqlType")
-_PARAM = TypeVar("_PARAM")
 SQL = Union[
     "BaseField[SqlType[_T], _T, Any]",
     "Block[SqlType[_T]]",

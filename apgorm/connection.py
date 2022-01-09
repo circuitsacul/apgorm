@@ -28,7 +28,7 @@ import asyncpg
 from asyncpg.cursor import CursorFactory
 from asyncpg.transaction import Transaction
 
-from apgorm.lazy_list import LazyList
+from apgorm.utils.lazy_list import LazyList
 
 
 class PoolAcquireContext:

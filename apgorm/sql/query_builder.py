@@ -33,7 +33,7 @@ from typing import (
 )
 
 from apgorm.field import BaseField
-from apgorm.lazy_list import LazyList
+from apgorm.utils.lazy_list import LazyList
 
 from .generators.query import delete, insert, select, update
 from .sql import SQL, Block, and_, r, sql, wrap

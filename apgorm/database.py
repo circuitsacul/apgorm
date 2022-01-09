@@ -31,12 +31,12 @@ import asyncpg
 from asyncpg.cursor import CursorFactory
 
 from apgorm.exceptions import NoMigrationsToCreate
-from apgorm.lazy_list import LazyList
 from apgorm.migrations import describe
 from apgorm.migrations.applied_migration import AppliedMigration
 from apgorm.migrations.apply_migration import apply_migration
 from apgorm.migrations.create_migration import create_next_migration
 from apgorm.migrations.migration import Migration
+from apgorm.utils.lazy_list import LazyList
 
 from .connection import Connection, Pool
 from .indexes import Index

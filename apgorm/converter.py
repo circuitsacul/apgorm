@@ -22,7 +22,8 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from enum import IntEnum, IntFlag
+from typing import Generic, Type, TypeVar, Union, cast
 
 _ORIG = TypeVar("_ORIG")
 _CONV = TypeVar("_CONV")
@@ -42,3 +43,24 @@ class Converter(Generic[_ORIG, _CONV]):
         used to store the value in the database."""
 
         raise NotImplementedError
+
+
+_INTEF = TypeVar("_INTEF", IntEnum, IntFlag)
+
+
+class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
+    """Converter that converts integers to IntEnums or IntFlags.
+    ```
+    class User(Model):
+        flags = Int().field().with_converter(IntEFConverter(MyIntFlag))
+    ```
+    """
+
+    def __init__(self, type_: Type[_INTEF]):
+        self.type_: Type[_INTEF] = type_
+
+    def from_stored(self, value: int) -> _INTEF:
+        return self.type_(value)
+
+    def to_stored(self, value: _INTEF) -> int:
+        return cast(Union[IntEnum, IntFlag], value).value
