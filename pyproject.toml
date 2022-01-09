@@ -5,7 +5,7 @@ line-length=79
 name = "apgorm"
 version = "0.1.0"
 description = "An ORM wrapped around asyncpg."
-authors = ["Circuit <circuitsacul@gmail.com>"]
+authors = ["Circuit"]
 license = "MIT"
 
 [tool.poetry.dependencies]
