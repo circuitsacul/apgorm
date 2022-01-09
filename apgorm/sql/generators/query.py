@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any, Sequence, Type
 from apgorm.field import BaseField
 from apgorm.sql.sql import SQL, Block, join, r, wrap
 from apgorm.types.boolean import Bool
+from apgorm.undefined import UNDEF
 
 if TYPE_CHECKING:
     from apgorm.model import Model
@@ -36,8 +37,8 @@ def select(
     from_: Model | Type[Model] | Block,
     fields: Sequence[BaseField | Block] | None = None,
     where: Block[Bool] | None = None,
-    order_by: BaseField | Block | None = None,
-    ascending: bool = True,
+    order_by: SQL | UNDEF = UNDEF.UNDEF,
+    reverse: bool = False,
     limit: int | None = None,
 ) -> Block[Any]:
     sql = Block[Any](r("SELECT"))
@@ -53,9 +54,9 @@ def select(
     if where is not None:
         sql += Block(r("WHERE"), where)
 
-    if order_by is not None:
+    if order_by is not UNDEF.UNDEF:
         sql += Block(r("ORDER BY"), order_by)
-        sql += r("ASC" if ascending else "DESC")
+        sql += r("DESC" if reverse else "ASC")
 
     if limit is not None:
         sql += Block(r("LIMIT"), r(str(limit)))
