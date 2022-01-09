@@ -32,7 +32,7 @@ from typing import (
     TypeVar,
 )
 
-from apgorm.field import BaseField
+from apgorm.undefined import UNDEF
 from apgorm.utils.lazy_list import LazyList
 
 from .generators.query import delete, insert, select, update
@@ -113,27 +113,27 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self.order_by_field: BaseField | Block | None = None
-        self.ascending: bool = True
+        self.order_by_logic: SQL | UNDEF = UNDEF.UNDEF
+        self.reverse: bool = False
 
     def order_by(
         self,
-        field: Block | BaseField,
-        ascending: bool = True,
+        logic: SQL,
+        reverse: bool = False,
     ) -> FetchQueryBuilder[_T]:
         """Specify the order logic of the query.
 
         Args:
             field (Block | BaseField): The field or raw field name to order by.
-            ascending (bool, optional): Whether to sort ascending (or
-            descending). Defaults to True.
+            reverse (bool, optional): If set, will return results decending
+            instead of ascending.
 
         Returns:
             FetchQueryBuilder: Returns the query builder to allow for chaining.
         """
 
-        self.order_by_field = field
-        self.ascending = ascending
+        self.order_by_logic = logic
+        self.reverse = reverse
         return self
 
     def exists(self) -> Block[Bool]:
@@ -208,8 +208,8 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         return select(
             from_=self.model,
             where=self.where_logic(),
-            order_by=self.order_by_field,
-            ascending=self.ascending,
+            order_by=self.order_by_logic,
+            reverse=self.reverse,
             limit=limit,
         )
 

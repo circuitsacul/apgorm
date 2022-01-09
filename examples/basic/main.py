@@ -55,13 +55,14 @@ async def _main():
     print("Deleted", user)
 
     # create lots of users
-    for un in ["Circuit", "Bad Guy", "Super Man"]:
+    for un in ["Circuit", "Bad Guy", "Super Man", "Batman"]:
         await User(username=un).create()
         print("Created user with name", un)
 
     # get all users except for "Bad Guy"
     query = User.fetch_query()
     query.where(User.username.neq("Bad Guy"))
+    query.order_by(User.username.eq("Circuit"), True)  # put Circuit first
     good_users = await query.fetchmany()
     print("Users except for 'Bad Guy':", good_users)
 
