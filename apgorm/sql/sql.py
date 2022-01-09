@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from apgorm.field import BaseField
     from apgorm.types.base_type import SqlType
     from apgorm.types.boolean import Bool
+    from apgorm.types.numeric import Int  # noqa
 
 _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
@@ -196,7 +197,7 @@ class _Op(Generic[_SQLT]):
 
 
 class _Func(Generic[_SQLT]):
-    def __init__(self, func: str, rside: bool = False) -> None:
+    def __init__(self, func: str, rside: bool = True) -> None:
         self.func = func
         self.rside = rside
 
@@ -214,8 +215,13 @@ class Comparable:
     def cast(self, type_: _SQLT) -> Block[_SQLT]:
         return wrap(self._get_block(), r("::"), r(type_.sql))
 
-    is_null = _Func["Bool"]("IS NULL", True)
-    not_ = _Func["Bool"]("NOT")
+    # comparison
+    is_null = _Func["Bool"]("IS NULL")
+    is_true = _Func["Bool"]("IS TRUE")
+    is_false = _Func["Bool"]("IS FALSE")
+    num_nulls = _Func["Int"]("NUM_NULLS")
+    num_nonnulls = _Func["Int"]("NUM_NONNULLS")
+    not_ = _Func["Bool"]("NOT", False)
 
     eq = _Op["Bool"]("=")
     neq = _Op["Bool"]("!=")
