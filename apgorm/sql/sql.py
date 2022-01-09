@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from apgorm.field import BaseField
     from apgorm.types.base_type import SqlType
     from apgorm.types.boolean import Bool
-    from apgorm.types.numeric import NUMBER, Int  # noqa
+    from apgorm.types.numeric import Int  # noqa
 
 _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
