@@ -23,7 +23,16 @@
 from __future__ import annotations
 
 from collections import UserString
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 if TYPE_CHECKING:
     from apgorm.field import BaseField
@@ -32,8 +41,8 @@ if TYPE_CHECKING:
 
 _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
-_SQLT = TypeVar("_SQLT", bound="SqlType", covariant=True)
-_CAST_SQLT = TypeVar("_CAST_SQLT", bound="SqlType")
+_SQLT_CO = TypeVar("_SQLT_CO", bound="SqlType", covariant=True)
+_SQLT = TypeVar("_SQLT", bound="SqlType")
 SQL = Union[
     "BaseField[SqlType[_T], _T, Any]",
     "Block[SqlType[_T]]",
@@ -69,7 +78,7 @@ bigint: CASTED[BigInt] = sql(1).cast(SmallInt())  # fails
 
 
 @overload
-def sql(piece: CASTED[_SQLT], /, *, wrap: bool = ...) -> Block[_SQLT]:
+def sql(piece: CASTED[_SQLT_CO], /, *, wrap: bool = ...) -> Block[_SQLT_CO]:
     ...
 
 
@@ -172,48 +181,51 @@ class Parameter(Generic[_T]):
         self.value = value
 
 
+class _Op(Generic[_SQLT]):
+    def __init__(self, op: str) -> None:
+        self.op = op
+
+    def __get__(
+        self, inst: object, cls: Type[object]
+    ) -> Callable[[SQL], Block[_SQLT]]:
+        def operator(other: SQL) -> Block[_SQLT]:
+            assert isinstance(inst, Comparable)
+            return wrap(inst._get_block(), r(self.op), other)
+
+        return operator
+
+
+class _Func(Generic[_SQLT]):
+    def __init__(self, func: str, rside: bool = False) -> None:
+        self.func = func
+        self.rside = rside
+
+    def __get__(self, inst: object, cls: Type[object]) -> Block[_SQLT]:
+        assert isinstance(inst, Comparable)
+        if self.rside:
+            return wrap(wrap(inst._get_block()), r(self.func))
+        return wrap(r(self.func), wrap(inst._get_block()))
+
+
 class Comparable:
     def _get_block(self) -> Block:
         raise NotImplementedError
 
-    def _op(self, op: str, other: SQL) -> Block:
-        return wrap(self._get_block(), r(op), other)
+    def cast(self, type_: _SQLT) -> Block[_SQLT]:
+        return wrap(self._get_block(), r("::"), r(type_.sql))
 
-    def _func(self, func: str) -> Block:
-        return wrap(func, wrap(self._get_block()))
+    is_null = _Func["Bool"]("IS NULL", True)
+    not_ = _Func["Bool"]("NOT")
 
-    def _rfunc(self, rfunc: str) -> Block:
-        return wrap(wrap(self._get_block()), rfunc)
-
-    def not_(self) -> Block[Bool]:
-        return self._func("NOT")
-
-    def is_null(self) -> Block[Bool]:
-        return self._rfunc("IS NULL")
-
-    def eq(self, other: SQL) -> Block[Bool]:
-        return self._op("=", other)
-
-    def neq(self, other: SQL) -> Block[Bool]:
-        return self._op("!=", other)
-
-    def lt(self, other: SQL) -> Block[Bool]:
-        return self._op("<", other)
-
-    def gt(self, other: SQL) -> Block[Bool]:
-        return self._op(">", other)
-
-    def lteq(self, other: SQL) -> Block[Bool]:
-        return self._op("<=", other)
-
-    def gteq(self, other: SQL) -> Block[Bool]:
-        return self._op(">=", other)
-
-    def cast(self, type_: _CAST_SQLT) -> Block[_CAST_SQLT]:
-        return self._op("::", r(type_.sql))
+    eq = _Op["Bool"]("=")
+    neq = _Op["Bool"]("!=")
+    lt = _Op["Bool"]("<")
+    gt = _Op["Bool"](">")
+    lteq = _Op["Bool"]("<=")
+    gteq = _Op["Bool"](">=")
 
 
-class Block(Comparable, Generic[_SQLT]):
+class Block(Comparable, Generic[_SQLT_CO]):
     """Represents a list of raw sql and parameters."""
 
     def __init__(self, *pieces: SQL | Raw, wrap: bool = False) -> None:
