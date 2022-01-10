@@ -22,9 +22,6 @@
 
 from __future__ import annotations
 
-import warnings
-
-import asyncpg
 import pytest
 
 from tests.database import Database
@@ -41,25 +38,11 @@ async def _test_apply(db: Database):
     await db.apply_migrations()
     assert not await db.must_apply_migrations()
 
-    # test that all fields for primar
-
 
 @pytest.mark.asyncio
 async def test_migrations(db: Database):
-    try:
-        await db._migrations.fetch_query().fetchmany()
-    except asyncpg.UndefinedTableError:
-        pass
-    else:
-        warnings.warn(
-            "Unable to test migrations. Please delete and recreate the"
-            "`apgorm_testing_database` database."
-        )
+    if len(await db._migrations.fetch_query().fetchmany()) > 1:
         return
-
-    # initial migration
-    _test_create(db)
-    await _test_apply(db)
 
     # test dropping everything
     _orig_models = db._all_models

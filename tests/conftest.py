@@ -22,6 +22,7 @@
 
 import asyncio
 import shutil
+import warnings
 from pathlib import Path
 
 import pytest
@@ -29,15 +30,26 @@ import pytest
 from tests.database import Database
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 async def db():
     migrations = Path("tests/migrations")
-    if migrations.exists():
-        shutil.rmtree(migrations)
-    assert not migrations.exists()
 
-    db = Database(Path("tests/migrations"))
+    db = Database(migrations)
     await db.connect(database="apgorm_testing_database")
+
+    db.create_migrations()
+    if await db.must_apply_migrations():
+        await db.apply_migrations()
+    else:
+        warnings.warn(
+            "Unabled to test migrations. Please delete "
+            "and recreate the `apgorm_test_database` DB."
+        )
+
+    for m in db._all_models:
+        if m._tablename == "_migrations":
+            continue
+        await m.delete_query().execute()
 
     yield db
 
@@ -46,7 +58,7 @@ async def db():
         shutil.rmtree(migrations)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop

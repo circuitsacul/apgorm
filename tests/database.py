@@ -158,10 +158,18 @@ class Indexed(apgorm.Model):
     primary_key = (pk,)
 
 
+class User(apgorm.Model):
+    name = character.VarChar(32).field()
+    age = numeric.Int().nullablefield()
+
+    primary_key = (name,)
+
+
 class Database(apgorm.Database):
     primary_table = PrimaryModel
     referenced_table = Referenced
     indexed_table = Indexed
+    users = User
 
     indexes = [
         Index(Indexed, Indexed.ibtree, IndexType.BTREE),
