@@ -73,7 +73,9 @@ class LazyList(Generic[_IN, _OUT]):
         return len(self._data)
 
     def __repr__(self) -> str:
-        if len(self) > 5:
+        if len(self) == 5:
+            ddd = ", {}".format(repr(self[-1]))
+        elif len(self) > 5:
             ddd = ", ..., {}".format(repr(self[-1]))
         else:
             ddd = ""
