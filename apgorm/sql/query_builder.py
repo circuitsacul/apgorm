@@ -38,7 +38,7 @@ from apgorm.utils.lazy_list import LazyList
 from .generators.query import delete, insert, select, update
 from .sql import SQL, Block, and_, r, sql, wrap
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.connection import Connection
     from apgorm.model import Model
     from apgorm.types.boolean import Bool
@@ -63,7 +63,7 @@ class Query(Generic[_T]):
     def _get_block(self) -> Block:
         """Convert the data in the query builder to a Block."""
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 _S = TypeVar("_S", bound="FilterQueryBuilder")

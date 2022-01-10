@@ -40,7 +40,7 @@ class Constraint:
             Block: The raw SQL.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def _describe(self) -> DescribeConstraint:
         return DescribeConstraint(
