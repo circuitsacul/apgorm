@@ -58,7 +58,7 @@ class Query(Generic[_T]):
 
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         self.model = model
-        self.con = con or model._database
+        self.con = con or model.database
 
     def _get_block(self) -> Block:
         """Convert the data in the query builder to a Block."""
@@ -198,7 +198,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         """
 
         con = self.con if isinstance(self.con, Connection) else None
-        async with self.model._database.cursor(
+        async with self.model.database.cursor(
             *self._get_block().render(), con=con
         ) as cursor:
             async for res in cursor:

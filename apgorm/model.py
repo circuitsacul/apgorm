@@ -76,7 +76,7 @@ class Model:
 
     _tablename: str  # populated by Database
     """The name of the table, populated by Database."""
-    _database: Database  # populated by Database
+    database: Database  # populated by Database
     """The database instance, populated by Database."""
 
     primary_key: tuple[BaseField, ...]

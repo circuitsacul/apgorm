@@ -86,7 +86,7 @@ class Database:
             if not issubclass(attr, Model):
                 continue
 
-            attr._database = self
+            attr.database = self
             attr._tablename = attr_name
             self._all_models.append(attr)
 
