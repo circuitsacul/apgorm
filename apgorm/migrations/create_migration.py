@@ -233,6 +233,16 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         add_exclude_constraints.extend(_new)
         drop_exclude_constraints.extend(_drop)
 
+    for tablename, lasttable in last_tables.items():
+        if tablename in curr_tables:
+            continue
+        _, _drop = _handle_constraint_list(
+            tablename,
+            lasttable.fk_constraints,
+            [],
+        )
+        drop_fk_constraints.extend(_drop)
+
     # finalization
     migrations.extend(add_tables)
 
