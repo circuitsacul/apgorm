@@ -238,6 +238,8 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
 
     migrations.extend(drop_fk_constraints)
 
+    migrations.extend(drop_indexes)
+
     migrations.extend(drop_tables)
 
     migrations.extend(add_fields)
@@ -246,8 +248,6 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(drop_unique_constraints)
     migrations.extend(drop_check_constraints)
     migrations.extend(drop_exclude_constraints)
-
-    migrations.extend(drop_indexes)
 
     migrations.extend(drop_fields)
 
