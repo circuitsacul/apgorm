@@ -174,6 +174,13 @@ class Model:
 
         return self
 
+    async def refetch(self: _SELF, con: Connection | None = None) -> None:
+        """Updates the model instance by fetching changed values from the
+        database."""
+
+        res = await self.fetch(con, **self._pk_fields())
+        self._update_from_model(res)
+
     @classmethod
     async def exists(
         cls: Type[_SELF], con: Connection | None = None, /, **values

@@ -89,6 +89,16 @@ async def test_model(db: Database) -> None:
     )
     assert all([u.nickname.v == "nick" for u in all_users])
 
+    # test Model.refetch
+    orig = await User.fetch(name="Circuit")
+    assert orig.nickname.v == "therealcircuit"
+    await User.update_query().where(name="Circuit").set(
+        nickname="new nick"
+    ).execute()
+    assert orig.nickname.v == "therealcircuit"
+    await orig.refetch()
+    assert orig.nickname.v == "new nick"
+
     # test eq
     assert (await User.fetch(name="Circuit")) == (
         await User.fetch(name="Circuit")
