@@ -119,7 +119,7 @@ async def _main(db: Database):
 
 async def main():
     db = Database(Path("examples/subquery/migrations"))
-    await db.connect(database="apgorm")
+    await db.connect(database="apgorm_testing_database")
     try:
         await _main(db)
     finally:

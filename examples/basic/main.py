@@ -87,7 +87,7 @@ async def _main():
 
 async def main():
     db = Database(Path("examples/basic/migrations"))
-    await db.connect(database="apgorm")
+    await db.connect(database="apgorm_testing_database")
 
     if db.must_create_migrations():
         db.create_migrations()
