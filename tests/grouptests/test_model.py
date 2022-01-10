@@ -25,6 +25,7 @@ from __future__ import annotations
 import pytest
 
 from apgorm import Model
+from apgorm.exceptions import ModelNotFound
 from apgorm.undefined import UNDEF
 from tests.database import Database, User
 
@@ -74,5 +75,35 @@ async def test_model(db: Database):
     _circuit = await User.fetch(name="Circuit")
     assert _circuit.age.v == 712
 
+    # test update query
+    all_users = (
+        await User.fetch_query().where(User.name.neq("Circuit")).fetchmany()
+    )
+    assert all([u.age.v is None for u in all_users])
+
+    await User.update_query().where(User.name.neq("Circuit")).set(
+        age=0
+    ).execute()
+    all_users = (
+        await User.fetch_query().where(User.name.neq("Circuit")).fetchmany()
+    )
+    assert all([u.age.v == 0 for u in all_users])
+
     # test eq
-    assert circuit == _circuit
+    assert (await User.fetch(name="Circuit")) == (
+        await User.fetch(name="Circuit")
+    )
+
+    # test deletion
+    circuit = await User.fetch(name="Circuit")
+    await circuit.delete()
+    try:
+        await User.fetch(name="Circuit")
+    except ModelNotFound:
+        pass
+    else:
+        raise AssertionError("User wasn't deleted?")
+
+    # test deletion query
+    await User.delete_query().execute()
+    assert len(await User.fetch_query().fetchmany()) == 0
