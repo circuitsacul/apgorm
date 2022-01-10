@@ -26,6 +26,7 @@ import random
 from pathlib import Path
 
 import apgorm
+from apgorm import ManyToMany
 from apgorm.constraints import ForeignKey
 from apgorm.types import Int, Serial, VarChar
 
@@ -38,6 +39,10 @@ class User(apgorm.Model):
 
 class Game(apgorm.Model):
     id_ = Serial().field()
+
+    users = ManyToMany[User](
+        "id_", "players.gameid", "players.username", "users.name"
+    )
 
     primary_key = (id_,)
 
@@ -104,6 +109,12 @@ async def _main(db: Database):
         )
 
         print(" - " + "\n - ".join([repr(g) for g in _games]))
+
+    # for each game, get all the users (using the ManyToMany)
+    for g in all_games:
+        print(f"Users for game {g}:")
+        _users = await g.users.fetchmany()
+        print(" - " + "\n - ".join([repr(u) for u in _users]))
 
 
 async def main():

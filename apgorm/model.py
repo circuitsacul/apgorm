@@ -43,6 +43,7 @@ from .constraints import (
     PrimaryKey,
     Unique,
 )
+from .manytomany import ManyToMany
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
@@ -73,6 +74,7 @@ class Model:
 
     all_fields: dict[str, BaseField]
     all_constraints: dict[str, Constraint]
+    _all_mtm: dict[str, ManyToMany]
 
     _tablename: str  # populated by Database
     """The name of the table, populated by Database."""
@@ -118,6 +120,10 @@ class Model:
         )
 
         self.all_fields = copied_fields
+
+        for name, mtm in self._all_mtm.items():
+            mtm = mtm._generate_mtm(self)
+            setattr(self, name, mtm)
 
     async def delete(self: _SELF, con: Connection | None = None) -> _SELF:
         """Delete the model. Does not update the values of this model,
@@ -272,6 +278,7 @@ class Model:
     ) -> tuple[dict[str, BaseField], dict[str, Constraint]]:
         fields: dict[str, BaseField] = {}
         constraints: dict[str, Constraint] = {}
+        mtm: dict[str, ManyToMany] = {}
 
         for attr_name in dir(cls):
             try:
@@ -295,8 +302,12 @@ class Model:
                     )
                 constraints[attr_name] = attr
 
+            elif isinstance(attr, ManyToMany):
+                mtm[attr_name] = attr
+
         cls.all_fields = fields
         cls.all_constraints = constraints
+        cls._all_mtm = mtm
 
         return fields, constraints
 

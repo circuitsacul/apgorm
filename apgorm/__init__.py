@@ -23,12 +23,14 @@
 from . import constraints, exceptions, indexes, migrations, sql, types, utils
 from .converter import Converter
 from .database import Database
+from .manytomany import ManyToMany
 from .model import Model
 
 __all__ = (
     "Converter",
     "Model",
     "Database",
+    "ManyToMany",
     "constraints",
     "types",
     "migrations",
