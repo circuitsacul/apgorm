@@ -166,7 +166,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             python int).
 
         Returns:
-            list[Model]: The list of models matching the query.
+            LazyList[dict, Model]: The list of models matching the query.
         """
 
         if limit is not None and not isinstance(limit, int):
@@ -220,13 +220,8 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     async def execute(self) -> LazyList[dict, _T]:
         """Execute the deletion query.
 
-        Args:
-            return_models (bool): If True, will return the models that were
-            deleted.
-
         Returns:
-            list[Model] | None: List of models deleted if return_models is
-            True.
+            LazyList[dict, Model]: List of models deleted.
         """
 
         res = await self.con.fetchmany(*self._get_block().render())
@@ -267,12 +262,8 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     async def execute(self) -> LazyList[dict, _T]:
         """Execute the query.
 
-        Args:
-            return_models (bool): If True, will return list of models updated.
-
         Returns:
-            list[Model] | None: List of updated models if return_models is
-            True.
+            LazyList[dict, Model]: List of updated models.
         """
 
         res = await self.con.fetchmany(*self._get_block().render())
