@@ -57,9 +57,6 @@ async def db():
     yield db
 
     await db.cleanup()
-    return
-    if migrations.exists():
-        shutil.rmtree(migrations)
 
 
 @pytest.fixture(scope="package")
