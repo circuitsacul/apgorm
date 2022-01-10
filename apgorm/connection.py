@@ -41,9 +41,6 @@ class PoolAcquireContext:
     async def __aexit__(self, *exc) -> None:
         await self.pac.__aexit__(*exc)
 
-    async def __await__(self) -> Connection:
-        return Connection(await self.pac.__await__())
-
 
 class Pool:
     def __init__(self, pool: asyncpg.Pool) -> None:
