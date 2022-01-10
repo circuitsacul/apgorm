@@ -109,7 +109,7 @@ class Index:
         fields = [f.name for f in self.fields if isinstance(f, BaseField)]
         return "_{type_}_index_{table}__{cols}".format(
             type_=self.type_.name,
-            table=self.table._tablename,
+            table=self.table.tablename,
             cols="_".join(fields),
         ).lower()
 
@@ -125,7 +125,7 @@ class Index:
             (r("UNIQUE INDEX") if self.unique else r("INDEX")),
             r(self.get_name()),
             r("ON"),
-            r(self.table._tablename),
+            r(self.table.tablename),
             r("USING"),
             r(self.type_.name),
             r("("),

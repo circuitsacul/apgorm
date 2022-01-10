@@ -50,7 +50,7 @@ async def db():
         )
 
     for m in db._all_models:
-        if m._tablename == "_migrations":
+        if m.tablename == "_migrations":
             continue
         await m.delete_query().execute()
 

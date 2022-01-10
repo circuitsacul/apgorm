@@ -76,7 +76,7 @@ class Model:
     all_constraints: dict[str, Constraint]
     _all_mtm: dict[str, ManyToMany]
 
-    _tablename: str  # populated by Database
+    tablename: str  # populated by Database
     """The name of the table, populated by Database."""
     database: Database  # populated by Database
     """The database instance, populated by Database."""
@@ -240,7 +240,7 @@ class Model:
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
         pk.name = (
-            f"_{cls._tablename}_"
+            f"_{cls.tablename}_"
             + "{}".format("_".join([f.name for f in cls.primary_key]))
             + "_primary_key"
         )
@@ -263,7 +263,7 @@ class Model:
                 exclude.append(c._describe())
 
         return DescribeTable(
-            name=cls._tablename,
+            name=cls.tablename,
             fields=[f._describe() for f in cls.all_fields.values()],
             fk_constraints=fk,
             pk_constraint=cls._primary_key()._describe(),

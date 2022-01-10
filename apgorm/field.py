@@ -102,7 +102,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
     def full_name(self) -> str:
         """The full name of the field (`tablename.fieldname`)."""
 
-        return f"{self.model._tablename}.{self.name}"
+        return f"{self.model.tablename}.{self.name}"
 
     def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
         """Add a validator to the value of this field."""
