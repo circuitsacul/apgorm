@@ -32,7 +32,7 @@ from apgorm.undefined import UNDEF
 
 from .migration import Migration
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .describe import Describe
 
 

@@ -29,7 +29,7 @@ from apgorm.sql.sql import SQL, Block, join, r, wrap
 from apgorm.types.boolean import Bool
 from apgorm.undefined import UNDEF
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.model import Model
 
 

@@ -28,7 +28,7 @@ from apgorm.sql.sql import Block, r
 
 from .constraint import Constraint
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.types.boolean import Bool
 
 

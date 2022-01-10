@@ -51,11 +51,11 @@ class LazyList(Generic[_IN, _OUT]):
 
     @overload
     def __getitem__(self, index: int) -> _OUT:
-        ...
+        ...  # pragma: no cover
 
     @overload
     def __getitem__(self, index: slice) -> LazyList[_IN, _OUT]:
-        ...
+        ...  # pragma: no cover
 
     def __getitem__(self, index: int | slice) -> LazyList[_IN, _OUT] | _OUT:
         if isinstance(index, int):

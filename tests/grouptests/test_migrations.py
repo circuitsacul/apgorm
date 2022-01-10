@@ -22,36 +22,47 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import pytest
 
-from apgorm.sql.sql import Block, join, r
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.field import BaseField
+from tests.database import Database
 
 
-class Unique(Constraint):
-    def __init__(self, *fields: BaseField | Block) -> None:
-        """Specify a unique constraint for a table.
+def _test_create(db: Database):
+    assert db.must_create_migrations()
+    db.create_migrations()
+    assert not db.must_create_migrations()
 
-        ```
-        class User(Model):
-            ...
-            nickname = VarChar(32).field()
-            nickname_unique = Unique(nickname)
-            ...
-        ```
-        """
-        self.fields = fields
 
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("UNIQUE ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
-        )
+async def _test_apply(db: Database):
+    assert await db.must_apply_migrations()
+    await db.apply_migrations()
+    assert not await db.must_apply_migrations()
+
+
+@pytest.mark.asyncio
+async def test_migrations(db: Database):
+    if len(await db._migrations.fetch_query().fetchmany()) > 1:
+        return
+
+    # test dropping everything
+    _orig_models = db._all_models
+    _orig_indexes = db.indexes
+
+    db._all_models = [db._migrations]  # we need to keep this table
+    db.indexes = []
+
+    _test_create(db)
+    await _test_apply(db)
+
+    # test adding everything back
+    db._all_models = _orig_models
+    db.indexes = _orig_indexes
+
+    _test_create(db)
+    await _test_apply(db)
+
+    # make sure migrations exist
+    assert len(db.load_all_migrations()) == 3
+    lm = db.load_last_migration()
+    assert lm is not None
+    assert lm.migration_id == 2

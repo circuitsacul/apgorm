@@ -19,39 +19,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-from apgorm.sql.sql import Block, join, r
-
-from .constraint import Constraint
-
-if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.field import BaseField
-
-
-class Unique(Constraint):
-    def __init__(self, *fields: BaseField | Block) -> None:
-        """Specify a unique constraint for a table.
-
-        ```
-        class User(Model):
-            ...
-            nickname = VarChar(32).field()
-            nickname_unique = Unique(nickname)
-            ...
-        ```
-        """
-        self.fields = fields
-
-    def creation_sql(self) -> Block:
-        return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("UNIQUE ("),
-            join(r(","), *self.fields),
-            r(")"),
-            wrap=True,
-        )
