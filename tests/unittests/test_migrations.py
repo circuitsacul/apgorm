@@ -24,24 +24,62 @@ from __future__ import annotations
 
 import warnings
 
+import asyncpg
 import pytest
 
 from tests.database import Database
 
 
-@pytest.mark.asyncio
-async def test_create_migrations(db: Database):
+def _test_create(db: Database):
     assert db.must_create_migrations()
     db.create_migrations()
     assert not db.must_create_migrations()
 
 
-@pytest.mark.asyncio
-async def test_apply_initial_migrations(db: Database):
-    if await db.must_apply_migrations():
-        await db.apply_migrations()
-    else:
-        warnings.warn("Could not test application of migrations.")
+async def _test_apply(db: Database):
+    assert await db.must_apply_migrations()
+    await db.apply_migrations()
     assert not await db.must_apply_migrations()
 
     # test that all fields for primar
+
+
+@pytest.mark.asyncio
+async def test_migrations(db: Database):
+    try:
+        await db._migrations.fetch_query().fetchmany()
+    except asyncpg.UndefinedTableError:
+        pass
+    else:
+        warnings.warn(
+            "Unable to test migrations. Please delete and recreate the"
+            "`apgorm_testing_database` database."
+        )
+        return
+
+    # initial migration
+    _test_create(db)
+    await _test_apply(db)
+
+    # test dropping everything
+    _orig_models = db._all_models
+    _orig_indexes = db.indexes
+
+    db._all_models = [db._migrations]  # we need to keep this table
+    db.indexes = []
+
+    _test_create(db)
+    await _test_apply(db)
+
+    # test adding everything back
+    db._all_models = _orig_models
+    db.indexes = _orig_indexes
+
+    _test_create(db)
+    await _test_apply(db)
+
+    # make sure migrations exist
+    assert len(db.load_all_migrations()) == 3
+    lm = db.load_last_migration()
+    assert lm is not None
+    assert lm.migration_id == 2

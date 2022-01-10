@@ -31,6 +31,7 @@ import asyncpg
 from asyncpg import BitString
 
 import apgorm
+from apgorm.indexes import Index, IndexType
 from apgorm.types import (
     array,
     binary,
@@ -142,6 +143,31 @@ class Referenced(apgorm.Model):
     primary_key = (serial,)
 
 
+class Indexed(apgorm.Model):
+    pk = numeric.Serial().field()
+
+    ibtree = numeric.Int().field(default=1)
+    ihash = numeric.Int().field(default=1)
+
+    igist = geometric.Point().field(default=asyncpg.Point(1, 1))
+    ispgist = geometric.Point().field(default=asyncpg.Point(1, 1))
+
+    igin = array.Array(numeric.Int()).field(default=[1, 2, 3])
+    ibrin = numeric.Int().field(default=1)
+
+    primary_key = (pk,)
+
+
 class Database(apgorm.Database):
     primary_table = PrimaryModel
     referenced_table = Referenced
+    indexed_table = Indexed
+
+    indexes = [
+        Index(Indexed, Indexed.ibtree, IndexType.BTREE),
+        Index(Indexed, Indexed.ihash, IndexType.HASH),
+        Index(Indexed, Indexed.igist, IndexType.GIST),
+        Index(Indexed, Indexed.ispgist, IndexType.SPGIST),
+        Index(Indexed, Indexed.igin, IndexType.GIN),
+        Index(Indexed, Indexed.ibrin, IndexType.BRIN),
+    ]
