@@ -47,8 +47,8 @@ class Action(Enum):
 class ForeignKey(Constraint):
     def __init__(
         self,
-        fields: Sequence[Block | BaseField],
-        ref_fields: Sequence[Block | BaseField],
+        fields: Sequence[Block | BaseField] | Block | BaseField,
+        ref_fields: Sequence[Block | BaseField] | Block | BaseField,
         ref_table: Block | None = None,
         match_full: bool = False,
         on_delete: Action = Action.CASCADE,
@@ -75,19 +75,21 @@ class ForeignKey(Constraint):
         Raises:
             BadArgument: Bad arguments were sent to ForeignKey.
         """
-        self.fields = fields
-        self.ref_fields = ref_fields
+        self.fields = fields if isinstance(fields, Sequence) else [fields]
+        self.ref_fields = (
+            ref_fields if isinstance(ref_fields, Sequence) else [ref_fields]
+        )
         self.ref_table = ref_table
         self.match_full = match_full
         self.on_delete = on_delete
         self.on_update = on_update
 
-        if len(ref_fields) != len(fields):
+        if len(self.ref_fields) != len(self.fields):
             raise BadArgument(
                 "Must have same number of fields and ref_fields."
             )
 
-        if len(fields) == 0:
+        if len(self.fields) == 0:
             raise BadArgument("Must specify at least on field and ref_field.")
 
     def creation_sql(self) -> Block:

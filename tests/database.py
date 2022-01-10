@@ -206,8 +206,8 @@ class Player(apgorm.Model):
     username = character.VarChar(32).field()
     gameid = numeric.Int().field()
 
-    username_fk = ForeignKey([username], [User.name])
-    gameid_fk = ForeignKey([gameid], [Game.gameid])
+    username_fk = ForeignKey(username, User.name)
+    gameid_fk = ForeignKey(gameid, Game.gameid)
 
     primary_key = (
         username,

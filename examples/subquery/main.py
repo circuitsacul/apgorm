@@ -46,8 +46,8 @@ class Player(apgorm.Model):
     username = VarChar(32).field()
     gameid = Int().field()
 
-    username_fk = ForeignKey([username], [User.name])
-    gameid_fk = ForeignKey([gameid], [Game.id_])
+    username_fk = ForeignKey(username, User.name)
+    gameid_fk = ForeignKey(gameid, Game.id_)
 
     primary_key = (
         username,
