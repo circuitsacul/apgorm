@@ -175,6 +175,28 @@ class Model:
         return self
 
     @classmethod
+    async def exists(
+        cls: Type[_SELF], con: Connection | None = None, /, **values
+    ) -> _SELF | None:
+        """Check if a model with the given values exists.
+
+        ```
+        assert (await User.exists(nickname=None)) is not None
+        ```
+
+        This method can also be used to get the `model or None`, whereas
+        `.fetch()` will raise an exception if the model does not exist.
+
+        Returns:
+            Model | None: The model if it existed, otherwise None.
+        """
+
+        try:
+            return await cls.fetch(con, **values)
+        except ModelNotFound:
+            return None
+
+    @classmethod
     async def fetch(
         cls: Type[_SELF],
         con: Connection | None = None,

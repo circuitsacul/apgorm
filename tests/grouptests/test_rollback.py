@@ -43,6 +43,4 @@ async def test_rollback(db: Database) -> None:
     except Exception:
         pass
 
-    assert (
-        await db.users.fetch_query().where(name="Circuit").fetchone()
-    ) is None
+    assert await db.users.exists(name="Circuit") is None
