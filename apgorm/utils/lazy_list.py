@@ -66,9 +66,6 @@ class LazyList(Generic[_IN, _OUT]):
         for r in self._data:
             yield self._converter(r)
 
-    def __list__(self) -> list[_OUT]:
-        return self._convert()
-
     def __len__(self) -> int:
         return len(self._data)
 
