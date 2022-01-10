@@ -160,19 +160,9 @@ class User(apgorm.Model):
 
     primary_key = (name,)
 
-    async def games(self) -> LazyList[dict, Game]:
-        return (
-            await Game.fetch_query()
-            .where(
-                Player.fetch_query()
-                .where(
-                    username=self.name.v,
-                    gameid=Game.gameid,
-                )
-                .exists()
-            )
-            .fetchmany()
-        )
+    games = apgorm.ManyToMany["Game"](
+        "name", "players.username", "players.gameid", "games.gameid"
+    )
 
     async def players(self) -> LazyList[dict, Player]:
         return (
@@ -185,20 +175,13 @@ class Game(apgorm.Model):
 
     primary_key = (gameid,)
 
+    users = apgorm.ManyToMany["User"](
+        "gameid", "players.gameid", "players.username", "users.name"
+    )
+
     async def players(self) -> LazyList[dict, Player]:
         return (
             await Player.fetch_query().where(gameid=self.gameid.v).fetchmany()
-        )
-
-    async def users(self) -> LazyList[dict, User]:
-        return (
-            await User.fetch_query()
-            .where(
-                Player.fetch_query()
-                .where(username=User.name, gameid=self.gameid.v)
-                .exists()
-            )
-            .fetchmany()
         )
 
 
