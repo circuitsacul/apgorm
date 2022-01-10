@@ -24,6 +24,7 @@ import asyncio
 import shutil
 import warnings
 from pathlib import Path
+from typing import AsyncGenerator, Generator
 
 import pytest
 
@@ -31,7 +32,7 @@ from tests.database import Database
 
 
 @pytest.fixture(scope="package")
-async def db():
+async def db() -> AsyncGenerator[Database, None]:
     migrations = Path("tests/migrations")
 
     if migrations.exists():
@@ -60,7 +61,7 @@ async def db():
 
 
 @pytest.fixture(scope="package")
-def event_loop():
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()

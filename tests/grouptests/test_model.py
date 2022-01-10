@@ -44,7 +44,7 @@ def _valid_model(model: Model) -> bool:
 
 
 @pytest.mark.asyncio
-async def test_model(db: Database):
+async def test_model(db: Database) -> None:
     # test basic creation
     names = ["Circuit", "User 5", "Unamed", "James"]
     for n in names:

@@ -27,20 +27,20 @@ import pytest
 from tests.database import Database
 
 
-def _test_create(db: Database):
+def _test_create(db: Database) -> None:
     assert db.must_create_migrations()
     db.create_migrations()
     assert not db.must_create_migrations()
 
 
-async def _test_apply(db: Database):
+async def _test_apply(db: Database) -> None:
     assert await db.must_apply_migrations()
     await db.apply_migrations()
     assert not await db.must_apply_migrations()
 
 
 @pytest.mark.asyncio
-async def test_migrations(db: Database):
+async def test_migrations(db: Database) -> None:
     if len(await db._migrations.fetch_query().fetchmany()) > 1:
         return
 
