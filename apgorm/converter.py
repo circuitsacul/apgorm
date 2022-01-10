@@ -36,13 +36,13 @@ class Converter(Generic[_ORIG, _CONV]):
         """Take the value given by the database and convert it to the type
         used in your code."""
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def to_stored(self, value: _CONV) -> _ORIG:
         """Take the type used by your code and convert it to the type
         used to store the value in the database."""
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 _INTEF = TypeVar("_INTEF", IntEnum, IntFlag)

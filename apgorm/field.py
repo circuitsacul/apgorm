@@ -35,7 +35,7 @@ from apgorm.sql.sql import Comparable, r
 from apgorm.undefined import UNDEF
 from apgorm.validator import Validator
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.model import Model
     from apgorm.sql.sql import Block
 
@@ -92,11 +92,11 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             Probably means that the model has not been created.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @v.setter
     def v(self, other: _C):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def full_name(self) -> str:

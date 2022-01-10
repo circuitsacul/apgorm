@@ -29,7 +29,7 @@ from apgorm.sql.sql import Block, join, r, wrap
 
 from .constraint import Constraint
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.field import BaseField
     from apgorm.types.boolean import Bool
 

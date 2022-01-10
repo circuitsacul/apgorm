@@ -44,7 +44,7 @@ from .constraints import (
     Unique,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
     from .database import Database
 

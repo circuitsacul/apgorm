@@ -28,7 +28,7 @@ import asyncpg
 
 from apgorm.exceptions import MigrationAlreadyApplied, ModelNotFound
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.database import Database
 
     from .migration import Migration

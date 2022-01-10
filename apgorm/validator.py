@@ -29,4 +29,4 @@ _T = TypeVar("_T", contravariant=True)
 
 class Validator(Protocol, Generic[_T]):
     def __call__(self, value: _T) -> bool:
-        ...
+        ...  # pragma: no cover

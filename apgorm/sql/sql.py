@@ -34,11 +34,11 @@ from typing import (
     overload,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.field import BaseField
     from apgorm.types.base_type import SqlType
     from apgorm.types.boolean import Bool
-    from apgorm.types.numeric import NUMBER, Int  # noqa
+    from apgorm.types.numeric import Int  # noqa
 
 _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
@@ -210,7 +210,7 @@ class _Func(Generic[_SQLT]):
 
 class Comparable:
     def _get_block(self) -> Block:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def cast(self, type_: _SQLT) -> Block[_SQLT]:
         return wrap(self._get_block(), r("::"), r(type_.sql))

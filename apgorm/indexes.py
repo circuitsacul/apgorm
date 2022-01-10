@@ -31,7 +31,7 @@ from apgorm.field import BaseField
 from apgorm.migrations.describe import DescribeIndex
 from apgorm.sql.sql import Block, join, r, wrap
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from apgorm.model import Model
 
 
