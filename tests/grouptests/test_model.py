@@ -69,25 +69,25 @@ async def test_model(db: Database):
     )
 
     # test saving
-    circuit.age.v = 712
+    circuit.nickname.v = "therealcircuit"
     await circuit.save()
 
     _circuit = await User.fetch(name="Circuit")
-    assert _circuit.age.v == 712
+    assert _circuit.nickname.v == "therealcircuit"
 
     # test update query
     all_users = (
         await User.fetch_query().where(User.name.neq("Circuit")).fetchmany()
     )
-    assert all([u.age.v is None for u in all_users])
+    assert all([u.nickname.v is None for u in all_users])
 
     await User.update_query().where(User.name.neq("Circuit")).set(
-        age=0
+        nickname="nick"
     ).execute()
     all_users = (
         await User.fetch_query().where(User.name.neq("Circuit")).fetchmany()
     )
-    assert all([u.age.v == 0 for u in all_users])
+    assert all([u.nickname.v == "nick" for u in all_users])
 
     # test eq
     assert (await User.fetch(name="Circuit")) == (

@@ -31,6 +31,7 @@ import asyncpg
 from asyncpg import BitString
 
 import apgorm
+from apgorm.constraints import ForeignKey
 from apgorm.indexes import Index, IndexType
 from apgorm.types import (
     array,
@@ -47,6 +48,7 @@ from apgorm.types import (
     uuid_type,
     xml_type,
 )
+from apgorm.utils import LazyList
 
 
 class PrimaryModel(apgorm.Model):
@@ -137,12 +139,6 @@ class PrimaryModel(apgorm.Model):
     )
 
 
-class Referenced(apgorm.Model):
-    serial = numeric.Serial().field()
-
-    primary_key = (serial,)
-
-
 class Indexed(apgorm.Model):
     pk = numeric.Serial().field()
 
@@ -160,16 +156,71 @@ class Indexed(apgorm.Model):
 
 class User(apgorm.Model):
     name = character.VarChar(32).field()
-    age = numeric.Int().nullablefield()
+    nickname = character.VarChar(32).nullablefield()
 
     primary_key = (name,)
+
+    async def games(self) -> LazyList[dict, Game]:
+        return (
+            await Game.fetch_query()
+            .where(
+                Player.fetch_query()
+                .where(
+                    username=self.name.v,
+                    gameid=Game.gameid,
+                )
+                .exists()
+            )
+            .fetchmany()
+        )
+
+    async def players(self) -> LazyList[dict, Player]:
+        return (
+            await Player.fetch_query().where(username=self.name.v).fetchmany()
+        )
+
+
+class Game(apgorm.Model):
+    gameid = numeric.Serial().field()
+
+    primary_key = (gameid,)
+
+    async def players(self) -> LazyList[dict, Player]:
+        return (
+            await Player.fetch_query().where(gameid=self.gameid.v).fetchmany()
+        )
+
+    async def users(self) -> LazyList[dict, User]:
+        return (
+            await User.fetch_query()
+            .where(
+                Player.fetch_query()
+                .where(username=User.name, gameid=self.gameid.v)
+                .exists()
+            )
+            .fetchmany()
+        )
+
+
+class Player(apgorm.Model):
+    username = character.VarChar(32).field()
+    gameid = numeric.Int().field()
+
+    username_fk = ForeignKey([username], [User.name])
+    gameid_fk = ForeignKey([gameid], [Game.gameid])
+
+    primary_key = (
+        username,
+        gameid,
+    )
 
 
 class Database(apgorm.Database):
     primary_table = PrimaryModel
-    referenced_table = Referenced
     indexed_table = Indexed
     users = User
+    games = Game
+    players = Player
 
     indexes = [
         Index(Indexed, Indexed.ibtree, IndexType.BTREE),

@@ -34,6 +34,9 @@ from tests.database import Database
 async def db():
     migrations = Path("tests/migrations")
 
+    if migrations.exists():
+        shutil.rmtree(migrations)
+
     db = Database(migrations)
     await db.connect(database="apgorm_testing_database")
 
@@ -54,6 +57,7 @@ async def db():
     yield db
 
     await db.cleanup()
+    return
     if migrations.exists():
         shutil.rmtree(migrations)
 
