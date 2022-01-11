@@ -20,44 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+
 import asyncio
-import shutil
-import warnings
-from pathlib import Path
-from typing import AsyncGenerator, Generator
+from typing import Generator
 
 import pytest
-
-from tests.database import Database
-
-
-@pytest.fixture(scope="package")
-async def db() -> AsyncGenerator[Database, None]:
-    migrations = Path("tests/migrations")
-
-    if migrations.exists():
-        shutil.rmtree(migrations)
-
-    db = Database(migrations)
-    await db.connect(database="apgorm_testing_database")
-
-    db.create_migrations()
-    if await db.must_apply_migrations():
-        await db.apply_migrations()
-    else:
-        warnings.warn(
-            "Unabled to test migrations. Please delete "
-            "and recreate the `apgorm_test_database` DB."
-        )
-
-    for m in db._all_models:
-        if m.tablename == "_migrations":
-            continue
-        await m.delete_query().execute()
-
-    yield db
-
-    await db.cleanup()
 
 
 @pytest.fixture(scope="package")
