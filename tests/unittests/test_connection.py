@@ -106,11 +106,12 @@ async def test_pool(mocker, async_mocked_con):
 
     pool = Pool(mocked_pool)
 
-    async with pool.acquire():
+    async with pool.acquire() as yielded_con:
         pass
 
     pool.close()
 
+    assert yielded_con.con is async_mocked_con
     mocked_pool.acquire.assert_called_once()
     mocked_pool.close.assert_called_once()
     mocked_pac.__aenter__.assert_called_once()
