@@ -23,13 +23,12 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from apgorm.converter import Converter
+from apgorm import Converter, Field
 from apgorm.exceptions import (
     BadArgument,
     InvalidFieldValue,
     UndefinedFieldValue,
 )
-from apgorm.field import Field
 
 
 @pytest.fixture(scope="function")

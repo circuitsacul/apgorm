@@ -22,10 +22,8 @@
 
 from __future__ import annotations
 
-from apgorm.database import Database
+from apgorm import Database, Index, IndexType, Model
 from apgorm.exceptions import BadArgument
-from apgorm.indexes import Index, IndexType
-from apgorm.model import Model
 from apgorm.types import VarChar
 
 

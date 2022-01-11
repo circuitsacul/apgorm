@@ -24,8 +24,7 @@ from __future__ import annotations
 
 import pytest
 
-from apgorm.connection import Connection, Pool
-from apgorm.utils.lazy_list import LazyList
+from apgorm import Connection, LazyList, Pool
 
 
 @pytest.fixture

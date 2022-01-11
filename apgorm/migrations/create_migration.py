@@ -25,11 +25,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from apgorm.migrations.describe import DescribeConstraint
 from apgorm.sql.generators import alter
 from apgorm.sql.sql import r
 from apgorm.undefined import UNDEF
 
+from .describe import DescribeConstraint
 from .migration import Migration
 
 if TYPE_CHECKING:  # pragma: no cover

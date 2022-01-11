@@ -26,13 +26,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Sequence, Type
 
-from apgorm.exceptions import BadArgument
-from apgorm.field import BaseField
-from apgorm.migrations.describe import DescribeIndex
-from apgorm.sql.sql import Block, join, r, wrap
+from .exceptions import BadArgument
+from .field import BaseField
+from .migrations.describe import DescribeIndex
+from .sql.sql import Block, join, r, wrap
 
 if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.model import Model
+    from .model import Model
 
 
 @dataclass

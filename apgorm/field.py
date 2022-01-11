@@ -24,21 +24,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, Generic, Type, TypeVar
 
-from apgorm.converter import Converter
-from apgorm.exceptions import (
-    BadArgument,
-    InvalidFieldValue,
-    UndefinedFieldValue,
-)
-from apgorm.migrations.describe import DescribeField
-from apgorm.sql.sql import Comparable, r
-from apgorm.undefined import UNDEF
-from apgorm.validator import Validator
+from .converter import Converter
+from .exceptions import BadArgument, InvalidFieldValue, UndefinedFieldValue
+from .migrations.describe import DescribeField
+from .sql.sql import Comparable, r
+from .undefined import UNDEF
+from .validator import Validator
 
 if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.model import Model
-    from apgorm.sql.sql import Block
-
+    from .model import Model
+    from .sql.sql import Block
     from .types.base_type import SqlType
 
 

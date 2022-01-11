@@ -30,17 +30,16 @@ from typing import Any, AsyncGenerator, Sequence, Type
 import asyncpg
 from asyncpg.cursor import CursorFactory
 
-from apgorm.exceptions import NoMigrationsToCreate
-from apgorm.migrations import describe
-from apgorm.migrations.applied_migration import AppliedMigration
-from apgorm.migrations.apply_migration import apply_migration
-from apgorm.migrations.create_migration import create_next_migration
-from apgorm.migrations.migration import Migration
-from apgorm.utils.lazy_list import LazyList
-
 from .connection import Connection, Pool
+from .exceptions import NoMigrationsToCreate
 from .indexes import Index
+from .migrations import describe
+from .migrations.applied_migration import AppliedMigration
+from .migrations.apply_migration import apply_migration
+from .migrations.create_migration import create_next_migration
+from .migrations.migration import Migration
 from .model import Model
+from .utils.lazy_list import LazyList
 
 
 class Database:

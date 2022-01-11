@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from enum import IntEnum, IntFlag
 
-from apgorm.converter import IntEFConverter
+from apgorm import IntEFConverter
 
 
 class IE(IntEnum):

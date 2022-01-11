@@ -25,10 +25,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, cast
 
 if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.connection import Connection
-    from apgorm.field import Field
-    from apgorm.model import Model
-    from apgorm.utils import LazyList
+    from .connection import Connection
+    from .field import Field
+    from .model import Model
+    from .utils.lazy_list import LazyList
 
 
 _REF = TypeVar("_REF", bound="Model")

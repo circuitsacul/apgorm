@@ -26,8 +26,7 @@ import random
 from pathlib import Path
 
 import apgorm
-from apgorm import ManyToMany
-from apgorm.constraints import ForeignKey
+from apgorm import ForeignKey, ManyToMany
 from apgorm.types import Int, Serial, VarChar
 
 

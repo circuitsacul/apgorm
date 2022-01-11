@@ -33,7 +33,7 @@ from apgorm.sql.sql import Block, join, r
 from .constraint import Constraint
 
 
-class Action(Enum):
+class ForeignKeyAction(Enum):
     """Action for ON UPDATE or ON DELETE of ForeignKey."""
 
     CASCADE = "CASCADE"
@@ -51,8 +51,8 @@ class ForeignKey(Constraint):
         ref_fields: Sequence[Block | BaseField] | Block | BaseField,
         ref_table: Block | None = None,
         match_full: bool = False,
-        on_delete: Action = Action.CASCADE,
-        on_update: Action = Action.CASCADE,
+        on_delete: ForeignKeyAction = ForeignKeyAction.CASCADE,
+        on_update: ForeignKeyAction = ForeignKeyAction.CASCADE,
     ) -> None:
         """Specify a ForeignKey constraint for a table.
 

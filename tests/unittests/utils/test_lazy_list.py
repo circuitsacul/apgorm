@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from apgorm.utils.lazy_list import LazyList
+from apgorm import LazyList
 
 
 def test_lazy_list():

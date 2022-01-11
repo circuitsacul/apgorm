@@ -24,26 +24,23 @@ from __future__ import annotations, print_function
 
 from typing import TYPE_CHECKING, Any, Type, TypeVar
 
-from apgorm.exceptions import ModelNotFound, SpecifiedPrimaryKey
-from apgorm.field import BaseField, ConverterField
-from apgorm.migrations.describe import DescribeConstraint, DescribeTable
-from apgorm.sql.query_builder import (
+from .constraints.check import Check
+from .constraints.constraint import Constraint
+from .constraints.exclude import Exclude
+from .constraints.foreign_key import ForeignKey
+from .constraints.primary_key import PrimaryKey
+from .constraints.unique import Unique
+from .exceptions import ModelNotFound, SpecifiedPrimaryKey
+from .field import BaseField, ConverterField
+from .manytomany import ManyToMany
+from .migrations.describe import DescribeConstraint, DescribeTable
+from .sql.query_builder import (
     DeleteQueryBuilder,
     FetchQueryBuilder,
     InsertQueryBuilder,
     UpdateQueryBuilder,
 )
-from apgorm.undefined import UNDEF
-
-from .constraints import (
-    Check,
-    Constraint,
-    Exclude,
-    ForeignKey,
-    PrimaryKey,
-    Unique,
-)
-from .manytomany import ManyToMany
+from .undefined import UNDEF
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
