@@ -67,6 +67,15 @@ class Model:
         users = User
         ...
     ```
+
+    Use Model() to create an instance of the model. There are two reasons you
+    might do this:
+        1. You used `Database.fetch...` directly instead of `Model.fetch`, and
+        you want to convert the result to a model.
+        2. You want to create a new model (`Model(**values).create()`).
+
+    If you wish to fetch an existing model, please use `Model.fetch` or
+    `Model.fetch_query`.
     """
 
     all_fields: dict[str, BaseField]
@@ -82,15 +91,6 @@ class Model:
     """The primary key for the model. All models MUST have a primary key."""
 
     def __init__(self, **values) -> None:
-        """Create an instance of the model. There are two reasons you might do this:
-         1. You used `Database.fetch...` directly instead of
-         `Model.fetch`, and you want to convert the result to a model.
-         2. You want to create a new model (`Model(**values).create()`).
-
-        If you wish to fetch an existing model, please use `Model.fetch` or
-        `Model.fetch_query`.
-        """
-
         copied_fields: dict[str, BaseField] = {}
 
         for f in self.all_fields.values():
