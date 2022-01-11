@@ -79,7 +79,7 @@ def _handle_constraint_list(
 
 
 def create_next_migration(cd: Describe, folder: Path) -> str | None:
-    lm = Migration.load_last_migration(folder)
+    lm = Migration._load_last_migration(folder)
 
     curr_tables = {t.name: t for t in cd.tables}
     last_tables = {t.name: t for t in lm.describe.tables} if lm else {}

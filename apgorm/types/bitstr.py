@@ -39,9 +39,9 @@ class Bit(SqlType[asyncpg.BitString]):
 
     def __init__(self, length: int | None = None) -> None:
         self._length = length
-        self.sql = "BIT"
+        self._sql = "BIT"
         if length is not None:
-            self.sql += f"({length})"
+            self._sql += f"({length})"
 
     @property
     def length(self) -> int | None:
@@ -69,9 +69,9 @@ class VarBit(SqlType[asyncpg.BitString]):
         """
 
         self._max_length = max_length
-        self.sql = "VARBIT"
+        self._sql = "VARBIT"
         if max_length is not None:
-            self.sql += f"({max_length})"
+            self._sql += f"({max_length})"
 
     @property
     def max_length(self) -> int | None:

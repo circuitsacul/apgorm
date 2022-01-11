@@ -34,7 +34,7 @@ _S = TypeVar("_S", bound="SqlType", covariant=True)
 class SqlType(Generic[_T]):
     """Base type for all SQL types."""
 
-    sql: str
+    _sql: str
     """The raw sql for the type."""
 
     def field(

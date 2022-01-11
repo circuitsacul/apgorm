@@ -39,9 +39,9 @@ class Timestamp(SqlType[datetime.datetime]):
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
-        self.sql = "TIMESTAMP"
+        self._sql = "TIMESTAMP"
         if precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
 
     @property
     def precision(self) -> int | None:
@@ -65,9 +65,9 @@ class TimestampTZ(SqlType[datetime.datetime]):
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
-        self.sql = "TIMESTAMPTZ"
+        self._sql = "TIMESTAMPTZ"
         if precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
 
     @property
     def precision(self) -> int | None:
@@ -91,9 +91,9 @@ class Time(SqlType[datetime.time]):
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
-        self.sql = "TIME"
+        self._sql = "TIME"
         if precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
 
     @property
     def precision(self) -> int | None:
@@ -117,9 +117,9 @@ class TimeTZ(SqlType[datetime.time]):
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
-        self.sql = "TIMETZ"
+        self._sql = "TIMETZ"
         if precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
 
     @property
     def precision(self) -> int | None:
@@ -138,7 +138,7 @@ class Date(SqlType[datetime.date]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    sql = "DATE"
+    _sql = "DATE"
 
 
 class IntervalField(Enum):
@@ -176,11 +176,11 @@ class Interval(SqlType[datetime.timedelta]):
         self._interval_field = interval_field
         self._precision = precision
 
-        self.sql = "INTERVAL"
+        self._sql = "INTERVAL"
         if interval_field is not None:
-            self.sql += " " + interval_field.value
+            self._sql += " " + interval_field.value
         if precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
 
     @property
     def interval_field(self) -> IntervalField | None:

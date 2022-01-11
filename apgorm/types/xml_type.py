@@ -31,4 +31,4 @@ class XML(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-xml.html
     """
 
-    sql = "XML"
+    _sql = "XML"

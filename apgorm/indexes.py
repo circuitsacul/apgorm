@@ -54,7 +54,28 @@ class IndexType(Enum):
 
 
 class Index:
-    """Represents an index for a table."""
+    """Represents an index for a table.
+
+    Must be added to Database.indexes before the database is initialized. For
+    example:
+    ```
+    class MyDatabase(Database):
+        ...
+
+        indexes = [Index(...), Index(...), ...]
+    ```
+
+    Args:
+        table (Type[Model]): The table this index is for.
+        fields (Sequence[BaseField): A list of fields that this index is for.
+        type_ (IndexType, optional): The index type. Defaults to
+        IndexType.BTREE.
+        unique (bool, optional): Whether or not the index should be unique
+        (BTREE only). Defaults to False.
+
+    Raises:
+        BadArgument: Bad arguments were passed to Index.
+    """
 
     def __init__(
         self,
@@ -63,28 +84,6 @@ class Index:
         type_: IndexType = IndexType.BTREE,
         unique: bool = False,
     ) -> None:
-        """Create an index. Must be added to Database.indexes before the
-        database is initialized. For example:
-        ```
-        class MyDatabase(Database):
-            ...
-
-            indexes = [Index(...), Index(...), ...]
-        ```
-
-        Args:
-            table (Type[Model]): The table this index is for.
-            fields (Sequence[BaseField): A list of fields that this index is
-            for.
-            type_ (IndexType, optional): The index type. Defaults to
-            IndexType.BTREE.
-            unique (bool, optional): Whether or not the index should be unique
-            (BTREE only). Defaults to False.
-
-        Raises:
-            BadArgument: Bad arguments were passed to Index.
-        """
-
         self.type_: _IndexType = type_.value
         if isinstance(fields, (Block, BaseField)):
             fields = [fields]
@@ -104,7 +103,11 @@ class Index:
             )
 
     def get_name(self) -> str:
-        """Create a name based on the type, table, and fields of the index."""
+        """Create a name based on the type, table, and fields of the index.
+
+        Returns:
+            str: The name.
+        """
 
         fields = [f.name for f in self.fields if isinstance(f, BaseField)]
         return "_{type_}_index_{table}__{cols}".format(
@@ -113,9 +116,7 @@ class Index:
             cols="_".join(fields),
         ).lower()
 
-    def creation_sql(self) -> Block:
-        """The raw sql for the index."""
-
+    def _creation_sql(self) -> Block:
         names = [
             wrap(f) if isinstance(f, Block) else wrap(r(f.name))
             for f in self.fields
@@ -136,5 +137,5 @@ class Index:
     def _describe(self) -> DescribeIndex:
         return DescribeIndex(
             name=self.get_name(),
-            raw_sql=self.creation_sql().render_no_params(),
+            raw_sql=self._creation_sql().render_no_params(),
         )

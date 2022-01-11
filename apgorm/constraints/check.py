@@ -42,7 +42,7 @@ class Check(Constraint):
 
         self.check = check
 
-    def creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block:
         return Block(
             r("CONSTRAINT"),
             r(self.name),

@@ -47,7 +47,7 @@ class SmallInt(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "SMALLINT"
+    _sql = "SMALLINT"
 
 
 class Int(SqlType[int]):
@@ -56,7 +56,7 @@ class Int(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "INTEGER"
+    _sql = "INTEGER"
 
 
 Integer = Int
@@ -68,7 +68,7 @@ class BigInt(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "BIGINT"
+    _sql = "BIGINT"
 
 
 class Numeric(SqlType[Decimal]):
@@ -97,12 +97,12 @@ class Numeric(SqlType[Decimal]):
         self._precision = precision
         self._scale = scale
 
-        self.sql = "NUMERIC"
+        self._sql = "NUMERIC"
 
         if precision is not None and scale is not None:
-            self.sql += f"({precision}, {scale})"
+            self._sql += f"({precision}, {scale})"
         elif precision is not None:
-            self.sql += f"({precision})"
+            self._sql += f"({precision})"
         elif scale is not None:
             raise BadArgument("Cannot specify scale without precision.")
 
@@ -133,7 +133,7 @@ class Real(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "REAL"
+    _sql = "REAL"
 
 
 class DoublePrecision(SqlType[float]):
@@ -142,7 +142,7 @@ class DoublePrecision(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "DOUBLE PRECISION"
+    _sql = "DOUBLE PRECISION"
 
 
 _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
@@ -179,7 +179,7 @@ class SmallSerial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "SMALLSERIAL"
+    _sql = "SMALLSERIAL"
 
 
 class Serial(_BaseSerial):
@@ -191,7 +191,7 @@ class Serial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "SERIAL"
+    _sql = "SERIAL"
 
 
 class BigSerial(_BaseSerial):
@@ -203,4 +203,4 @@ class BigSerial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    sql = "BIGSERIAL"
+    _sql = "BIGSERIAL"

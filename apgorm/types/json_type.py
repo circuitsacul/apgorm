@@ -31,7 +31,7 @@ class Json(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-json.html
     """
 
-    sql = "JSON"
+    _sql = "JSON"
 
 
 class JsonB(SqlType[str]):
@@ -40,4 +40,4 @@ class JsonB(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-json.html
     """
 
-    sql = "JSONB"
+    _sql = "JSONB"

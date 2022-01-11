@@ -54,13 +54,16 @@ class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
     class User(Model):
         flags = Int().field().with_converter(IntEFConverter(MyIntFlag))
     ```
+
+    Args:
+        type_ (Type[IntEnum] | Type[IntFlag]): The IntEnum or IntFlag to use.
     """
 
     def __init__(self, type_: Type[_INTEF]):
-        self.type_: Type[_INTEF] = type_
+        self._type: Type[_INTEF] = type_
 
     def from_stored(self, value: int) -> _INTEF:
-        return self.type_(value)
+        return self._type(value)
 
     def to_stored(self, value: _INTEF) -> int:
         return cast(Union[IntEnum, IntFlag], value).value

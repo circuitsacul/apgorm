@@ -133,7 +133,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
     def _describe(self) -> DescribeField:
         return DescribeField(
             name=self.name,
-            type_=self.sql_type.sql,
+            type_=self.sql_type._sql,
             not_null=self.not_null,
         )
 

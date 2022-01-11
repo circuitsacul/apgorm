@@ -33,4 +33,4 @@ class UUID(SqlType[uuid.UUID]):
     https://www.postgresql.org/docs/14/datatype-uuid.html
     """
 
-    sql = "UUID"
+    _sql = "UUID"

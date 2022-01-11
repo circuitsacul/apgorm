@@ -35,7 +35,7 @@ class CIDR(SqlType[Union[ipaddr.IPv4Network, ipaddr.IPv6Network]]):
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
     """
 
-    sql = "CIDR"
+    _sql = "CIDR"
 
 
 class INET(
@@ -54,7 +54,7 @@ class INET(
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
     """
 
-    sql = "INET"
+    _sql = "INET"
 
 
 class MacAddr(SqlType[str]):
@@ -63,7 +63,7 @@ class MacAddr(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR
     """
 
-    sql = "MACADDR"
+    _sql = "MACADDR"
 
 
 class MacAddr8(SqlType[str]):
@@ -72,4 +72,4 @@ class MacAddr8(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR8
     """
 
-    sql = "MACADDR8"
+    _sql = "MACADDR8"

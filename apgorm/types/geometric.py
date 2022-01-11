@@ -33,7 +33,7 @@ class Point(SqlType[asyncpg.Point]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.5
     """
 
-    sql = "POINT"
+    _sql = "POINT"
 
 
 class Line(SqlType[asyncpg.Line]):
@@ -42,7 +42,7 @@ class Line(SqlType[asyncpg.Line]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-LINE
     """
 
-    sql = "LINE"
+    _sql = "LINE"
 
 
 class LineSegment(SqlType[asyncpg.LineSegment]):
@@ -51,7 +51,7 @@ class LineSegment(SqlType[asyncpg.LineSegment]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-LSEG
     """
 
-    sql = "LSEG"
+    _sql = "LSEG"
 
 
 class Box(SqlType[asyncpg.Box]):
@@ -60,7 +60,7 @@ class Box(SqlType[asyncpg.Box]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.8
     """
 
-    sql = "BOX"
+    _sql = "BOX"
 
 
 class Path(SqlType[asyncpg.Path]):
@@ -70,7 +70,7 @@ class Path(SqlType[asyncpg.Path]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.9
     """
 
-    sql = "PATH"
+    _sql = "PATH"
 
 
 class Polygon(SqlType[asyncpg.Polygon]):
@@ -79,7 +79,7 @@ class Polygon(SqlType[asyncpg.Polygon]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-POLYGON
     """
 
-    sql = "POLYGON"
+    _sql = "POLYGON"
 
 
 class Circle(SqlType[asyncpg.Circle]):
@@ -88,4 +88,4 @@ class Circle(SqlType[asyncpg.Circle]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-CIRCLE
     """
 
-    sql = "CIRCLE"
+    _sql = "CIRCLE"

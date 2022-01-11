@@ -54,7 +54,7 @@ class Exclude(Constraint):
         self.elements = elements
         self.where = where
 
-    def creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block:
         sql = Block[Any](
             r("CONSTRAINT"),
             r(self.name),

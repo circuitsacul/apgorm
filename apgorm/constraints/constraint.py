@@ -33,17 +33,11 @@ class Constraint:
     Populated by Database and will not exist until an instance
     of Database has been created."""
 
-    def creation_sql(self) -> Block:
-        """Returns the raw SQL for this constraint.
-
-        Returns:
-            Block: The raw SQL.
-        """
-
+    def _creation_sql(self) -> Block:
         raise NotImplementedError  # pragma: no cover
 
     def _describe(self) -> DescribeConstraint:
         return DescribeConstraint(
             name=self.name,
-            raw_sql=self.creation_sql().render_no_params(),
+            raw_sql=self._creation_sql().render_no_params(),
         )

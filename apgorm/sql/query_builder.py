@@ -75,12 +75,7 @@ class FilterQueryBuilder(Query[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self.filters: list[Block[Bool]] = []
-
-    def where_logic(self) -> Block[Bool] | None:
-        if len(self.filters) == 0:
-            return None
-        return and_(*self.filters)
+        self._filters: list[Block[Bool]] = []
 
     def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
         """Extend the current where logic.
@@ -100,11 +95,16 @@ class FilterQueryBuilder(Query[_T]):
         # vulnerability, it's really not. Since the keys for **values
         # can only contain A-Za-z_ characters, there's no possibly way
         # to perform sql injection, even if the keys are user input.
-        self.filters.extend(filters)
+        self._filters.extend(filters)
         for k, v in values.items():
-            self.filters.append(r(k).eq(v))
+            self._filters.append(r(k).eq(v))
 
         return self
+
+    def _where_logic(self) -> Block[Bool] | None:
+        if len(self._filters) == 0:
+            return None
+        return and_(*self._filters)
 
 
 class FetchQueryBuilder(FilterQueryBuilder[_T]):
@@ -113,8 +113,8 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self.order_by_logic: SQL | UNDEF = UNDEF.UNDEF
-        self.reverse: bool = False
+        self._order_by_logic: SQL | UNDEF = UNDEF.UNDEF
+        self._reverse: bool = False
 
     def order_by(
         self,
@@ -132,8 +132,8 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             FetchQueryBuilder: Returns the query builder to allow for chaining.
         """
 
-        self.order_by_logic = logic
-        self.reverse = reverse
+        self._order_by_logic = logic
+        self._reverse = reverse
         return self
 
     def exists(self) -> Block[Bool]:
@@ -207,9 +207,9 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def _get_block(self, limit: int | None = None) -> Block:
         return select(
             from_=self.model,
-            where=self.where_logic(),
-            order_by=self.order_by_logic,
-            reverse=self.reverse,
+            where=self._where_logic(),
+            order_by=self._order_by_logic,
+            reverse=self._reverse,
             limit=limit,
         )
 
@@ -230,7 +230,7 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     def _get_block(self) -> Block:
         return delete(
             self.model,
-            self.where_logic(),
+            self._where_logic(),
             list(self.model.all_fields.values()),
         )
 
@@ -241,7 +241,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self.set_values: dict[Block, SQL] = {}
+        self._set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> UpdateQueryBuilder[_T]:
         """Specify changes in the model.
@@ -256,7 +256,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
             chaining.
         """
 
-        self.set_values.update({r(k): v for k, v in values.items()})
+        self._set_values.update({r(k): v for k, v in values.items()})
         return self
 
     async def execute(self) -> LazyList[dict, _T]:
@@ -272,8 +272,8 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     def _get_block(self) -> Block:
         return update(
             self.model,
-            {k: v for k, v in self.set_values.items()},
-            where=self.where_logic(),
+            {k: v for k, v in self._set_values.items()},
+            where=self._where_logic(),
             return_fields=list(self.model.all_fields.values()),
         )
 
@@ -284,7 +284,7 @@ class InsertQueryBuilder(Query[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self.set_values: dict[Block, SQL] = {}
+        self._set_values: dict[Block, SQL] = {}
 
     def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
         """Specify values to be set in the database.
@@ -298,7 +298,7 @@ class InsertQueryBuilder(Query[_T]):
             chaining.
         """
 
-        self.set_values.update({r(k): v for k, v in values.items()})
+        self._set_values.update({r(k): v for k, v in values.items()})
         return self
 
     async def execute(self) -> _T:
@@ -313,8 +313,8 @@ class InsertQueryBuilder(Query[_T]):
         )
 
     def _get_block(self) -> Block:
-        value_names = [n for n in self.set_values.keys()]
-        value_values = [v for v in self.set_values.values()]
+        value_names = [n for n in self._set_values.keys()]
+        value_values = [v for v in self._set_values.values()]
 
         return insert(
             self.model,

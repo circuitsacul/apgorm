@@ -37,6 +37,12 @@ _OUT = TypeVar("_OUT")
 
 
 class LazyList(Generic[_IN, _OUT]):
+    """Lazily converts each value of an iterable.
+
+    Incredible useful for casting `list[asyncpg.Record]` to `list[dict]`, and
+    then `list[dict]` to `list[Model]`, especially when there are many rows.
+    """
+
     def __init__(
         self,
         data: Sequence[_IN] | LazyList[Any, _IN],

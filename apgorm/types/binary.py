@@ -31,4 +31,4 @@ class ByteA(SqlType[bytes]):
     https://www.postgresql.org/docs/14/datatype-binary.html
     """
 
-    sql = "BYTEA"
+    _sql = "BYTEA"

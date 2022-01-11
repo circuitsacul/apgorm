@@ -121,7 +121,7 @@ class Database:
             list[Migration]: The migrations.
         """
 
-        return Migration.load_all_migrations(self._migrations_folder)
+        return Migration._load_all_migrations(self._migrations_folder)
 
     def load_last_migration(self) -> Migration | None:
         """Loads and returns the most recent migration, if any.
@@ -130,7 +130,21 @@ class Database:
             Migration | None: The migration.
         """
 
-        return Migration.load_last_migration(self._migrations_folder)
+        return Migration._load_last_migration(self._migrations_folder)
+
+    def load_migration_from_id(self, migration_id: int) -> Migration:
+        """Loads a migration from its id.
+
+        Args:
+            migration_id (int): The id of the migration.
+
+        Returns:
+            Migration: The migration.
+        """
+
+        return Migration._from_path(
+            Migration._path_from_id(migration_id, self._migrations_folder)
+        )
 
     def must_create_migrations(self) -> bool:
         """Whether or not you need to call Database.create_migrations()
@@ -144,7 +158,7 @@ class Database:
             return False
         return True
 
-    def create_migrations(self, indent: int | None = None) -> Migration:
+    def create_migrations(self) -> Migration:
         """Create migrations.
 
         Raises:
@@ -159,7 +173,7 @@ class Database:
         d = self.describe()
         sql = create_next_migration(d, self._migrations_folder)
         assert sql is not None
-        return Migration.create_migration(d, sql, self._migrations_folder)
+        return Migration._create_migration(d, sql, self._migrations_folder)
 
     async def load_unapplied_migrations(self) -> list[Migration]:
         """Returns a list of migrations that have not been applied on the
@@ -266,7 +280,7 @@ class Database:
     async def cursor(
         self, query: str, params: list[Any], con: Connection | None = None
     ) -> AsyncGenerator[CursorFactory, None]:
-        """Yields a CursorFactory, but inside a transaction.
+        """Yields a CursorFactory.
 
         Usage:
         ```

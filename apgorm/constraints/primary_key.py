@@ -46,7 +46,7 @@ class PrimaryKey(Constraint):
 
         self.fields = fields
 
-    def creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block:
         names = [f if isinstance(f, Block) else r(f.name) for f in self.fields]
         return Block(
             r("CONSTRAINT"),

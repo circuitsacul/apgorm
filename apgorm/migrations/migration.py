@@ -29,44 +29,73 @@ from .describe import Describe
 
 
 class Migration:
+    """Represents a single migrations."""
+
     def __init__(
         self, describe: Describe, migrations: str, path: Path
     ) -> None:
         self.describe = describe
+        """The Database.describe() at the time this migration was created."""
         self.migrations = migrations
+        """The raw SQL used for applying the migration."""
         self.path = path
+        """The path at which the migration can be found."""
 
     @property
     def migration_id(self) -> int:
-        return self.id_from_path(self.path)
+        """The id of the migration.
+
+        Returns:
+            int: The migration id.
+        """
+
+        return self._id_from_path(self.path)
 
     @classmethod
-    def load_all_migrations(cls, folder: Path) -> list[Migration]:
+    def _from_path(cls, path: Path) -> Migration:
+        with (path / "describe.json").open("r") as f:
+            describe = Describe(**json.loads(f.read()))
+
+        with (path / "migrations.sql").open("r") as f:
+            sql = f.read()
+
+        return cls(describe, sql, path)
+
+    @staticmethod
+    def _path_from_id(migration_id: int, folder: Path) -> Path:
+        return folder / str(migration_id)
+
+    @staticmethod
+    def _id_from_path(path: Path) -> int:
+        return int(path.name)
+
+    @classmethod
+    def _load_all_migrations(cls, folder: Path) -> list[Migration]:
         migrations: list[Migration] = []
         for p in folder.glob("*"):
             if p.is_file():
                 continue
 
             try:
-                migrations.append(cls.from_path(p))
+                migrations.append(cls._from_path(p))
             except FileNotFoundError:
                 continue
 
         return migrations
 
     @classmethod
-    def load_last_migration(cls, folder: Path) -> Migration | None:
-        migrations = cls.load_all_migrations(folder)
+    def _load_last_migration(cls, folder: Path) -> Migration | None:
+        migrations = cls._load_all_migrations(folder)
         if len(migrations) == 0:
             return None
         migrations.sort(key=lambda m: m.migration_id)
         return migrations[-1]
 
     @classmethod
-    def create_migration(
+    def _create_migration(
         cls, describe: Describe, migrations: str, folder: Path
     ) -> Migration:
-        last_migration = cls.load_last_migration(folder)
+        last_migration = cls._load_last_migration(folder)
         if last_migration:
             next_id = last_migration.migration_id + 1
         else:
@@ -79,21 +108,3 @@ class Migration:
             f.write(migrations)
 
         return cls(describe, migrations, next_path)
-
-    @classmethod
-    def from_path(cls, path: Path) -> Migration:
-        with (path / "describe.json").open("r") as f:
-            describe = Describe(**json.loads(f.read()))
-
-        with (path / "migrations.sql").open("r") as f:
-            sql = f.read()
-
-        return cls(describe, sql, path)
-
-    @staticmethod
-    def path_from_id(migration_id: int, folder: Path) -> Path:
-        return folder / str(migration_id)
-
-    @staticmethod
-    def id_from_path(path: Path) -> int:
-        return int(path.name)

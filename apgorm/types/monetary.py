@@ -32,4 +32,4 @@ class Money(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-money.html
     """
 
-    sql = "MONEY"
+    _sql = "MONEY"

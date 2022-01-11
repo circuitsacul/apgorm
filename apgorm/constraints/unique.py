@@ -44,9 +44,10 @@ class Unique(Constraint):
             ...
         ```
         """
+
         self.fields = fields
 
-    def creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block:
         return Block(
             r("CONSTRAINT"),
             r(self.name),

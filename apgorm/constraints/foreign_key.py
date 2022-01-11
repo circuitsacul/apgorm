@@ -75,6 +75,7 @@ class ForeignKey(Constraint):
         Raises:
             BadArgument: Bad arguments were sent to ForeignKey.
         """
+
         self.fields = fields if isinstance(fields, Sequence) else [fields]
         self.ref_fields = (
             ref_fields if isinstance(ref_fields, Sequence) else [ref_fields]
@@ -92,7 +93,7 @@ class ForeignKey(Constraint):
         if len(self.fields) == 0:
             raise BadArgument("Must specify at least on field and ref_field.")
 
-    def creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block:
         ref_table: Block
         ref_fields: list[Block] = []
 

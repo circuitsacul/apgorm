@@ -62,7 +62,7 @@ class Array(SqlType["list[_T | None]"]):
 
         arrays, final = _get_arrays(self)
 
-        self.sql = final.sql + "".join(
+        self._sql = final._sql + "".join(
             [
                 ("[]" if a.size is None else f"[{a.size}]")
                 for a in reversed(arrays)

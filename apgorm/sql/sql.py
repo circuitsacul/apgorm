@@ -213,7 +213,7 @@ class Comparable:
         raise NotImplementedError  # pragma: no cover
 
     def cast(self, type_: _SQLT) -> Block[_SQLT]:
-        return wrap(self._get_block(), r("::"), r(type_.sql))
+        return wrap(self._get_block(), r("::"), r(type_._sql))
 
     # comparison
     is_null = _Func["Bool"]("IS NULL", True)
@@ -254,11 +254,11 @@ class Block(Comparable, Generic[_SQLT_CO]):
         if len(pieces) == 1 and isinstance(pieces[0], Block):
             block = pieces[0]
             assert isinstance(block, Block)
-            self.wrap: bool = block.wrap or wrap
+            self._wrap: bool = block._wrap or wrap
             self._pieces = block._pieces
 
         else:
-            self.wrap = wrap
+            self._wrap = wrap
             for p in pieces:
                 if isinstance(p, Comparable):
                     p = p._get_block()
@@ -268,9 +268,6 @@ class Block(Comparable, Generic[_SQLT_CO]):
                     self._pieces.append(p)
                 else:
                     self._pieces.append(Parameter(p))
-
-    def _get_block(self) -> Block:
-        return self
 
     def render(self) -> tuple[str, list[Any]]:
         """Return the rendered result of the Block.
@@ -297,10 +294,13 @@ class Block(Comparable, Generic[_SQLT_CO]):
     def get_pieces(
         self, force_wrap: bool | None = None
     ) -> list[Raw | Parameter]:
-        wrap = self.wrap if force_wrap is None else force_wrap
+        wrap = self._wrap if force_wrap is None else force_wrap
         if wrap:
             return [Raw("("), *self._pieces, Raw(")")]
         return self._pieces
+
+    def _get_block(self) -> Block:
+        return self
 
     def __iadd__(self, other: object):
         if isinstance(other, Block):
@@ -318,7 +318,7 @@ class Renderer:
         self._curr_value_id: int = 0
 
     @property
-    def next_value_id(self) -> int:
+    def _next_value_id(self) -> int:
         self._curr_value_id += 1
         return self._curr_value_id
 
@@ -330,7 +330,7 @@ class Renderer:
             if isinstance(piece, Raw):
                 sql_pieces.append(str(piece))
             else:
-                sql_pieces.append(f"${self.next_value_id}")
+                sql_pieces.append(f"${self._next_value_id}")
                 params.append(piece.value)
 
         return " ".join(sql_pieces), params
