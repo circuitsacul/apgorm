@@ -1,4 +1,8 @@
 # apgorm
+[![pytest](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml/badge.svg)](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/TrigonDev/apgorm/main.svg)](https://results.pre-commit.ci/latest/github/TrigonDev/apgorm/main)
+
+
 An asynchronous ORM wrapped around asyncpg. Examples can be found under `examples/`. Run examples with `python -m examples.<example_name>` (`python -m examples.basic`).
 
 Please note that this library is not for those learning SQL or Postgres. Although the basic usage of apgorm is straightforward, you will run into problems, especially with migrations, if you don't understand regular SQL well.
