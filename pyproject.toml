@@ -3,10 +3,14 @@ line-length=79
 
 [tool.poetry]
 name = "apgorm"
-version = "0.1.0"
+version = "0.1.0.post1"
 description = "An ORM wrapped around asyncpg."
 authors = ["Circuit"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/TrigonDev/apgorm"
+documentation = "https://github.com/TrigonDev/apgorm/wiki"
+keywords = ["postgres", "postgresql", "asyncpg", "asyncio", "orm"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
