@@ -20,6 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""
+apgorm is a full type-checked asynchronous ORM wrapped around asyncpg.
+
+apgorm is licensed under the MIT license.
+
+https://github.com/TrigonDev/apgorm
+"""
+
 from . import exceptions
 from .connection import Connection, Pool, PoolAcquireContext
 from .constraints.check import Check
