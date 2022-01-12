@@ -132,9 +132,11 @@ class Model:
 
         deleted = (
             await self.delete_query(con=con)
-            .where(**self._pk_fields())
+            .where(**(f := self._pk_fields()))
             .execute()
         )
+        if len(deleted) == 0:
+            raise ModelNotFound(self.__class__, f)
         return deleted[0]
 
     async def save(self, con: Connection | None = None) -> None:
