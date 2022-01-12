@@ -76,7 +76,7 @@ from .undefined import UNDEF
 from .utils.lazy_list import LazyList
 from .validator import Validator
 
-__version__ = "0.1.0-a.0"
+__version__ = "0.1.0-a.1"
 
 __all__ = (
     "Converter",
