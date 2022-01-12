@@ -33,13 +33,17 @@ from apgorm.types import Int, Serial, VarChar
 class User(apgorm.Model):
     name = VarChar(32).field()
 
+    games = ManyToMany["Game", "Player"](
+        "name", "players.username", "players.gameid", "games.id_"
+    )
+
     primary_key = (name,)
 
 
 class Game(apgorm.Model):
     id_ = Serial().field()
 
-    users = ManyToMany[User](
+    users = ManyToMany[User, "Player"](
         "id_", "players.gameid", "players.username", "users.name"
     )
 
@@ -91,29 +95,45 @@ async def _main(db: Database):
     for g in all_games:
         for u in all_users:
             if random.randint(0, 1) == 1:
-                await Player(gameid=g.id_.v, username=u.name.v).create()
+                await g.users.add(u)  # or, await u.games.add(g)
 
     # for each user, get all their games (using subqueries)
     for user in all_users:
         print(f"Games {user} is in:")
-
-        _games = (
-            await Game.fetch_query()
-            .where(
-                Player.fetch_query()
-                .where(gameid=Game.id_, username=user.name.v)
-                .exists()
-            )
-            .fetchmany()
-        )
-
+        _games = await user.games.fetchmany()
         print(" - " + "\n - ".join([repr(g) for g in _games]))
+
+    print("")
 
     # for each game, get all the users (using the ManyToMany)
     for g in all_games:
         print(f"Users for game {g}:")
         _users = await g.users.fetchmany()
         print(" - " + "\n - ".join([repr(u) for u in _users]))
+
+    # remove all instances of player (remove all games from all users)
+    await Player.delete_query().execute()
+    print("\nRemoved all games from all users")
+
+    # add all games to Circuit
+    circuit = await User.fetch(name="Circuit")
+    [await circuit.games.add(g) for g in all_games]
+
+    print(f"\nAdded {all_games} to {circuit}")
+    print("Circuits Games: {}\n".format(await circuit.games.fetchmany()))
+
+    # remove two random games:
+    to_remove = random.choices(list(all_games), k=2)
+    [await circuit.games.remove(r) for r in to_remove]
+
+    print(f"Removed {to_remove} from {circuit}")
+    print("Circuits Games: {}\n".format(await circuit.games.fetchmany()))
+
+    # clear all games from circuit
+    await circuit.games.clear()
+
+    print(f"Cleared all games from {circuit}")
+    print("Circuits Games: {}\n".format(await circuit.games.fetchmany()))
 
 
 async def main():

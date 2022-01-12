@@ -32,9 +32,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 _REF = TypeVar("_REF", bound="Model")
+_THROUGH = TypeVar("_THROUGH", bound="Model")
 
 
-class ManyToMany(Generic[_REF]):
+class ManyToMany(Generic[_REF, _THROUGH]):
     """A useful tool to simplify many-to-many references.
 
     Args:
@@ -57,7 +58,7 @@ class ManyToMany(Generic[_REF]):
         username = VarChar(32).field()
         primary_key = (username,)
 
-        games = ManyToMany(
+        games = ManyToMany["Game", "Player"](  # the typehints are optional
             # the column on this table referenced in Player
             "username",
 
@@ -75,7 +76,7 @@ class ManyToMany(Generic[_REF]):
         gameid = Serial().field()
         primary_key = (gameid,)
 
-        users = ManyToMany(
+        users = ManyToMany["User", "Player"](
             "gameid",
             "players.gameid",
             "players.username",
@@ -124,6 +125,72 @@ class ManyToMany(Generic[_REF]):
 
         Returns:
             LazyList[dict, Model]: A lazy-list of returned Models.
+        """
+
+        raise NotImplementedError  # pragma: no cover
+
+    async def add(
+        self, other: _REF, con: Connection | None = None
+    ) -> _THROUGH:
+        """Add one or more models to this ManyToMany.
+
+        Each of these lines does the exact same thing:
+        ```
+        player = await user.games.add(game)
+        # OR
+        player = await games.users.add(user)
+        # OR
+        player = await Player(username=user.name.v, gameid=game.id.v).create()
+        ```
+
+        Returns:
+            Model: The reference model that lines this model and the other
+            model. In the example, the return would be a Player.
+        """
+
+        raise NotImplementedError  # pragma: no cover
+
+    async def remove(
+        self, other: _REF, con: Connection | None = None
+    ) -> LazyList[dict, _THROUGH]:
+        """Remove one or models from this ManyToMany.
+
+        Each of these lines does the exact same thing:
+        ```
+        deleted_players = await user.games.remove(game)
+        # OR
+        deleted_players = await games.user.remove(user)
+        # OR
+        deleted_players = await Player.delete_query().where(
+            username=user.name.v, gameid=game.id.v
+        ).execute()
+        ```
+
+        Note: The fact that .remove() returns a list instead of a single model
+        was intentional. The reason is ManyToMany does not enforce uniqueness
+        in any way, so there could be multiple Players that link a single user
+        to a single game. Thus, user.remove(game) could actually end up
+        deleting multiple players.
+        """
+
+        raise NotImplementedError  # pragma: no cover
+
+    async def clear(
+        self, con: Connection | None = None
+    ) -> LazyList[dict, _THROUGH]:
+        """Remove all instances of the other model from this instance.
+
+        Both of these lines do the same thing:
+        ```
+        deleted_players = await user.games.clear()
+        deleted_players = await Player.delete_query().where(
+            username=user.name.v
+        ).execute()
+        ```
+
+        Returns:
+            LazyList[dict, _REF]: A lazy-list of deleted through models (in
+            the example, it would be a list of Player).
         """
 
         raise NotImplementedError  # pragma: no cover
@@ -196,4 +263,31 @@ class _RealManyToMany:
                 .exists()
             )
             .fetchmany()
+        )
+
+    async def clear(
+        self, con: Connection | None = None
+    ) -> LazyList[dict, Model]:
+        return (
+            await self.mm_model.delete_query(con=con)
+            .where(self.mm_h_field.eq(self.field.v))
+            .execute()
+        )
+
+    async def add(self, other: Model, con: Connection | None = None) -> Model:
+        values = {
+            self.mm_h_field.name: self.field.v,
+            self.mm_o_field.name: other.all_fields[self.ot_field.name].v,
+        }
+        return await self.mm_model(**values).create(con=con)
+
+    async def remove(
+        self, other: Model, con: Connection | None = None
+    ) -> LazyList[dict, Model]:
+        values = {
+            self.mm_h_field.name: self.field.v,
+            self.mm_o_field.name: other.all_fields[self.ot_field.name].v,
+        }
+        return (
+            await self.mm_model.delete_query(con=con).where(**values).execute()
         )
