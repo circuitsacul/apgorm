@@ -3,7 +3,7 @@ line-length=79
 
 [tool.poetry]
 name = "apgorm"
-version = "0.1.0.post1"
+version = "0.1.0-a.0"
 description = "A fully type-checked asynchronous ORM wrapped around asyncpg."
 authors = ["Circuit"]
 license = "MIT"
