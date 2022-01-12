@@ -33,7 +33,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Unique(Constraint):
-    def __init__(self, *fields: BaseField | Block) -> None:
+    def __init__(self, *fields: BaseField | Block | str) -> None:
         """Specify a unique constraint for a table.
 
         ```
@@ -45,7 +45,7 @@ class Unique(Constraint):
         ```
         """
 
-        self.fields = fields
+        self.fields = [r(f) if isinstance(f, str) else f for f in fields]
 
     def _creation_sql(self) -> Block:
         return Block(

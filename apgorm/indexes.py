@@ -80,14 +80,14 @@ class Index:
     def __init__(
         self,
         table: Type[Model],
-        fields: Sequence[BaseField | Block] | BaseField | Block,
+        fields: Sequence[BaseField | Block | str] | BaseField | Block | str,
         type_: IndexType = IndexType.BTREE,
         unique: bool = False,
     ) -> None:
         self.type_: _IndexType = type_.value
-        if isinstance(fields, (Block, BaseField)):
+        if not isinstance(fields, Sequence):
             fields = [fields]
-        self.fields = fields
+        self.fields = [r(f) if isinstance(f, str) else f for f in fields]
         self.table = table
         self.unique = unique
 

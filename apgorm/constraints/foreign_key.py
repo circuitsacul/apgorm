@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Sequence
+from typing import Sequence
 from typing import cast as typingcast
 
 from apgorm.exceptions import BadArgument
@@ -47,9 +47,12 @@ class ForeignKeyAction(Enum):
 class ForeignKey(Constraint):
     def __init__(
         self,
-        fields: Sequence[Block | BaseField] | Block | BaseField,
-        ref_fields: Sequence[Block | BaseField] | Block | BaseField,
-        ref_table: Block | None = None,
+        fields: Sequence[Block | BaseField | str] | Block | BaseField | str,
+        ref_fields: Sequence[Block | BaseField | str]
+        | Block
+        | BaseField
+        | str,
+        ref_table: Block | str | None = None,
         match_full: bool = False,
         on_delete: ForeignKeyAction = ForeignKeyAction.CASCADE,
         on_update: ForeignKeyAction = ForeignKeyAction.CASCADE,
@@ -76,11 +79,21 @@ class ForeignKey(Constraint):
             BadArgument: Bad arguments were sent to ForeignKey.
         """
 
-        self.fields = fields if isinstance(fields, Sequence) else [fields]
-        self.ref_fields = (
-            ref_fields if isinstance(ref_fields, Sequence) else [ref_fields]
+        self.fields: Sequence[BaseField | Block] = [
+            r(f) if isinstance(f, str) else f
+            for f in (fields if isinstance(fields, Sequence) else [fields])
+        ]
+        self.ref_fields: Sequence[BaseField | Block] = [
+            r(f) if isinstance(f, str) else f
+            for f in (
+                ref_fields
+                if isinstance(ref_fields, Sequence)
+                else [ref_fields]
+            )
+        ]
+        self.ref_table = (
+            r(ref_table) if isinstance(ref_table, str) else ref_table
         )
-        self.ref_table = ref_table
         self.match_full = match_full
         self.on_delete = on_delete
         self.on_update = on_update
@@ -118,7 +131,7 @@ class ForeignKey(Constraint):
                     "ref_fields must either all be BaseFields or "
                     "ref_table must be specified."
                 )
-            _ref_fields = typingcast(List[BaseField], _ref_fields)
+            _ref_fields = typingcast(Sequence[BaseField], _ref_fields)
 
             ref_table = r(_ref_fields[0].model.tablename)
 

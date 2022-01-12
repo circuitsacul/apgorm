@@ -33,7 +33,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class PrimaryKey(Constraint):
-    def __init__(self, *fields: BaseField | Block) -> None:
+    def __init__(self, *fields: BaseField | Block | str) -> None:
         """Do not use. Specify primary keys like this instead:
 
         ```
@@ -44,15 +44,21 @@ class PrimaryKey(Constraint):
         ```
         """
 
-        self.fields = fields
+        self.fields = [
+            r(f)
+            if isinstance(f, str)
+            else f
+            if isinstance(f, Block)
+            else r(f.name)
+            for f in fields
+        ]
 
     def _creation_sql(self) -> Block:
-        names = [f if isinstance(f, Block) else r(f.name) for f in self.fields]
         return Block(
             r("CONSTRAINT"),
             r(self.name),
             r("PRIMARY KEY ("),
-            join(r(","), *names),
+            join(r(","), *self.fields),
             r(")"),
             wrap=True,
         )

@@ -33,14 +33,14 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Check(Constraint):
-    def __init__(self, check: Block[Bool]) -> None:
+    def __init__(self, check: Block[Bool] | str) -> None:
         """Specify a check constraint for a table.
 
         Args:
             check (Block[Bool]): The raw SQL for the check constraint.
         """
 
-        self.check = check
+        self.check = r(check) if isinstance(check, str) else check
 
     def _creation_sql(self) -> Block:
         return Block(
