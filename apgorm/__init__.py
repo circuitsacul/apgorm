@@ -28,6 +28,8 @@ apgorm is licensed under the MIT license.
 https://github.com/TrigonDev/apgorm
 """
 
+from importlib import metadata
+
 from . import exceptions
 from .connection import Connection, Pool, PoolAcquireContext
 from .constraints.check import Check
@@ -76,7 +78,7 @@ from .undefined import UNDEF
 from .utils.lazy_list import LazyList
 from .validator import Validator
 
-__version__ = "0.1.0-a.1"
+__version__ = metadata.version(__name__)
 
 __all__ = (
     "Converter",
