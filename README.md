@@ -1,5 +1,6 @@
 # apgorm
 [![pytest](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml/badge.svg)](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml)
+[![pypi](https://github.com/TrigonDev/apgorm/actions/workflows/pypi.yml/badge.svg)](https://github.com/TrigonDev/apgorm/actions/workflows/pypi.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/TrigonDev/apgorm/main.svg)](https://results.pre-commit.ci/latest/github/TrigonDev/apgorm/main)
 
 
