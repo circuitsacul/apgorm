@@ -75,16 +75,10 @@ class UndefinedFieldValue(ApgormException):
 class InvalidFieldValue(ApgormException):
     """The field value failed the validator check."""
 
-    def __init__(
-        self,
-        field: BaseField,
-        value: Any,
-        exc: Exception | None = None,
-    ) -> None:
-        self.orig = exc
-        super().__init__(
-            f"{value!r} failed the validator for {field.full_name}."
-        )
+    def __init__(self, message: str) -> None:
+        self.message = message
+
+        super().__init__(message)
 
 
 class SpecifiedPrimaryKey(ApgormException):

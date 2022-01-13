@@ -70,7 +70,7 @@ def test_validate(mock_field: Field, mocker: MockerFixture):
     fails.return_value = False
 
     def fails_another_way(v):
-        raise Exception
+        raise InvalidFieldValue("Test")
 
     assert mock_field.add_validator(works)._validate(None) is None
 

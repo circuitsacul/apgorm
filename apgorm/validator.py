@@ -22,11 +22,10 @@
 
 from __future__ import annotations
 
-from typing import Generic, Protocol, TypeVar
+from typing import Callable, Protocol, TypeVar
 
-_T = TypeVar("_T", contravariant=True)
+_T = TypeVar("_T", bound="Callable")
 
 
-class Validator(Protocol, Generic[_T]):
-    def __call__(self, value: _T) -> bool:
-        ...  # pragma: no cover
+class Validator(Protocol[_T]):
+    __call__: _T

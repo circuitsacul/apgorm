@@ -99,7 +99,9 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
         return f"{self.model.tablename}.{self.name}"
 
-    def add_validator(self: _SELF, validator: Validator[_C]) -> _SELF:
+    def add_validator(
+        self: _SELF, validator: Validator[Callable[[_T], bool]]
+    ) -> _SELF:
         """Add a validator to the value of this field."""
 
         self._validators.append(validator)
@@ -117,13 +119,14 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         return n
 
     def _validate(self, value: _C) -> None:
-        try:
-            if not all([v(value) for v in self._validators]):
-                raise InvalidFieldValue(self, value)
-        except InvalidFieldValue:
-            raise
-        except Exception as e:
-            raise InvalidFieldValue(self, value, exc=e)
+        for v in self._validators:
+            try:
+                if not v(value):
+                    raise InvalidFieldValue(
+                        f"Validator on {self.name} failed for {value!r}"
+                    )
+            except InvalidFieldValue:
+                raise
 
     def _describe(self) -> DescribeField:
         return DescribeField(

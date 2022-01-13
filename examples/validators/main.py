@@ -29,12 +29,16 @@ from apgorm.exceptions import InvalidFieldValue
 from apgorm.types import VarChar
 
 
+def email_validator(email: str | None) -> bool:
+    if email is None or email.endswith("@gmail.com"):
+        return True
+    raise InvalidFieldValue("Email must be None or end with @gmail.com")
+
+
 class User(apgorm.Model):
     username = VarChar(32).field()
     email = VarChar(32).nullablefield()
-    email.add_validator(
-        lambda email: email is None or email.endswith("@gmail.com")
-    )
+    email.add_validator(email_validator)
 
     primary_key = (username,)
 
