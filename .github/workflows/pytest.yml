@@ -4,11 +4,13 @@ on: [push]
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       matrix:
         python-version: [ '3.8', '3.9', '3.10' ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
 
     name: Python ${{ matrix.python-version }}
     steps:
@@ -22,4 +24,3 @@ jobs:
     - name: Install dependencies
       run: poetry install
     - name: Test with pytest
-      run: poetry run python -m pytest
