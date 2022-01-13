@@ -98,16 +98,23 @@ class Model:
             copied_fields[f.name] = f
             setattr(self, f.name, f)
 
+            convert: bool = True
             value = values.get(f.name, UNDEF.UNDEF)
             if value is UNDEF.UNDEF:
                 d = f._get_default()
+                convert = False
                 if d is not UNDEF.UNDEF:
                     value = d
                 else:
                     continue
-            if isinstance(f, ConverterField):
+            if isinstance(f, ConverterField) and convert:
+                f._validate(value)
                 f._value = f.converter.to_stored(value)
             else:
+                if isinstance(f, ConverterField):
+                    f._validate(f.converter.from_stored(value))
+                else:
+                    f._validate(value)
                 f._value = value
 
         # carry the copies of the fields over to primary_key so that
