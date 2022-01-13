@@ -22,8 +22,11 @@
 
 from __future__ import annotations
 
+import asyncio
+import shutil
 from pathlib import Path
 
+import pytest
 from pytest_mock import MockerFixture
 
 import apgorm
@@ -45,7 +48,10 @@ class Database(apgorm.Database):
     indexes = [apgorm.Index(User, User.nick)]
 
 
-DB = Database(Path("path/to/migrations"))
+MIG_PATH = Path("tests/migrations")
+if MIG_PATH.exists():
+    shutil.rmtree(MIG_PATH)
+DB = Database(MIG_PATH)
 
 
 def test_updates_models_and_fields():
@@ -121,7 +127,85 @@ def test_must_create_migrations_false(mocker: MockerFixture):
 
 
 def test_must_create_igrations_true(mocker: MockerFixture):
+    if MIG_PATH.exists():
+        shutil.rmtree(MIG_PATH)
+
     spy = mocker.spy(DB, "_create_next_migration")
 
     assert DB.must_create_migrations()
     spy.assert_called_once()
+
+
+def test_create_migrations():
+    if MIG_PATH.exists():
+        shutil.rmtree(MIG_PATH)
+    mig = DB.create_migrations()
+
+    assert MIG_PATH.exists()
+    assert not DB.must_create_migrations()
+    assert mig.migration_id == 0
+
+
+def test_create_migrations_none_to_create(mocker: MockerFixture):
+    func = mocker.patch.object(DB, "must_create_migrations")
+    func.return_value = False
+
+    try:
+        DB.create_migrations()
+    except apgorm.exceptions.NoMigrationsToCreate:
+        pass
+    else:
+        assert False, "Didn't raise NoMigrationsToCreate"
+
+
+def test_create_migrations_none_to_create_allow_empty(mocker: MockerFixture):
+    if MIG_PATH.exists():
+        shutil.rmtree(MIG_PATH)
+
+    func = mocker.patch.object(DB, "must_create_migrations")
+    func.return_value = False
+    func = mocker.patch.object(DB, "_create_next_migration")
+    func.return_value = ""
+
+    mig = DB.create_migrations(allow_empty=True)
+
+    assert mig.migrations == ""
+
+
+@pytest.mark.asyncio
+async def test_must_apply_migrations_false(mocker: MockerFixture):
+    func = mocker.patch.object(DB, "load_unapplied_migrations")
+    func.return_value = []
+
+    assert not await DB.must_apply_migrations()
+
+
+@pytest.mark.asyncio
+async def test_must_apply_migrations_true(mocker: MockerFixture):
+    func = mocker.patch.object(DB, "load_unapplied_migrations")
+    func.return_value = [mocker.Mock()]
+
+    assert await DB.must_apply_migrations()
+
+
+@pytest.mark.asyncio
+async def test_load_unapplied_migrations(mocker: MockerFixture):
+    if MIG_PATH.exists():
+        shutil.rmtree(MIG_PATH)
+
+    DB.create_migrations()
+
+    m = mocker.Mock()
+    ret = asyncio.Future()
+
+    migration = mocker.Mock()
+    ret.set_result([migration])
+
+    mocker.patch.object(DB, "_migrations", m)
+    m.fetch_query.return_value.fetchmany.return_value = ret
+
+    unapplied = await DB.load_unapplied_migrations()
+    all_mig = DB.load_all_migrations()
+
+    assert unapplied == all_mig
+    m.fetch_query.return_value.fetchmany.assert_called_once_with()
