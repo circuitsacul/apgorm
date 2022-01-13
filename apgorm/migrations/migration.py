@@ -108,3 +108,8 @@ class Migration:
             f.write(migrations)
 
         return cls(describe, migrations, next_path)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Migration):
+            raise TypeError(f"Unsupported type {type(other)}")
+        return self.migration_id == other.migration_id
