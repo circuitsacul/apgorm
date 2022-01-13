@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Sequence, Type
+from typing import Any, AsyncGenerator, Awaitable, Sequence, Type
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -77,7 +77,7 @@ class Database:
         for attr_name in dir(self):
             try:
                 attr = getattr(self, attr_name)
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 continue
 
             if not isinstance(attr, type):
@@ -152,7 +152,7 @@ class Database:
             bool
         """
 
-        sql = create_next_migration(self.describe(), self._migrations_folder)
+        sql = self._create_next_migration()
         if sql is None:
             return False
         return True
@@ -173,10 +173,11 @@ class Database:
 
         if (not self.must_create_migrations()) and not allow_empty:
             raise NoMigrationsToCreate
-        d = self.describe()
-        sql = create_next_migration(d, self._migrations_folder)
+        sql = self._create_next_migration()
         sql = sql or ""
-        return Migration._create_migration(d, sql, self._migrations_folder)
+        return Migration._create_migration(
+            self.describe(), sql, self._migrations_folder
+        )
 
     async def load_unapplied_migrations(self) -> list[Migration]:
         """Returns a list of migrations that have not been applied on the
@@ -212,7 +213,7 @@ class Database:
         """Applies all migrations that need to be applied."""
 
         for m in await self.load_unapplied_migrations():
-            await apply_migration(m, self)
+            await self._apply_migration(m)
 
     # database functions
     async def connect(self, **connect_kwargs) -> None:
@@ -301,3 +302,9 @@ class Database:
             async with self.pool.acquire() as con:
                 async with con.transaction():
                     yield con.cursor(query, params)
+
+    def _create_next_migration(self) -> str | None:
+        return create_next_migration(self.describe(), self._migrations_folder)
+
+    def _apply_migration(self, migration: Migration) -> Awaitable[None]:
+        return apply_migration(migration, self)
