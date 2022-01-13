@@ -48,7 +48,7 @@ _T = TypeVar("_T", bound="Model")
 
 def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
     def converter(values: dict[str, Any]) -> _T:
-        return model(**values)
+        return model(True, **values)
 
     return converter
 
@@ -188,7 +188,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         res = await self.con.fetchrow(*self._get_block().render())
         if res is None:
             return None
-        return self.model(**res)
+        return self.model(True, **res)
 
     async def cursor(self) -> AsyncGenerator[_T, None]:
         """Return an iterator of the resulting models.
@@ -202,7 +202,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             *self._get_block().render(), con=con
         ) as cursor:
             async for res in cursor:
-                yield self.model(**res)
+                yield self.model(True, **res)
 
     def _get_block(self, limit: int | None = None) -> Block:
         return select(
@@ -309,7 +309,7 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
         """
 
         return self.model(
-            **await self.con.fetchrow(*self._get_block().render())
+            True, **await self.con.fetchrow(*self._get_block().render())
         )
 
     def _get_block(self) -> Block:

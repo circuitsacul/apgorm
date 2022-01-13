@@ -90,7 +90,7 @@ class Model:
     primary_key: tuple[BaseField, ...]
     """The primary key for the model. All models MUST have a primary key."""
 
-    def __init__(self, **values) -> None:
+    def __init__(self, override_validator: bool = False, /, **values) -> None:
         copied_fields: dict[str, BaseField] = {}
 
         for f in self.all_fields.values():
@@ -108,13 +108,15 @@ class Model:
                 else:
                     continue
             if isinstance(f, ConverterField) and convert:
-                f._validate(value)
+                if not override_validator:
+                    f._validate(value)
                 f._value = f.converter.to_stored(value)
             else:
-                if isinstance(f, ConverterField):
-                    f._validate(f.converter.from_stored(value))
-                else:
-                    f._validate(value)
+                if not override_validator:
+                    if isinstance(f, ConverterField):
+                        f._validate(f.converter.from_stored(value))
+                    else:
+                        f._validate(value)
                 f._value = value
 
         # carry the copies of the fields over to primary_key so that
