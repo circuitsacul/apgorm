@@ -157,8 +157,12 @@ class Database:
             return False
         return True
 
-    def create_migrations(self) -> Migration:
+    def create_migrations(self, allow_empty: bool = False) -> Migration:
         """Create migrations.
+
+        Args:
+            allow_empty (bool): Whether to allow the migration to be empty
+            (useful for creating custom migrations).
 
         Raises:
             NoMigrationsToCreate: Migrations do not creating.
@@ -167,11 +171,11 @@ class Database:
             Migration: The created migration.
         """
 
-        if not self.must_create_migrations():
+        if (not self.must_create_migrations()) and not allow_empty:
             raise NoMigrationsToCreate
         d = self.describe()
         sql = create_next_migration(d, self._migrations_folder)
-        assert sql is not None
+        sql = sql or ""
         return Migration._create_migration(d, sql, self._migrations_folder)
 
     async def load_unapplied_migrations(self) -> list[Migration]:
