@@ -43,12 +43,8 @@ def mock_field(mocker: MockerFixture):
 
 def test_init():
     Field(None)
-    try:
+    with pytest.raises(BadArgument):
         Field(None, default=None, default_factory=lambda: 1)
-    except BadArgument:
-        pass
-    else:
-        assert False, "Didn't raise BadArgument."
 
 
 def test_full_name(mock_field: Field):
