@@ -113,10 +113,10 @@ class ManyToMany(Generic[_REF, _THROUGH]):
         other_ref: str,
         other: str,
     ) -> None:
-        self.here = here
-        self.here_ref = here_ref
-        self.other_ref = other_ref
-        self.other = other
+        self._here = here
+        self._here_ref = here_ref
+        self._other_ref = other_ref
+        self._other = other
 
     async def fetchmany(
         self, con: Connection | None = None
@@ -222,8 +222,8 @@ class _RealManyToMany:
 
         self.orig = orig
 
-        mm_h_model, _mm_h_field = self.orig.here_ref.split(".")
-        mm_o_model, _mm_o_field = self.orig.other_ref.split(".")
+        mm_h_model, _mm_h_field = self.orig._here_ref.split(".")
+        mm_o_model, _mm_o_field = self.orig._other_ref.split(".")
         assert mm_h_model == mm_o_model
 
         mm_model = cast(
@@ -233,13 +233,13 @@ class _RealManyToMany:
         mm_h_field = cast("Field", getattr(mm_model, _mm_h_field))
         mm_o_field = cast("Field", getattr(mm_model, _mm_o_field))
 
-        _ot_model, _ot_field = self.orig.other.split(".")
+        _ot_model, _ot_field = self.orig._other.split(".")
         ot_model = cast("Type[Model]", getattr(model_inst.database, _ot_model))
 
         ot_field = cast("Field", getattr(ot_model, _ot_field))
 
         self.model = model_inst
-        self.field = cast("Field", getattr(model_inst, self.orig.here))
+        self.field = cast("Field", getattr(model_inst, self.orig._here))
         self.mm_model = mm_model
         self.mm_h_field = mm_h_field
         self.mm_o_field = mm_o_field
