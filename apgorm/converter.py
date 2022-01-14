@@ -45,7 +45,7 @@ class Converter(Generic[_ORIG, _CONV]):
         raise NotImplementedError  # pragma: no cover
 
 
-_INTEF = TypeVar("_INTEF", IntEnum, IntFlag)
+_INTEF = TypeVar("_INTEF", bound="Union[IntFlag, IntEnum]")
 
 
 class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
@@ -63,7 +63,7 @@ class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
         self._type: Type[_INTEF] = type_
 
     def from_stored(self, value: int) -> _INTEF:
-        return self._type(value)
+        return cast(_INTEF, self._type(value))
 
     def to_stored(self, value: _INTEF) -> int:
         return cast(Union[IntEnum, IntFlag], value).value

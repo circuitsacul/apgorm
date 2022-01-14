@@ -100,7 +100,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         return f"{self.model.tablename}.{self.name}"
 
     def add_validator(
-        self: _SELF, validator: Validator[Callable[[_T], bool]]
+        self: _SELF, validator: Validator[Callable[[_C], bool]]
     ) -> _SELF:
         """Add a validator to the value of this field."""
 
