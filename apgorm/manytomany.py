@@ -39,7 +39,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
     """A useful tool to simplify many-to-many references.
 
     Args:
-        here (str): The field name on the current column.
+        here (str): The field name on the current model.
         here_ref (str): The model and field name on the "middle" table (in the
         example below, the middle table is Player) in the format of
         "model.field".
