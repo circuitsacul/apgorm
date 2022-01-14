@@ -320,7 +320,7 @@ class Model:
         for attr_name in dir(cls):
             try:
                 attr = getattr(cls, attr_name)
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 continue
 
             if isinstance(attr, BaseField):
