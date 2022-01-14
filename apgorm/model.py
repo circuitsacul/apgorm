@@ -106,7 +106,7 @@ class Model:
                 if d is not UNDEF.UNDEF:
                     value = d
                 else:
-                    continue
+                    continue  # pragma: no cover  # (pytest bug)
             if isinstance(f, ConverterField) and convert:
                 if not override_validator:
                     f._validate(value)
