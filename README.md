@@ -2,6 +2,7 @@
 [![pytest](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml/badge.svg)](https://github.com/TrigonDev/apgorm/actions/workflows/pytest.yml)
 [![pypi](https://github.com/TrigonDev/apgorm/actions/workflows/pypi.yml/badge.svg)](https://pypi.org/project/apgorm)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/TrigonDev/apgorm/main.svg)](https://results.pre-commit.ci/latest/github/TrigonDev/apgorm/main)
+[![codecov](https://codecov.io/gh/TrigonDev/apgorm/branch/main/graph/badge.svg?token=LEY276K4NS)](https://codecov.io/gh/TrigonDev/apgorm)
 
 
 An asynchronous ORM wrapped around asyncpg. Examples can be found under `examples/`. Run examples with `python -m examples.<example_name>` (`python -m examples.basic`).
