@@ -37,6 +37,7 @@ from .constraints.constraint import Constraint
 from .constraints.exclude import Exclude
 from .constraints.foreign_key import ForeignKey, ForeignKeyAction
 from .constraints.primary_key import PrimaryKey
+from .constraints.unique import Unique
 from .converter import Converter, IntEFConverter
 from .database import Database
 from .field import BaseField, ConverterField, Field
@@ -91,6 +92,7 @@ __all__ = (
     "ForeignKeyAction",
     "PrimaryKey",
     "Exclude",
+    "Unique",
     "Index",
     "IndexType",
     "Migration",
