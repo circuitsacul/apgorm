@@ -52,7 +52,7 @@ def select(
     sql += Block(r("FROM"), tablename)
 
     if where is not None:
-        sql += Block(r("WHERE"), where)
+        sql += Block(r("WHERE"), wrap(where))
 
     if order_by is not UNDEF.UNDEF:
         sql += Block(r("ORDER BY"), order_by)
