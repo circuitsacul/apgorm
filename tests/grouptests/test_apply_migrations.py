@@ -95,7 +95,6 @@ async def test_load_unapplied_all(
 async def test_load_unapplied_exc(
     patch_fetch: tuple[asyncio.Future, Mock],
     db: Database,
-    mocker: MockerFixture,
 ):
     ret, func = patch_fetch
     ret.set_exception(asyncpg.UndefinedTableError)

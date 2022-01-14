@@ -74,12 +74,8 @@ def test_validate(mock_field: Field, mocker: MockerFixture):
 
     assert mock_field.add_validator(works)._validate(None) is None
 
-    try:
+    with pytest.raises(InvalidFieldValue):
         mock_field.add_validator(fails)._validate(None)
-    except InvalidFieldValue:
-        pass
-    else:
-        assert False, "Didn't raise InvalidFieldValue."
 
     mock_field._validators = []
     try:
@@ -106,12 +102,8 @@ def test_copy(mock_field: Field):
 
 
 def test_value(mock_field: Field):
-    try:
+    with pytest.raises(UndefinedFieldValue):
         mock_field.v
-    except UndefinedFieldValue:
-        pass
-    else:
-        assert False, "Didn't raise UndefinedFieldValue."
 
     mock_field.v = "hello"
 
@@ -134,12 +126,8 @@ def test_with_converter(mock_field: Field, mocker: MockerFixture):
     convf_init = mock_field.with_converter(i := MyConv())
     convf_type = mock_field.with_converter(MyConv)
 
-    try:
+    with pytest.raises(UndefinedFieldValue):
         convf_init.v
-    except UndefinedFieldValue:
-        pass
-    else:
-        assert False, "Didn't raise UndefinedFieldValue."
 
     convf_init.v = "1"
     convf_type.v = "1"

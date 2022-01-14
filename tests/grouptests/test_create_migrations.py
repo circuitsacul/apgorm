@@ -23,6 +23,8 @@
 import shutil
 from pathlib import Path
 
+import pytest
+
 import apgorm
 from apgorm.types import VarChar
 
@@ -65,12 +67,8 @@ def test_migrations():
     assert not UDB.must_create_migrations()
 
     # Test trying to create migration when none are needed
-    try:
+    with pytest.raises(apgorm.exceptions.NoMigrationsToCreate):
         UDB.create_migrations()
-    except apgorm.exceptions.NoMigrationsToCreate:
-        pass
-    else:
-        assert False, "Didn't raise NoMigrationsToCreate"
 
     # Test with override
     UDB.create_migrations(allow_empty=True)

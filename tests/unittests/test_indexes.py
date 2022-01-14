@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from apgorm import Database, Index, IndexType, Model
 from apgorm.exceptions import BadArgument
 from apgorm.types import VarChar
@@ -50,12 +52,8 @@ def test_creation():
     assert multi_index.fields == [SomeModel.name, SomeModel.other]
 
     # test 0 field error
-    try:
+    with pytest.raises(BadArgument):
         Index(SomeModel, [])
-    except BadArgument:
-        pass
-    else:
-        assert False, "Didn't raise BadArgument."
 
     # test other exceptions
     for t in IndexType:
