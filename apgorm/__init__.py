@@ -77,7 +77,6 @@ from .sql.sql import (
 )
 from .undefined import UNDEF
 from .utils.lazy_list import LazyList
-from .validator import Validator
 
 __version__ = metadata.version(__name__)
 
@@ -123,7 +122,6 @@ __all__ = (
     "PoolAcquireContext",
     "IntEFConverter",
     "UNDEF",
-    "Validator",
     "and_",
     "join",
     "or_",

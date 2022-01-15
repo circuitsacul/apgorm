@@ -29,7 +29,6 @@ from .exceptions import BadArgument, InvalidFieldValue, UndefinedFieldValue
 from .migrations.describe import DescribeField
 from .sql.sql import Comparable, r
 from .undefined import UNDEF
-from .validator import Validator
 
 if TYPE_CHECKING:  # pragma: no cover
     from .model import Model
@@ -41,6 +40,7 @@ _SELF = TypeVar("_SELF", bound="BaseField", covariant=True)
 _T = TypeVar("_T")
 _C = TypeVar("_C")
 _F = TypeVar("_F", bound="SqlType")
+VALIDATOR = Callable[[_C], bool]
 
 
 class BaseField(Comparable, Generic[_F, _T, _C]):
@@ -76,7 +76,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         self.changed: bool = False
         self._value: _T | UNDEF = UNDEF.UNDEF
 
-        self._validators: list[Validator] = []
+        self._validators: list[VALIDATOR[_C]] = []
 
     @property
     def v(self) -> _C:
@@ -99,9 +99,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
         return f"{self.model.tablename}.{self.name}"
 
-    def add_validator(
-        self: _SELF, validator: Validator[Callable[[_C], bool]]
-    ) -> _SELF:
+    def add_validator(self: _SELF, validator: VALIDATOR[_C]) -> _SELF:
         """Add a validator to the value of this field."""
 
         self._validators.append(validator)
