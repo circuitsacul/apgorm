@@ -63,7 +63,7 @@ class Database:
     indexes: Sequence[Index] | None = None
     """A list of indexes for the database."""
 
-    def __init__(self, migrations_folder: Path) -> None:
+    def __init__(self, migrations_folder: Path | str) -> None:
         """Initialize the database.
 
         Args:
@@ -71,7 +71,11 @@ class Database:
             are/will be stored.
         """
 
-        self._migrations_folder = migrations_folder
+        self._migrations_folder = (
+            Path(migrations_folder)
+            if isinstance(migrations_folder, str)
+            else migrations_folder
+        )
         self._all_models: list[Type[Model]] = []
 
         for attr_name in dir(self):

@@ -62,6 +62,12 @@ def test_updates_models_and_fields():
     assert DB.users.primary_key[0] is DB.users.name
 
 
+def test_str_folder():
+    STR = apgorm.Database("tests/migrations")
+    assert isinstance(STR._migrations_folder, Path)
+    assert STR._migrations_folder == DB._migrations_folder
+
+
 def test_collects_models():
     assert User in DB._all_models
     assert User is DB.users
