@@ -1,2 +1,2 @@
 def untested_func():
-  print("hi")
+    print("hi")
