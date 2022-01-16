@@ -4,7 +4,7 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/TrigonDev/apgorm/main.svg)](https://results.pre-commit.ci/latest/github/TrigonDev/apgorm/main)
 [![codecov](https://codecov.io/gh/TrigonDev/apgorm/branch/main/graph/badge.svg?token=LEY276K4NS)](https://codecov.io/gh/TrigonDev/apgorm)
 
-[Documentation](https://github.com/trigondev/apgorm/wiki) | [CONTRIBUTING.md](https://github.com/trigondev/apgorm/tree/main/CONTRIBUTING.md)
+[Documentation](https://github.com/trigondev/apgorm/wiki) | [CONTRIBUTING.md](https://github.com/trigondev/.github/tree/main/CONTRIBUTING.md)
 
 An asynchronous ORM wrapped around asyncpg. Examples can be found under `examples/`. Run examples with `python -m examples.<example_name>` (`python -m examples.basic`).
 
