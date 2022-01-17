@@ -238,6 +238,21 @@ class Model:
         return res
 
     @classmethod
+    async def count(
+        cls: Type[_SELF],
+        con: Connection | None = None,
+        /,
+        **values,
+    ) -> int:
+        """Get the number of rows matching these params.
+
+        Returns:
+            int: The count.
+        """
+
+        return await cls.fetch_query(con=con).where(**values).count()
+
+    @classmethod
     def fetch_query(
         cls: Type[_SELF], con: Connection | None = None
     ) -> FetchQueryBuilder[_SELF]:

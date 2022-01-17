@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Sequence, Type
+from typing import TYPE_CHECKING, Any, Literal, Sequence, Type, overload
 
 from apgorm.field import BaseField
 from apgorm.sql.sql import SQL, Block, join, r, wrap
@@ -33,9 +33,35 @@ if TYPE_CHECKING:  # pragma: no cover
     from apgorm.model import Model
 
 
+@overload
 def select(
+    *,
+    from_: Model | Type[Model] | Block,
+    fields: Sequence[BaseField | Block] | None = ...,
+    where: Block[Bool] | None = ...,
+    order_by: SQL | UNDEF = ...,
+    reverse: bool = ...,
+    limit: int | None = ...,
+) -> Block:
+    ...
+
+
+@overload
+def select(
+    *,
+    from_: Model | Type[Model] | Block,
+    count: Literal[True] = True,
+    where: Block[Bool] | None = ...,
+    limit: int | None = ...,
+) -> Block:
+    ...
+
+
+def select(
+    *,
     from_: Model | Type[Model] | Block,
     fields: Sequence[BaseField | Block] | None = None,
+    count: bool = False,
     where: Block[Bool] | None = None,
     order_by: SQL | UNDEF = UNDEF.UNDEF,
     reverse: bool = False,
@@ -43,10 +69,12 @@ def select(
 ) -> Block[Any]:
     sql = Block[Any](r("SELECT"))
 
-    if fields is None:
-        sql += Block(r("*"))
-    else:
+    if count:
+        sql += Block(r("COUNT(1)"))
+    elif fields is not None:
         sql += join(r(","), *fields, wrap=True)
+    else:
+        sql += Block(r("*"))
 
     tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
     sql += Block(r("FROM"), tablename)

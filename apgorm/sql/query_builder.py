@@ -30,6 +30,7 @@ from typing import (
     Generic,
     Type,
     TypeVar,
+    cast,
 )
 
 from apgorm.undefined import UNDEF
@@ -190,6 +191,17 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             return None
         return self.model(True, **res)
 
+    async def count(self) -> int:
+        """SELECT COUNT(1) ...
+
+        Returns:
+            int: The count.
+        """
+
+        return cast(
+            int, await self.con.fetchval(*self._get_block(count=True).render())
+        )
+
     async def cursor(self) -> AsyncGenerator[_T, None]:
         """Return an iterator of the resulting models.
 
@@ -204,7 +216,18 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             async for res in cursor:
                 yield self.model(True, **res)
 
-    def _get_block(self, limit: int | None = None) -> Block:
+    def _get_block(
+        self,
+        limit: int | None = None,
+        count: bool = False,
+    ) -> Block:
+        if count:
+            return select(
+                from_=self.model,
+                where=self._where_logic(),
+                count=True,
+                limit=limit,
+            )
         return select(
             from_=self.model,
             where=self._where_logic(),
