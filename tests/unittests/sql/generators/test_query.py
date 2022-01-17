@@ -44,7 +44,7 @@ DB = Database(None)
 
 @pytest.mark.parametrize("model", [MyModel, MyModel(), apgorm.r("mymodel")])
 def test_select_table_model(model):
-    q = query.select(model)
+    q = query.select(from_=model)
     assert q.render() == ("SELECT * FROM mymodel", [])
 
 
@@ -57,7 +57,7 @@ def test_select_table_model(model):
     ],
 )
 def test_select_table_fields(fields):
-    q = query.select(MyModel, fields=fields)
+    q = query.select(from_=MyModel, fields=fields)
     fs = [
         f.render_no_params() if isinstance(f, Block) else f.full_name
         for f in fields
@@ -67,5 +67,10 @@ def test_select_table_fields(fields):
 
 
 def test_where_logic():
-    q = query.select(MyModel, where=apgorm.r("name=$1"))
+    q = query.select(from_=MyModel, where=apgorm.r("name=$1"))
     assert q.render() == ("SELECT * FROM mymodel WHERE ( name=$1 )", [])
+
+
+def test_count():
+    q = query.select(from_=MyModel, count=True)
+    assert q.render() == ("SELECT COUNT(1) FROM mymodel", [])
