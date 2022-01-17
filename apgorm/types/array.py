@@ -35,7 +35,6 @@ class Array(SqlType["list[_T | None]"]):
     Args:
         subtype (SqlType): The subtype (can be another Array for multiple
         dimensions).
-        size (int, optional): The size of the array. Defaults to None.
 
     Example:
     ```
@@ -46,9 +45,8 @@ class Array(SqlType["list[_T | None]"]):
     https://www.postgresql.org/docs/14/arrays.html
     """
 
-    def __init__(self, subtype: SqlType[_T], size: int | None = None) -> None:
+    def __init__(self, subtype: SqlType[_T]) -> None:
         self._subtype = subtype
-        self._size = size
 
         def _get_arrays(
             t: SqlType, arrays: list[Array] | None = None
@@ -62,22 +60,7 @@ class Array(SqlType["list[_T | None]"]):
 
         arrays, final = _get_arrays(self)
 
-        self._sql = final._sql + "".join(
-            [
-                ("[]" if a.size is None else f"[{a.size}]")
-                for a in reversed(arrays)
-            ]
-        )
-
-    @property
-    def size(self) -> int | None:
-        """The size of the array.
-
-        Returns:
-            int | None: The size of the array.
-        """
-
-        return self._size
+        self._sql = final._sql + "".join(["[]" for _ in reversed(arrays)])
 
     @property
     def subtype(self) -> SqlType[_T]:
