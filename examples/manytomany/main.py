@@ -97,7 +97,7 @@ async def _main(db: Database):
             if random.randint(0, 1) == 1:
                 await g.users.add(u)  # or, await u.games.add(g)
 
-    # for each user, get all their games (using subqueries)
+    # for each user, get all their games
     for user in all_users:
         print(f"Games {user} is in:")
         _games = await user.games.fetchmany()
@@ -105,7 +105,7 @@ async def _main(db: Database):
 
     print("")
 
-    # for each game, get all the users (using the ManyToMany)
+    # for each game, get all the users
     for g in all_games:
         print(f"Users for game {g}:")
         _users = await g.users.fetchmany()
