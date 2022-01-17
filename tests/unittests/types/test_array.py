@@ -25,19 +25,16 @@ import pytest
 from apgorm.types import Array, Int  # for subtypes
 
 
-@pytest.mark.parametrize("size", [None, 5])
 @pytest.mark.parametrize(
     "subtype",
-    [Int(), Array(Int()), Array(Int(), 5)],
+    [Int(), Array(Int()), Array(Array(Int()))],
 )
-def test_array_init(subtype, size):
-    a = Array(subtype, size)
+def test_array_init(subtype):
+    a = Array(subtype)
 
-    assert a.size == size
     assert a.subtype is subtype
 
 
 def test_array_sql():
     assert Array(Int())._sql == "INTEGER[]"
-    assert Array(Int(), 5)._sql == "INTEGER[5]"
-    assert Array(Array(Int(), 3), 9)._sql == "INTEGER[3][9]"
+    assert Array(Array(Int()))._sql == "INTEGER[][]"
