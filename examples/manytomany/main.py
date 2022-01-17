@@ -101,6 +101,8 @@ async def _main(db: Database):
     for user in all_users:
         print(f"Games {user} is in:")
         _games = await user.games.fetchmany()
+        num = await user.games.count()
+        assert num == len(_games)
         print(" - " + "\n - ".join([repr(g) for g in _games]))
 
     print("")

@@ -129,6 +129,19 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
         raise NotImplementedError  # pragma: no cover
 
+    async def count(self, con: Connection | None = None) -> int:
+        """Returns the count.
+
+        Warning: To be efficient, this returns the count of *middle* models,
+        which may differ from the number of final models if you did not use
+        ForeignKeys properly.
+
+        Returns:
+            int: The count.
+        """
+
+        raise NotImplementedError  # pragma: no cover
+
     async def add(
         self, other: _REF, con: Connection | None = None
     ) -> _THROUGH:
@@ -263,6 +276,13 @@ class _RealManyToMany:
                 .exists()
             )
             .fetchmany()
+        )
+
+    async def count(self, con: Connection | None = None) -> int:
+        return (
+            await self.mm_model.fetch_query(con=con)
+            .where(self.mm_h_field.eq(self.field.v))
+            .count()
         )
 
     async def clear(
