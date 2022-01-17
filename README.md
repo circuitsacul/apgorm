@@ -39,7 +39,7 @@ class Database(apgorm.Database):
 
 Intializing the database:
 ```py
-db = Database(migrations_folder=pathlib.Path("path/to/migrations"))
+db = Database(migrations_folder="path/to/migrations")
 await db.connect(database="database name")
 ```
 
