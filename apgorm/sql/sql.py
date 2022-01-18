@@ -230,6 +230,9 @@ class Comparable:
     lteq = _Op["Bool"]("<=")
     gteq = _Op["Bool"](">=")
 
+    any = _Func["Any"]("ANY")
+    all = _Func["Any"]("ALL")
+
 
 class Block(Comparable, Generic[_SQLT_CO]):
     """Represents a list of raw sql and parameters."""
