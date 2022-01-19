@@ -45,7 +45,14 @@ class Unique(Constraint):
         ```
         """
 
-        self.fields = [r(f) if isinstance(f, str) else f for f in fields]
+        self.fields = [
+            r(f)
+            if isinstance(f, str)
+            else f
+            if isinstance(f, Block)
+            else r(f.name)
+            for f in fields
+        ]
 
     def _creation_sql(self) -> Block:
         return Block(
