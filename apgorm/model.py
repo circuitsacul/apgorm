@@ -348,6 +348,8 @@ class Model:
                         [
                             f.name
                             if isinstance(f, BaseField)
+                            else f
+                            if isinstance(f, str)
                             else f.render_no_params()
                             for f in attr.fields
                         ],

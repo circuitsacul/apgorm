@@ -44,21 +44,22 @@ class PrimaryKey(Constraint):
         ```
         """
 
-        self.fields = [
+        self.fields = fields
+
+    def _creation_sql(self) -> Block:
+        fields = [
             r(f)
             if isinstance(f, str)
             else f
             if isinstance(f, Block)
             else r(f.name)
-            for f in fields
+            for f in self.fields
         ]
-
-    def _creation_sql(self) -> Block:
         return Block(
             r("CONSTRAINT"),
             r(self.name),
             r("PRIMARY KEY ("),
-            join(r(","), *self.fields),
+            join(r(","), *fields),
             r(")"),
             wrap=True,
         )
