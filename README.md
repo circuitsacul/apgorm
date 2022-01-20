@@ -10,6 +10,8 @@ An asynchronous ORM wrapped around asyncpg. Examples can be found under `example
 
 Please note that this library is not for those learning SQL or Postgres. Although the basic usage of apgorm is straightforward, you will run into problems, especially with migrations, if you don't understand regular SQL well.
 
+If you need support, you can contact me `Circuit#3397` after joining [this server](https://discord.gg/dGAzZDaTS9). I don't accept friend requests.
+
 ## Features
  - Fairly straightforward and easy-to-use.
  - Support for basic migrations.
