@@ -46,8 +46,8 @@ def test_model_converter(mocker):
     c = _dict_model_converter(m := mocker.Mock())
     ret = c({"hello": "world"})
 
-    assert m.return_value is ret
-    m.assert_called_once_with(True, hello="world")
+    assert m._from_raw.return_value is ret
+    m._from_raw.assert_called_once_with(hello="world")
 
 
 @pytest.mark.parametrize("type_", ALL_BUILDERS)
@@ -132,5 +132,5 @@ async def test_fqb_fetchmany(mocker):
     ll = await q.fetchmany()
     cnv = ll[0]
     assert ll._data == [{"hello": "world"}]
-    assert cnv is m.return_value
-    m.assert_called_once_with(True, hello="world")
+    assert cnv is m._from_raw.return_value
+    m._from_raw.assert_called_once_with(hello="world")

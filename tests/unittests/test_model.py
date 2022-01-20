@@ -182,7 +182,7 @@ def test_validate_in_init():
         User(status=UserStatus.INVISIBLE)
 
     User(status=UserStatus.OFFLINE)
-    User(True, status=UserStatus.INVISIBLE)
+    User._from_raw(status=UserStatus.INVISIBLE)
 
 
 def test_gets_default():
