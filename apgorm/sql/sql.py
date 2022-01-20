@@ -205,7 +205,7 @@ class _Func(Generic[_SQLT]):
         assert isinstance(inst, Comparable)
         if self.rside:
             return wrap(wrap(inst._get_block()), r(self.func))
-        return wrap(r(self.func), wrap(inst._get_block()))
+        return sql(r(self.func), wrap(inst._get_block()))
 
 
 class Comparable:
