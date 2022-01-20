@@ -49,7 +49,7 @@ _T = TypeVar("_T", bound="Model")
 
 def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
     def converter(values: dict[str, Any]) -> _T:
-        return model(True, **values)
+        return model._from_raw(**values)
 
     return converter
 
@@ -189,7 +189,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         res = await self.con.fetchrow(*self._get_block().render())
         if res is None:
             return None
-        return self.model(True, **res)
+        return self.model._from_raw(**res)
 
     async def count(self) -> int:
         """SELECT COUNT(1) ...
@@ -214,7 +214,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             *self._get_block().render(), con=con
         ) as cursor:
             async for res in cursor:
-                yield self.model(True, **res)
+                yield self.model._from_raw(**res)
 
     def _get_block(
         self,
@@ -331,8 +331,8 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
             Model: The model that was inserted.
         """
 
-        return self.model(
-            True, **await self.con.fetchrow(*self._get_block().render())
+        return self.model._from_raw(
+            **await self.con.fetchrow(*self._get_block().render())
         )
 
     def _get_block(self) -> Block:

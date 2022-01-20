@@ -90,7 +90,7 @@ class Model:
     primary_key: tuple[BaseField, ...]
     """The primary key for the model. All models MUST have a primary key."""
 
-    def __init__(self, override_validator: bool = False, /, **values) -> None:
+    def __init__(self, **values) -> None:
         copied_fields: dict[str, BaseField] = {}
 
         for f in self.all_fields.values():
@@ -108,15 +108,13 @@ class Model:
                 else:
                     continue  # pragma: no cover  # (pytest bug)
             if isinstance(f, ConverterField) and convert:
-                if not override_validator:
-                    f._validate(value)
+                f._validate(value)
                 f._value = f.converter.to_stored(value)
             else:
-                if not override_validator:
-                    if isinstance(f, ConverterField):
-                        f._validate(f.converter.from_stored(value))
-                    else:
-                        f._validate(value)
+                if isinstance(f, ConverterField):
+                    f._validate(f.converter.from_stored(value))
+                else:
+                    f._validate(value)
                 f._value = value
 
         # carry the copies of the fields over to primary_key so that
@@ -287,6 +285,13 @@ class Model:
     def _update_from_model(self: _SELF, updated: _SELF) -> None:
         for f in updated.all_fields.values():
             self.all_fields[f.name]._value = f._value
+
+    @classmethod
+    def _from_raw(cls: type[_SELF], **values) -> _SELF:
+        n = cls()
+        for k, v in values.items():
+            n.all_fields[k]._value = v
+        return n
 
     @classmethod
     def _primary_key(cls) -> PrimaryKey:
