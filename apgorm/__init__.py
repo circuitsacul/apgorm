@@ -121,7 +121,6 @@ __all__ = (
     "ConverterField",
     "PoolAcquireContext",
     "IntEFConverter",
-    "DecimalConverter",
     "UNDEF",
     "and_",
     "join",

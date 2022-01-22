@@ -22,7 +22,6 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
 from enum import IntEnum, IntFlag
 from typing import Generic, Type, TypeVar, Union, cast
 
