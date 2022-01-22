@@ -68,13 +68,3 @@ class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
 
     def to_stored(self, value: _INTEF) -> int:
         return cast(Union[IntEnum, IntFlag], value).value
-
-
-class DecimalConverter(Converter[Decimal, int]):
-    """Converter that converts Decimal to int."""
-
-    def from_stored(self, value: Decimal) -> int:
-        return int(value)
-
-    def to_stored(self, value: int) -> Decimal:
-        return Decimal(value)
