@@ -93,15 +93,6 @@ class Database:
             attr.tablename = attr_name
             self._all_models.append(attr)
 
-            all_fields, all_constraints = attr._special_attrs()
-
-            for name, field in all_fields.items():
-                field.model = attr
-                field.name = name
-
-            for name, constraint in all_constraints.items():
-                constraint.name = name
-
         self.pool: Pool | None = None
 
     # migration functions

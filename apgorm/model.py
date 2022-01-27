@@ -90,6 +90,28 @@ class Model:
     primary_key: tuple[BaseField, ...]
     """The primary key for the model. All models MUST have a primary key."""
 
+    def __init_subclass__(cls) -> None:
+        cls.all_fields = {}
+        cls.all_constraints = {}
+        cls._all_mtm = {}
+
+        for key, value in cls.__dict__.items():
+            if isinstance(value, BaseField):
+                value.name = key
+                value.model = cls
+                cls.all_fields[key] = value
+
+            elif isinstance(value, Constraint):
+                if isinstance(value, PrimaryKey):
+                    raise SpecifiedPrimaryKey(
+                        cls.__name__, [str(f) for f in value.fields]
+                    )
+                value.name = key
+                cls.all_constraints[key] = value
+
+            elif isinstance(value, ManyToMany):
+                cls._all_mtm[key] = value
+
     def __init__(self, **values) -> None:
         copied_fields: dict[str, BaseField] = {}
 
@@ -328,47 +350,6 @@ class Model:
             check_constraints=check,
             exclude_constraints=exclude,
         )
-
-    @classmethod
-    def _special_attrs(
-        cls,
-    ) -> tuple[dict[str, BaseField], dict[str, Constraint]]:
-        fields: dict[str, BaseField] = {}
-        constraints: dict[str, Constraint] = {}
-        mtm: dict[str, ManyToMany] = {}
-
-        for attr_name in dir(cls):
-            try:
-                attr = getattr(cls, attr_name)
-            except AttributeError:  # pragma: no cover
-                continue
-
-            if isinstance(attr, BaseField):
-                fields[attr_name] = attr
-
-            elif isinstance(attr, Constraint):
-                if isinstance(attr, PrimaryKey):
-                    raise SpecifiedPrimaryKey(
-                        cls.__name__,
-                        [
-                            f.name
-                            if isinstance(f, BaseField)
-                            else f
-                            if isinstance(f, str)
-                            else f.render_no_params()
-                            for f in attr.fields
-                        ],
-                    )
-                constraints[attr_name] = attr
-
-            elif isinstance(attr, ManyToMany):
-                mtm[attr_name] = attr
-
-        cls.all_fields = fields
-        cls.all_constraints = constraints
-        cls._all_mtm = mtm
-
-        return fields, constraints
 
     def _pk_fields(self) -> dict[str, Any]:
         return {f.name: f.v for f in self.primary_key}
