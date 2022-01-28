@@ -144,37 +144,9 @@ def assert_transaction(db: PatchedDBMethods):
     db.con.transaction.return_value.__aenter__.assert_called_once_with()
 
 
-def test_attr_copies():
-    user = User()
-
-    for name, field in user.all_fields.items():
-        assert field is getattr(user, name)
-        assert field.name == name
-        assert getattr(user, name).name == name
-        assert [pk is user.all_fields[pk.name] for pk in user.primary_key]
-
-        assert field is not User.all_fields[name]
-        assert User.all_fields[name] is getattr(User, name)
-        assert [pk is User.all_fields[pk.name] for pk in User.primary_key]
-
-    for name, constraint in user.all_constraints.items():
-        assert constraint is getattr(user, name)
-        assert constraint.name == name
-        assert getattr(user, name).name == name
-
-        assert constraint is User.all_constraints[name]
-        assert User.all_constraints[name] is getattr(User, name)
-
-    for name, mtm in user._all_mtm.items():
-        assert mtm is not getattr(user, name)
-        assert mtm is getattr(User, name)
-        assert getattr(User, name) is User._all_mtm[name]
-
-
 def test_converter_field_in_init():
     user = User(status=UserStatus.OFFLINE)
-    assert user.status.v is UserStatus.OFFLINE
-    assert user.status._value == UserStatus.OFFLINE.value
+    assert user._raw_values["status"] == UserStatus.OFFLINE.value
 
 
 def test_validate_in_init():
@@ -182,15 +154,15 @@ def test_validate_in_init():
         User(status=UserStatus.INVISIBLE)
 
     User(status=UserStatus.OFFLINE)
-    User._from_raw(status=UserStatus.INVISIBLE)
+    User._from_raw(status=UserStatus.INVISIBLE.value)
 
 
 def test_gets_default():
     user = User()
 
-    assert user.status.v is UserStatus.OFFLINE
-    assert user.default_fact.v == "hello, world"
-    assert user.name._value is apgorm.UNDEF.UNDEF
+    assert user.status is UserStatus.OFFLINE
+    assert user.default_fact == "hello, world"
+    assert "name" not in user._raw_values
 
 
 @pytest.mark.asyncio
@@ -203,8 +175,9 @@ async def test_delete(db: PatchedDBMethods, mocker: MockerFixture):
 
     user = User(userid=5)
     ret = await user.delete()
-    assert ret.userid.v == 1
-    assert user.userid.v == 5
+    assert user is not ret
+    assert ret.userid == 1
+    assert user.userid == 5
 
 
 @pytest.mark.asyncio
@@ -239,10 +212,10 @@ async def test_save_normal(db: PatchedDBMethods, mocker: MockerFixture):
     mocker.patch.object(apgorm.UpdateQueryBuilder, "execute", new_execute)
 
     user = User(userid=1)
-    user.name.v = "New Name"
+    user.name = "New Name"
     await user.save()
 
-    assert user.userid.v == 5  # updated
+    assert user.userid == 5  # updated
 
 
 @pytest.mark.asyncio

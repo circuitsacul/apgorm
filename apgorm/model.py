@@ -31,7 +31,7 @@ from .constraints.foreign_key import ForeignKey
 from .constraints.primary_key import PrimaryKey
 from .constraints.unique import Unique
 from .exceptions import ModelNotFound, SpecifiedPrimaryKey
-from .field import BaseField, ConverterField
+from .field import BaseField
 from .manytomany import ManyToMany
 from .migrations.describe import DescribeConstraint, DescribeTable
 from .sql.query_builder import (
@@ -78,9 +78,13 @@ class Model:
     `Model.fetch_query`.
     """
 
-    all_fields: dict[str, BaseField]
-    all_constraints: dict[str, Constraint]
+    _all_fields: dict[str, BaseField]
+    _all_constraints: dict[str, Constraint]
     _all_mtm: dict[str, ManyToMany]
+    _changed_fields: set[str]
+
+    _raw_values: dict[str, Any]
+    _columns: set[str]
 
     tablename: str  # populated by Database
     """The name of the table, populated by Database."""
@@ -91,15 +95,18 @@ class Model:
     """The primary key for the model. All models MUST have a primary key."""
 
     def __init_subclass__(cls) -> None:
-        cls.all_fields = {}
-        cls.all_constraints = {}
+        cls._all_fields = {}
+        cls._all_constraints = {}
         cls._all_mtm = {}
+        cls._changed_fields = set()
+        cls._columns = set()
 
         for key, value in cls.__dict__.items():
             if isinstance(value, BaseField):
                 value.name = key
                 value.model = cls
-                cls.all_fields[key] = value
+                cls._all_fields[key] = value
+                cls._columns.add(value.name)
 
             elif isinstance(value, Constraint):
                 if isinstance(value, PrimaryKey):
@@ -107,45 +114,20 @@ class Model:
                         cls.__name__, [str(f) for f in value.fields]
                     )
                 value.name = key
-                cls.all_constraints[key] = value
+                cls._all_constraints[key] = value
 
             elif isinstance(value, ManyToMany):
                 cls._all_mtm[key] = value
 
     def __init__(self, **values) -> None:
-        copied_fields: dict[str, BaseField] = {}
+        self._raw_values: dict[str, Any] = {}
 
-        for f in self.all_fields.values():
-            f = f.copy()
-            copied_fields[f.name] = f
-            setattr(self, f.name, f)
-
-            convert: bool = True
-            value = values.get(f.name, UNDEF.UNDEF)
-            if value is UNDEF.UNDEF:
-                d = f._get_default()
-                convert = False
-                if d is not UNDEF.UNDEF:
-                    value = d
-                else:
-                    continue  # pragma: no cover  # (pytest bug)
-            if isinstance(f, ConverterField) and convert:
-                f._validate(value)
-                f._value = f.converter.to_stored(value)
-            else:
-                if isinstance(f, ConverterField):
-                    f._validate(f.converter.from_stored(value))
-                else:
-                    f._validate(value)
-                f._value = value
-
-        # carry the copies of the fields over to primary_key so that
-        # Model.field is Model.primary_key[index of that field]
-        self.primary_key = tuple(
-            [copied_fields[f.name] for f in self.primary_key]
-        )
-
-        self.all_fields = copied_fields
+        for f in self._all_fields.values():
+            if f.name in values:
+                f.__set__(self, values[f.name])
+            elif (d := f._get_default()) is not UNDEF.UNDEF:
+                self._raw_values[f.name] = d
+            self._changed_fields.clear()
 
         for name, mtm in self._all_mtm.items():
             mtm = mtm._generate_mtm(self)
@@ -176,10 +158,10 @@ class Model:
         if len(changed_fields) == 0:
             return
         q = self.update_query(con=con).where(**self._pk_fields())
-        q.set(**{f.name: f._value for f in changed_fields})
+        q.set(**changed_fields)
         result = await q.execute()
-        self._update_from_model(result[0])
-        self._set_saved()
+        self._raw_values.update(result[0]._raw_values)
+        self._changed_fields.clear()
 
     async def create(self: _SELF, con: Connection | None = None) -> _SELF:
         """Insert the model into the database. Updates the values on this
@@ -193,12 +175,12 @@ class Model:
         q = self.insert_query(con=con)
         q.set(
             **{
-                f.name: f._value
-                for f in self.all_fields.values()
-                if f._value is not UNDEF.UNDEF
+                f.name: self._raw_values[f.name]
+                for f in self._all_fields.values()
+                if f.name in self._raw_values
             }
         )
-        self._update_from_model(await q.execute())
+        self._raw_values.update((await q.execute())._raw_values)
 
         return self
 
@@ -207,7 +189,7 @@ class Model:
         database."""
 
         res = await self.fetch(con, **self._pk_fields())
-        self._update_from_model(res)
+        self._raw_values.update(res._raw_values)
 
     @classmethod
     async def exists(
@@ -304,15 +286,10 @@ class Model:
 
         return InsertQueryBuilder(model=cls, con=con)
 
-    def _update_from_model(self: _SELF, updated: _SELF) -> None:
-        for f in updated.all_fields.values():
-            self.all_fields[f.name]._value = f._value
-
     @classmethod
     def _from_raw(cls: type[_SELF], **values) -> _SELF:
         n = cls()
-        for k, v in values.items():
-            n.all_fields[k]._value = v
+        n._raw_values = values
         return n
 
     @classmethod
@@ -331,7 +308,7 @@ class Model:
         check: list[DescribeConstraint] = []
         fk: list[DescribeConstraint] = []
         exclude: list[DescribeConstraint] = []
-        for c in cls.all_constraints.values():
+        for c in cls._all_constraints.values():
             if isinstance(c, Check):
                 check.append(c._describe())
             elif isinstance(c, ForeignKey):
@@ -343,7 +320,7 @@ class Model:
 
         return DescribeTable(
             name=cls.tablename,
-            fields=[f._describe() for f in cls.all_fields.values()],
+            fields=[f._describe() for f in cls._all_fields.values()],
             fk_constraints=fk,
             pk_constraint=cls._primary_key()._describe(),
             unique_constraints=unique,
@@ -352,14 +329,10 @@ class Model:
         )
 
     def _pk_fields(self) -> dict[str, Any]:
-        return {f.name: f.v for f in self.primary_key}
+        return {f.name: self._raw_values[f.name] for f in self.primary_key}
 
-    def _set_saved(self) -> None:
-        for f in self.all_fields.values():
-            f.changed = False
-
-    def _get_changed_fields(self) -> list[BaseField]:
-        return [f for f in self.all_fields.values() if f.changed]
+    def _get_changed_fields(self) -> dict[str, Any]:
+        return {n: self._raw_values[n] for n in self._changed_fields}
 
     # magic methods
     def __repr__(self) -> str:
@@ -367,9 +340,9 @@ class Model:
             f"<{self.__class__.__name__} "
             + " ".join(
                 [
-                    f"{f.name}:{f.v!r}"
-                    for f in self.all_fields.values()
-                    if f.use_repr and f._value is not UNDEF.UNDEF
+                    f"{f.name}:{self._raw_values[f.name]!r}"
+                    for f in self._all_fields.values()
+                    if f.use_repr and f.name in self._raw_values
                 ]
             )
             + ">"

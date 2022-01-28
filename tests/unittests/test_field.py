@@ -24,11 +24,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from apgorm import Converter, Field
-from apgorm.exceptions import (
-    BadArgument,
-    InvalidFieldValue,
-    UndefinedFieldValue,
-)
+from apgorm.exceptions import BadArgument, InvalidFieldValue
 
 
 @pytest.fixture(scope="function")
@@ -84,27 +80,8 @@ def test_validate(mock_field: Field, mocker: MockerFixture):
     # test that Field.v = value calls validators
     validator = mocker.Mock()
     mock_field._validators = [validator]
-    mock_field.v = 1
+    mock_field._validate(1)
     validator.assert_called_once_with(1)
-
-
-def test_copy(mock_field: Field):
-    cp = mock_field.copy()
-
-    assert cp is not mock_field
-    assert cp.model is mock_field.model
-    assert cp._copy_kwargs() == mock_field._copy_kwargs()
-    assert cp.name == mock_field.name
-
-
-def test_value(mock_field: Field):
-    with pytest.raises(UndefinedFieldValue):
-        mock_field.v
-
-    mock_field.v = "hello"
-
-    assert mock_field.v == "hello"
-    assert mock_field.changed
 
 
 class MyConv(Converter):
@@ -115,32 +92,9 @@ class MyConv(Converter):
         return str(value)
 
 
-def test_with_converter(mock_field: Field, mocker: MockerFixture):
-    to_stored_spy = mocker.spy(MyConv, "to_stored")
-    from_stored_spy = mocker.spy(MyConv, "from_stored")
-
+def test_with_converter(mock_field: Field):
     convf_init = mock_field.with_converter(i := MyConv())
     convf_type = mock_field.with_converter(MyConv)
 
-    with pytest.raises(UndefinedFieldValue):
-        convf_init.v
-
-    convf_init.v = "1"
-    convf_type.v = "1"
-
-    assert convf_init.v == "1"
-    assert convf_type.v == "1"
-    to_stored_spy.assert_any_call(i, "1")
-    to_stored_spy.assert_any_call(convf_type.converter, "1")
-    from_stored_spy.assert_any_call(i, 1)
-    from_stored_spy.assert_any_call(convf_type.converter, 1)
-
-
-def test_converter_field_copy(mock_field: Field):
-    field = mock_field.with_converter(MyConv())
-    cp = field.copy()
-
-    assert cp is not field
-    assert cp._copy_kwargs() == field._copy_kwargs()
-    assert cp.model is field.model
-    assert cp.name == field.name
+    assert convf_init.converter is i
+    assert isinstance(convf_type.converter, MyConv)

@@ -61,12 +61,12 @@ async def _main():
     ).create()
     print("Created player", player)
 
-    print("player.status.v:", player.status.v)  # PlayerStatus.NOT_FINISHED
-    print("players.status._value:", player.status._value)  # 0
+    print("player.status:", player.status)  # PlayerStatus.NOT_FINISHED
+    print("players.status raw value:", player._raw_values["status"])  # 0
 
-    player.status.v = PlayerStatus.WINNER
+    player.status = PlayerStatus.WINNER
     await player.save()
-    print(f"Set status to {player.status.v!r} ({player.status._value!r})")
+    print(f"Set status to {player.status!r}")
 
     await player.delete()
 

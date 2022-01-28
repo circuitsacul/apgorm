@@ -144,7 +144,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         user = await User.fetch(name="Circuit")
         games = await Game.fetch_query().where(
             Player.fetch_query().where(
-                gameid=Game.id_, username=user.name.v
+                gameid=Game.id_, username=user.name
             ).exists()
         ).fetchmany()
         ```
@@ -254,7 +254,7 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
         return delete(
             self.model,
             self._where_logic(),
-            list(self.model.all_fields.values()),
+            list(self.model._all_fields.values()),
         )
 
 
@@ -297,7 +297,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
             self.model,
             {k: v for k, v in self._set_values.items()},
             where=self._where_logic(),
-            return_fields=list(self.model.all_fields.values()),
+            return_fields=list(self.model._all_fields.values()),
         )
 
 
@@ -343,5 +343,5 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
             self.model,
             value_names,
             value_values,
-            return_fields=list(self.model.all_fields.values()),
+            return_fields=list(self.model._all_fields.values()),
         )
