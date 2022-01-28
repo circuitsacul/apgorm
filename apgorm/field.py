@@ -22,7 +22,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Generic, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    Type,
+    TypeVar,
+    overload,
+)
 
 from .converter import Converter
 from .exceptions import BadArgument, InvalidFieldValue, UndefinedFieldValue
@@ -73,25 +81,23 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
         self.use_repr = use_repr
 
-        self.changed: bool = False
-        self._value: _T | UNDEF = UNDEF.UNDEF
-
         self._validators: list[VALIDATOR[_C]] = []
 
-    @property
-    def v(self) -> _C:
-        """The current value of the field.
+    @overload
+    def __get__(self: _SELF, inst: None, cls: Type[Model]) -> _SELF:
+        ...
 
-        Raises:
-            UndefinedFieldValue: The field value is undefined.
-            Probably means that the model has not been created.
-        """
+    @overload
+    def __get__(self, inst: Model, cls: Type[Model]) -> _C:
+        ...
 
-        raise NotImplementedError  # pragma: no cover
+    def __get__(
+        self: _SELF, inst: Model | None, cls: Type[Model]
+    ) -> _SELF | _C:
+        raise NotImplementedError
 
-    @v.setter
-    def v(self, other: _C):
-        raise NotImplementedError  # pragma: no cover
+    def __set__(self, inst: Model, value: _C):
+        raise NotImplementedError
 
     @property
     def full_name(self) -> str:
@@ -104,17 +110,6 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
         self._validators.append(validator)
         return self
-
-    def copy(self) -> BaseField[_F, _T, _C]:
-        """Create a copy of the field."""
-
-        n = self.__class__(**self._copy_kwargs())
-        if hasattr(self, "name"):
-            n.name = self.name
-        if hasattr(self, "model"):
-            n.model = self.model
-        n._validators = self._validators
-        return n
 
     def _validate(self, value: _C) -> None:
         for v in self._validators:
@@ -154,17 +149,19 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
 
 class Field(BaseField[_F, _T, _T]):
-    @property
-    def v(self) -> _T:
-        if self._value is UNDEF.UNDEF:
-            raise UndefinedFieldValue(self)
-        return self._value
+    if not TYPE_CHECKING:
 
-    @v.setter
-    def v(self, other: _T):
-        self._validate(other)
-        self._value = other
-        self.changed = True
+        def __get__(self, inst, cls):
+            if not inst:
+                return self
+            if self.name not in inst._raw_values:
+                raise UndefinedFieldValue(self)
+            return inst._raw_values[self.name]
+
+        def __set__(self, inst, value):
+            self._validate(value)
+            inst._raw_values[self.name] = value
+            inst._changed_fields.add(self.name)
 
     def with_converter(
         self, converter: Converter[_T, _C] | Type[Converter[_T, _C]]
@@ -195,19 +192,18 @@ class ConverterField(BaseField[_F, _T, _C]):
         self.converter: Converter[_T, _C] = kwargs.pop("converter")
         super().__init__(*args, **kwargs)
 
-    @property
-    def v(self) -> _C:
-        if self._value is UNDEF.UNDEF:
-            raise UndefinedFieldValue(self)
-        return self.converter.from_stored(self._value)
+    if not TYPE_CHECKING:
 
-    @v.setter
-    def v(self, other: _C):
-        self._validate(other)
-        self._value = self.converter.to_stored(other)
-        self.changed = True
+        def __get__(
+            self, inst: Model | None, cls: Type[Model]
+        ) -> ConverterField | Any:
+            if not inst:
+                return self
+            if self.name not in inst._raw_values:
+                raise UndefinedFieldValue(self)
+            return self.converter.from_stored(inst._raw_values[self.name])
 
-    def _copy_kwargs(self) -> dict[str, Any]:
-        dct = super()._copy_kwargs()
-        dct["converter"] = self.converter
-        return dct
+        def __set__(self, inst, value):
+            self._validate(value)
+            inst._raw_values[self.name] = self.converter.to_stored(value)
+            inst._changed_fields.add(self.name)

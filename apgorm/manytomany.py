@@ -153,7 +153,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
         # OR
         player = await games.users.add(user)
         # OR
-        player = await Player(username=user.name.v, gameid=game.id.v).create()
+        player = await Player(username=user.name, gameid=game.id).create()
         ```
 
         Returns:
@@ -175,7 +175,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
         deleted_players = await games.user.remove(user)
         # OR
         deleted_players = await Player.delete_query().where(
-            username=user.name.v, gameid=game.id.v
+            username=user.name, gameid=game.id
         ).execute()
         ```
 
@@ -197,7 +197,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
         ```
         deleted_players = await user.games.clear()
         deleted_players = await Player.delete_query().where(
-            username=user.name.v
+            username=user.name
         ).execute()
         ```
 
@@ -252,7 +252,9 @@ class _RealManyToMany:
         ot_field = cast("Field", getattr(ot_model, _ot_field))
 
         self.model = model_inst
-        self.field = cast("Field", getattr(model_inst, self.orig._here))
+        self.field = cast(
+            "Field", getattr(model_inst.__class__, self.orig._here)
+        )
         self.mm_model = mm_model
         self.mm_h_field = mm_h_field
         self.mm_o_field = mm_o_field
@@ -270,7 +272,9 @@ class _RealManyToMany:
             .where(
                 self.mm_model.fetch_query()
                 .where(
-                    self.mm_h_field.eq(self.field.v),
+                    self.mm_h_field.eq(
+                        self.model._raw_values[self.field.name]
+                    ),
                     self.mm_o_field.eq(self.ot_field),
                 )
                 .exists()
@@ -281,7 +285,7 @@ class _RealManyToMany:
     async def count(self, con: Connection | None = None) -> int:
         return (
             await self.mm_model.fetch_query(con=con)
-            .where(self.mm_h_field.eq(self.field.v))
+            .where(self.mm_h_field.eq(self.model._raw_values[self.field.name]))
             .count()
         )
 
@@ -290,14 +294,14 @@ class _RealManyToMany:
     ) -> LazyList[dict, Model]:
         return (
             await self.mm_model.delete_query(con=con)
-            .where(self.mm_h_field.eq(self.field.v))
+            .where(self.mm_h_field.eq(self.model._raw_values[self.field.name]))
             .execute()
         )
 
     async def add(self, other: Model, con: Connection | None = None) -> Model:
         values = {
-            self.mm_h_field.name: self.field.v,
-            self.mm_o_field.name: other.all_fields[self.ot_field.name].v,
+            self.mm_h_field.name: self.model._raw_values[self.field.name],
+            self.mm_o_field.name: other._raw_values[self.ot_field.name],
         }
         return await self.mm_model(**values).create(con=con)
 
@@ -305,8 +309,8 @@ class _RealManyToMany:
         self, other: Model, con: Connection | None = None
     ) -> LazyList[dict, Model]:
         values = {
-            self.mm_h_field.name: self.field.v,
-            self.mm_o_field.name: other.all_fields[self.ot_field.name].v,
+            self.mm_h_field.name: self.model._raw_values[self.field.name],
+            self.mm_o_field.name: other._raw_values[self.ot_field.name],
         }
         return (
             await self.mm_model.delete_query(con=con).where(**values).execute()

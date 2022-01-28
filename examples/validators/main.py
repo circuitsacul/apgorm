@@ -52,9 +52,9 @@ def main():
 
     user = User(username="Circuit")
     try:
-        user.email.v = "not an email"
+        user.email = "not an email"
     except InvalidFieldValue:
         print("'not an email' is not a valid email!")
 
-    user.email.v = "something@gmail.com"
-    print(f"{user.email.v} is a valid email!")
+    user.email = "something@gmail.com"
+    print(f"{user.email} is a valid email!")

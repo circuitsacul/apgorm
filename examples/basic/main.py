@@ -68,7 +68,7 @@ async def _main():
 
     # set the nickname for all good users to "Good Guy"
     for user in good_users:
-        user.nickname.v = "Good Guy"
+        user.nickname = "Good Guy"
         await user.save()
 
     # OR, you can use User.update_query...

@@ -177,7 +177,7 @@ async def test_create_and_apply_migrations(patch_pool, mocker):
     )
 
     mig = mocker.Mock()
-    mig.id_.v = 0
+    mig.id_ = 0
     f.fetch_query.return_value.fetchmany.return_value = _make_fut([mig])
 
     await UDB.apply_migrations()
@@ -206,7 +206,7 @@ async def test_load_unapplied_all(
     erase_migrations()
     ret, func = patch_fetch
     mig = mocker.Mock()
-    mig.id_.v = 0
+    mig.id_ = 0
     ret.set_result([mig])
 
     assert len(await UDB.load_unapplied_migrations()) == 0
@@ -247,7 +247,7 @@ async def test_must_apply_false(
 
     ret, func = patch_fetch
     mig = mocker.Mock()
-    mig.id_.v = 0
+    mig.id_ = 0
     ret.set_result([mig])
 
     assert not await UDB.must_apply_migrations()

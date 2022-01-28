@@ -184,8 +184,7 @@ class Database:
 
         try:
             applied = [
-                m.id_.v
-                for m in await self._migrations.fetch_query().fetchmany()
+                m.id_ for m in await self._migrations.fetch_query().fetchmany()
             ]
         except asyncpg.UndefinedTableError:
             applied = []
