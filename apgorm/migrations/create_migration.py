@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from apgorm.sql.generators import alter
-from apgorm.sql.sql import r
+from apgorm.sql.sql import raw
 from apgorm.undefined import UNDEF
 
 from .describe import DescribeConstraint
@@ -46,14 +46,14 @@ def _handle_constraint_list(
 
     new_constraints = [
         alter.add_constraint(
-            r(tablename),
+            raw(tablename),
             c.raw_sql,
         ).render_no_params()
         for c in currd.values()
         if c.name not in origd
     ]
     drop_constraints = [
-        alter.drop_constraint(r(tablename), r(c.name)).render_no_params()
+        alter.drop_constraint(raw(tablename), raw(c.name)).render_no_params()
         for c in origd.values()
         if c.name not in currd
     ]
@@ -65,13 +65,13 @@ def _handle_constraint_list(
 
         new_constraints.append(
             alter.add_constraint(
-                r(tablename), currc.raw_sql
+                raw(tablename), currc.raw_sql
             ).render_no_params()
         )
         drop_constraints.append(
             alter.drop_constraint(
-                r(tablename),
-                r(currc.name),
+                raw(tablename),
+                raw(currc.name),
             ).render_no_params()
         )
 
@@ -88,12 +88,12 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
 
     # tables  # TODO: renamed tables
     add_tables = [
-        alter.add_table(r(key)).render_no_params()
+        alter.add_table(raw(key)).render_no_params()
         for key in curr_tables
         if key not in last_tables
     ]
     drop_tables = [
-        alter.drop_table(r(key)).render_no_params()
+        alter.drop_table(raw(key)).render_no_params()
         for key in last_tables
         if key not in curr_tables
     ]
@@ -111,14 +111,14 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         if name not in last_indexes
     ]
     drop_indexes: list[str] = [
-        alter.drop_index(r(c.name)).render_no_params()
+        alter.drop_index(raw(c.name)).render_no_params()
         for name, c in last_indexes.items()
         if name not in curr_indexes
     ]
     for curr, last in comm_indexes:
         if curr.raw_sql != last.raw_sql:
             drop_indexes.append(
-                alter.drop_index(r(curr.name)).render_no_params()
+                alter.drop_index(raw(curr.name)).render_no_params()
             )
             add_indexes.append(
                 alter.add_index(curr.raw_sql).render_no_params()
@@ -155,7 +155,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         add_fields.extend(
             [
                 alter.add_field(
-                    r(tablename), r(key), r(f.type_)
+                    raw(tablename), raw(key), raw(f.type_)
                 ).render_no_params()
                 for key, f in curr_fields.items()
                 if key not in last_fields
@@ -163,7 +163,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         )
         drop_fields.extend(
             [
-                alter.drop_field(r(tablename), r(key)).render_no_params()
+                alter.drop_field(raw(tablename), raw(key)).render_no_params()
                 for key, f in last_fields.items()
                 if key not in curr_fields
             ]
@@ -186,8 +186,8 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
             if set_nn_to is not None:
                 field_not_nulls.append(
                     alter.set_field_not_null(
-                        r(tablename),
-                        r(field.name),
+                        raw(tablename),
+                        raw(field.name),
                         set_nn_to,
                     ).render_no_params()
                 )

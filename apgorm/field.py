@@ -35,7 +35,7 @@ from typing import (
 from .converter import Converter
 from .exceptions import BadArgument, InvalidFieldValue, UndefinedFieldValue
 from .migrations.describe import DescribeField
-from .sql.sql import Comparable, r
+from .sql.sql import Comparable, raw
 from .undefined import UNDEF
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -136,7 +136,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
         return UNDEF.UNDEF
 
     def _get_block(self) -> Block:
-        return r(self.full_name)
+        return raw(self.full_name)
 
     def _copy_kwargs(self) -> dict[str, Any]:
         return dict(

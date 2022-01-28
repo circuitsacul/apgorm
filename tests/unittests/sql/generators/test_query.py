@@ -42,7 +42,7 @@ class Database(apgorm.Database):
 DB = Database(None)
 
 
-@pytest.mark.parametrize("model", [MyModel, MyModel(), apgorm.r("mymodel")])
+@pytest.mark.parametrize("model", [MyModel, MyModel(), apgorm.raw("mymodel")])
 def test_select_table_model(model):
     q = query.select(from_=model)
     assert q.render() == ("SELECT * FROM mymodel", [])
@@ -51,8 +51,8 @@ def test_select_table_model(model):
 @pytest.mark.parametrize(
     "fields",
     [
-        [apgorm.r("somefield"), MyModel.somefield],
-        [apgorm.r("somefield")],
+        [apgorm.raw("somefield"), MyModel.somefield],
+        [apgorm.raw("somefield")],
         [MyModel.somefield],
     ],
 )
@@ -67,7 +67,7 @@ def test_select_table_fields(fields):
 
 
 def test_where_logic():
-    q = query.select(from_=MyModel, where=apgorm.r("name=$1"))
+    q = query.select(from_=MyModel, where=apgorm.raw("name=$1"))
     assert q.render() == ("SELECT * FROM mymodel WHERE ( name=$1 )", [])
 
 

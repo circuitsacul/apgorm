@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from apgorm.sql.sql import Block, join, r
+from apgorm.sql.sql import Block, join, raw
 
 from .constraint import Constraint
 
@@ -48,18 +48,18 @@ class PrimaryKey(Constraint):
 
     def _creation_sql(self) -> Block:
         fields = [
-            r(f)
+            raw(f)
             if isinstance(f, str)
             else f
             if isinstance(f, Block)
-            else r(f.name)
+            else raw(f.name)
             for f in self.fields
         ]
         return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("PRIMARY KEY ("),
-            join(r(","), *fields),
-            r(")"),
+            raw("CONSTRAINT"),
+            raw(self.name),
+            raw("PRIMARY KEY ("),
+            join(raw(","), *fields),
+            raw(")"),
             wrap=True,
         )

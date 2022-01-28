@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from apgorm.sql.sql import Block, r
+from apgorm.sql.sql import Block, raw
 
 from .constraint import Constraint
 
@@ -40,13 +40,13 @@ class Check(Constraint):
             check (Block[Bool]): The raw SQL for the check constraint.
         """
 
-        self.check = r(check) if isinstance(check, str) else check
+        self.check = raw(check) if isinstance(check, str) else check
 
     def _creation_sql(self) -> Block:
         return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("CHECK"),
+            raw("CONSTRAINT"),
+            raw(self.name),
+            raw("CHECK"),
             Block(self.check, wrap=True),
             wrap=True,
         )

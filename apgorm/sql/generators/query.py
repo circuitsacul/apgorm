@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal, Sequence, Type, overload
 
 from apgorm.field import BaseField
-from apgorm.sql.sql import SQL, Block, join, r, wrap
+from apgorm.sql.sql import SQL, Block, join, raw, wrap
 from apgorm.types.boolean import Bool
 from apgorm.undefined import UNDEF
 
@@ -67,27 +67,27 @@ def select(
     reverse: bool = False,
     limit: int | None = None,
 ) -> Block[Any]:
-    sql = Block[Any](r("SELECT"))
+    sql = Block[Any](raw("SELECT"))
 
     if count:
-        sql += Block(r("COUNT(1)"))
+        sql += Block(raw("COUNT(1)"))
     elif fields is not None:
-        sql += join(r(","), *fields, wrap=True)
+        sql += join(raw(","), *fields, wrap=True)
     else:
-        sql += Block(r("*"))
+        sql += Block(raw("*"))
 
-    tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
-    sql += Block(r("FROM"), tablename)
+    tablename = from_ if isinstance(from_, Block) else raw(from_.tablename)
+    sql += Block(raw("FROM"), tablename)
 
     if where is not None:
-        sql += Block(r("WHERE"), wrap(where))
+        sql += Block(raw("WHERE"), wrap(where))
 
     if order_by is not UNDEF.UNDEF:
-        sql += Block(r("ORDER BY"), order_by)
-        sql += r("DESC" if reverse else "ASC")
+        sql += Block(raw("ORDER BY"), order_by)
+        sql += raw("DESC" if reverse else "ASC")
 
     if limit is not None:
-        sql += Block(r("LIMIT"), r(str(limit)))
+        sql += Block(raw("LIMIT"), raw(str(limit)))
 
     return wrap(sql)
 
@@ -97,14 +97,14 @@ def delete(
     where: Block[Bool] | None = None,
     return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block:
-    tablename = from_ if isinstance(from_, Block) else r(from_.tablename)
-    sql = Block[Any](r("DELETE FROM"), tablename)
+    tablename = from_ if isinstance(from_, Block) else raw(from_.tablename)
+    sql = Block[Any](raw("DELETE FROM"), tablename)
     if where is not None:
-        sql += Block(r("WHERE"), where)
+        sql += Block(raw("WHERE"), where)
     if return_fields is not None:
         sql += Block(
-            r("RETURNING"),
-            join(r(","), *return_fields),
+            raw("RETURNING"),
+            join(raw(","), *return_fields),
         )
     return wrap(sql)
 
@@ -115,22 +115,22 @@ def update(
     where: Block[Bool] | None = None,
     return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block:
-    tablename = table if isinstance(table, Block) else r(table.tablename)
-    sql = Block[Any](r("UPDATE"), tablename, r("SET"))
+    tablename = table if isinstance(table, Block) else raw(table.tablename)
+    sql = Block[Any](raw("UPDATE"), tablename, raw("SET"))
 
     set_logic: list[Block] = []
     for key, value in values.items():
-        set_logic.append(Block(key, r("="), value))
+        set_logic.append(Block(key, raw("="), value))
 
-    sql += join(r(","), *set_logic)
+    sql += join(raw(","), *set_logic)
 
     if where is not None:
-        sql += Block(r("WHERE"), where)
+        sql += Block(raw("WHERE"), where)
 
     if return_fields is not None:
         sql += Block(
-            r("RETURNING"),
-            join(r(","), *return_fields),
+            raw("RETURNING"),
+            join(raw(","), *return_fields),
         )
 
     return wrap(sql)
@@ -142,22 +142,22 @@ def insert(
     values: Sequence[SQL],
     return_fields: Sequence[BaseField | Block] | None = None,
 ) -> Block[Any]:
-    tablename = into if isinstance(into, Block) else r(into.tablename)
+    tablename = into if isinstance(into, Block) else raw(into.tablename)
 
-    sql = Block[Any](r("INSERT INTO"), tablename)
+    sql = Block[Any](raw("INSERT INTO"), tablename)
     if len(fields) > 0:
-        sql += join(r(","), *fields, wrap=True)
+        sql += join(raw(","), *fields, wrap=True)
 
     if len(values) > 0:
-        sql += Block[Any](r("VALUES"), join(r(","), *values, wrap=True))
+        sql += Block[Any](raw("VALUES"), join(raw(","), *values, wrap=True))
     else:
-        sql += Block[Any](r("DEFAULT VALUES"))
+        sql += Block[Any](raw("DEFAULT VALUES"))
 
     if return_fields is not None:
-        sql += r("RETURNING")
+        sql += raw("RETURNING")
         if isinstance(return_fields, (BaseField, Block)):
             sql += return_fields
         else:
-            sql += join(r(","), *return_fields)
+            sql += join(raw(","), *return_fields)
 
     return wrap(sql)

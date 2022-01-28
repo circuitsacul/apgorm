@@ -37,7 +37,7 @@ from apgorm.undefined import UNDEF
 from apgorm.utils.lazy_list import LazyList
 
 from .generators.query import delete, insert, select, update
-from .sql import SQL, Block, and_, r, sql, wrap
+from .sql import SQL, Block, and_, raw, sql, wrap
 
 if TYPE_CHECKING:  # pragma: no cover
     from apgorm.connection import Connection
@@ -98,7 +98,7 @@ class FilterQueryBuilder(BaseQueryBuilder[_T]):
         # to perform sql injection, even if the keys are user input.
         self._filters.extend(filters)
         for k, v in values.items():
-            self._filters.append(r(k).eq(v))
+            self._filters.append(raw(k).eq(v))
 
         return self
 
@@ -153,7 +153,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             Block[Bool]: The subquery.
         """
 
-        return sql(r("EXISTS"), wrap(self._get_block()))
+        return sql(raw("EXISTS"), wrap(self._get_block()))
 
     async def fetchmany(self, limit: int | None = None) -> LazyList[dict, _T]:
         """Execute the query and return a list of models.
@@ -279,7 +279,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
             chaining.
         """
 
-        self._set_values.update({r(k): v for k, v in values.items()})
+        self._set_values.update({raw(k): v for k, v in values.items()})
         return self
 
     async def execute(self) -> LazyList[dict, _T]:
@@ -321,7 +321,7 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
             chaining.
         """
 
-        self._set_values.update({r(k): v for k, v in values.items()})
+        self._set_values.update({raw(k): v for k, v in values.items()})
         return self
 
     async def execute(self) -> _T:
