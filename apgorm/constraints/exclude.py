@@ -37,7 +37,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Exclude(Constraint):
     def __init__(
         self,
-        *elements: tuple[BaseField | Block | str, str],
+        *elements: tuple[BaseField[Any, Any, Any] | Block[Any] | str, str],
         using: IndexType = IndexType.BTREE,
         where: Block[Bool] | str | None = None
     ) -> None:
@@ -60,7 +60,7 @@ class Exclude(Constraint):
         ]
         self.where = raw(where) if isinstance(where, str) else where
 
-    def _creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block[Any]:
         sql = Block[Any](
             raw("CONSTRAINT"),
             raw(self.name),

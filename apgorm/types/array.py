@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from .base_type import SqlType
 
@@ -49,8 +49,8 @@ class Array(SqlType["list[_T | None]"]):
         self._subtype = subtype
 
         def _get_arrays(
-            t: SqlType, arrays: list[Array] | None = None
-        ) -> tuple[list[Array], SqlType]:
+            t: SqlType[Any], arrays: list[Array[Any]] | None = None
+        ) -> tuple[list[Array[Any]], SqlType[Any]]:
             arrays = arrays or []
             if isinstance(t, Array):
                 arrays.append(t)

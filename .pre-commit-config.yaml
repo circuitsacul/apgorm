@@ -17,5 +17,6 @@ repos:
     rev: v0.931
     hooks:
       - id: mypy
+        additional_dependencies: [pydantic]
         pass_filenames: false
         entry: mypy .

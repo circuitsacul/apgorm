@@ -62,7 +62,7 @@ class UndefinedFieldValue(ApgormException):
 
     Usually means that the model has not been created."""
 
-    def __init__(self, field: BaseField) -> None:
+    def __init__(self, field: BaseField[Any, Any, Any]) -> None:
         self.field = field
 
         super().__init__(

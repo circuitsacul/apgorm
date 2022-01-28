@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from apgorm.sql.sql import Block, join, raw
 
@@ -33,7 +33,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class PrimaryKey(Constraint):
-    def __init__(self, *fields: BaseField | Block | str) -> None:
+    def __init__(
+        self, *fields: BaseField[Any, Any, Any] | Block[Any] | str
+    ) -> None:
         """Do not use. Specify primary keys like this instead:
 
         ```
@@ -46,7 +48,7 @@ class PrimaryKey(Constraint):
 
         self.fields = fields
 
-    def _creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block[Any]:
         fields = [
             raw(f)
             if isinstance(f, str)

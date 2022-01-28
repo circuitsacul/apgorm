@@ -38,7 +38,7 @@ class PoolAcquireContext:
     async def __aenter__(self) -> Connection:
         return Connection(await self.pac.__aenter__())
 
-    async def __aexit__(self, *exc) -> None:
+    async def __aexit__(self, *exc: Exception) -> None:
         await self.pac.__aexit__(*exc)
 
 
@@ -104,7 +104,7 @@ class Connection:
 
     async def fetchrow(
         self, query: str, params: list[Any] | None = None
-    ) -> dict | None:
+    ) -> dict[str, Any] | None:
         """Execute SQL and return a single row, if any.
 
         Consider using Database.fetchrow() unless you want to manage the

@@ -44,10 +44,10 @@ if TYPE_CHECKING:  # pragma: no cover
     from .types.base_type import SqlType
 
 
-_SELF = TypeVar("_SELF", bound="BaseField", covariant=True)
+_SELF = TypeVar("_SELF", bound="BaseField[Any, Any, Any]", covariant=True)
 _T = TypeVar("_T")
 _C = TypeVar("_C")
-_F = TypeVar("_F", bound="SqlType")
+_F = TypeVar("_F", bound="SqlType[Any]")
 VALIDATOR = Callable[[_C], bool]
 
 
@@ -96,7 +96,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
     ) -> _SELF | _C:
         raise NotImplementedError
 
-    def __set__(self, inst: Model, value: _C):
+    def __set__(self, inst: Model, value: _C) -> None:
         raise NotImplementedError
 
     @property
@@ -135,7 +135,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
             return self._default_factory()
         return UNDEF.UNDEF
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[SqlType[Any]]:
         return raw(self.full_name)
 
     def _copy_kwargs(self) -> dict[str, Any]:
@@ -188,7 +188,7 @@ class Field(BaseField[_F, _T, _T]):
 
 
 class ConverterField(BaseField[_F, _T, _C]):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.converter: Converter[_T, _C] = kwargs.pop("converter")
         super().__init__(*args, **kwargs)
 

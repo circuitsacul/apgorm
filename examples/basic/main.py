@@ -39,7 +39,7 @@ class Database(apgorm.Database):
     users = User
 
 
-async def _main():
+async def _main() -> None:
     await User.delete_query().execute()
 
     # create a user
@@ -85,7 +85,7 @@ async def _main():
     )
 
 
-async def main():
+async def main() -> None:
     db = Database(Path("examples/basic/migrations"))
     await db.connect(database="apgorm_testing_database")
 

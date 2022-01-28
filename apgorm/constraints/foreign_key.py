@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Sequence
+from typing import Any, Sequence
 from typing import cast as typingcast
 
 from apgorm.exceptions import BadArgument
@@ -47,12 +47,15 @@ class ForeignKeyAction(Enum):
 class ForeignKey(Constraint):
     def __init__(
         self,
-        fields: Sequence[Block | BaseField | str] | Block | BaseField | str,
-        ref_fields: Sequence[Block | BaseField | str]
-        | Block
-        | BaseField
+        fields: Sequence[Block[Any] | BaseField[Any, Any, Any] | str]
+        | Block[Any]
+        | BaseField[Any, Any, Any]
         | str,
-        ref_table: Block | str | None = None,
+        ref_fields: Sequence[Block[Any] | BaseField[Any, Any, Any] | str]
+        | Block[Any]
+        | BaseField[Any, Any, Any]
+        | str,
+        ref_table: Block[Any] | str | None = None,
         match_full: bool = False,
         on_delete: ForeignKeyAction = ForeignKeyAction.CASCADE,
         on_update: ForeignKeyAction = ForeignKeyAction.CASCADE,
@@ -79,11 +82,11 @@ class ForeignKey(Constraint):
             BadArgument: Bad arguments were sent to ForeignKey.
         """
 
-        self.fields: Sequence[BaseField | Block] = [
+        self.fields: Sequence[BaseField[Any, Any, Any] | Block[Any]] = [
             raw(f) if isinstance(f, str) else f
             for f in (fields if isinstance(fields, Sequence) else [fields])
         ]
-        self.ref_fields: Sequence[BaseField | Block] = [
+        self.ref_fields: Sequence[BaseField[Any, Any, Any] | Block[Any]] = [
             raw(f) if isinstance(f, str) else f
             for f in (
                 ref_fields
@@ -106,9 +109,9 @@ class ForeignKey(Constraint):
         if len(self.fields) == 0:
             raise BadArgument("Must specify at least on field and ref_field.")
 
-    def _creation_sql(self) -> Block:
-        ref_table: Block
-        ref_fields: list[Block] = []
+    def _creation_sql(self) -> Block[Any]:
+        ref_table: Block[Any]
+        ref_fields: list[Block[Any]] = []
 
         if (
             len(
@@ -131,7 +134,9 @@ class ForeignKey(Constraint):
                     "ref_fields must either all be BaseFields or "
                     "ref_table must be specified."
                 )
-            _ref_fields = typingcast(Sequence[BaseField], _ref_fields)
+            _ref_fields = typingcast(
+                Sequence[BaseField[Any, Any, Any]], _ref_fields
+            )
 
             ref_table = raw(_ref_fields[0].model.tablename)
 

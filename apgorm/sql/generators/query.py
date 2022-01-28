@@ -36,34 +36,34 @@ if TYPE_CHECKING:  # pragma: no cover
 @overload
 def select(
     *,
-    from_: Model | Type[Model] | Block,
-    fields: Sequence[BaseField | Block] | None = ...,
+    from_: Model | Type[Model] | Block[Any],
+    fields: Sequence[BaseField[Any, Any, Any] | Block[Any]] | None = ...,
     where: Block[Bool] | None = ...,
-    order_by: SQL | UNDEF = ...,
+    order_by: SQL[Any] | UNDEF = ...,
     reverse: bool = ...,
     limit: int | None = ...,
-) -> Block:
+) -> Block[Any]:
     ...
 
 
 @overload
 def select(
     *,
-    from_: Model | Type[Model] | Block,
+    from_: Model | Type[Model] | Block[Any],
     count: Literal[True] = True,
     where: Block[Bool] | None = ...,
     limit: int | None = ...,
-) -> Block:
+) -> Block[Any]:
     ...
 
 
 def select(
     *,
-    from_: Model | Type[Model] | Block,
-    fields: Sequence[BaseField | Block] | None = None,
+    from_: Model | Type[Model] | Block[Any],
+    fields: Sequence[BaseField[Any, Any, Any] | Block[Any]] | None = None,
     count: bool = False,
     where: Block[Bool] | None = None,
-    order_by: SQL | UNDEF = UNDEF.UNDEF,
+    order_by: SQL[Any] | UNDEF = UNDEF.UNDEF,
     reverse: bool = False,
     limit: int | None = None,
 ) -> Block[Any]:
@@ -93,10 +93,11 @@ def select(
 
 
 def delete(
-    from_: Model | Type[Model] | Block,
+    from_: Model | Type[Model] | Block[Any],
     where: Block[Bool] | None = None,
-    return_fields: Sequence[BaseField | Block] | None = None,
-) -> Block:
+    return_fields: Sequence[BaseField[Any, Any, Any] | Block[Any]]
+    | None = None,
+) -> Block[Any]:
     tablename = from_ if isinstance(from_, Block) else raw(from_.tablename)
     sql = Block[Any](raw("DELETE FROM"), tablename)
     if where is not None:
@@ -110,15 +111,16 @@ def delete(
 
 
 def update(
-    table: Model | Type[Model] | Block,
-    values: dict[SQL, SQL],
+    table: Model | Type[Model] | Block[Any],
+    values: dict[SQL[Any], SQL[Any]],
     where: Block[Bool] | None = None,
-    return_fields: Sequence[BaseField | Block] | None = None,
-) -> Block:
+    return_fields: Sequence[BaseField[Any, Any, Any] | Block[Any]]
+    | None = None,
+) -> Block[Any]:
     tablename = table if isinstance(table, Block) else raw(table.tablename)
     sql = Block[Any](raw("UPDATE"), tablename, raw("SET"))
 
-    set_logic: list[Block] = []
+    set_logic: list[Block[Any]] = []
     for key, value in values.items():
         set_logic.append(Block(key, raw("="), value))
 
@@ -137,10 +139,11 @@ def update(
 
 
 def insert(
-    into: Model | Type[Model] | Block,
-    fields: Sequence[BaseField | Block],
-    values: Sequence[SQL],
-    return_fields: Sequence[BaseField | Block] | None = None,
+    into: Model | Type[Model] | Block[Any],
+    fields: Sequence[BaseField[Any, Any, Any] | Block[Any]],
+    values: Sequence[SQL[Any]],
+    return_fields: Sequence[BaseField[Any, Any, Any] | Block[Any]]
+    | None = None,
 ) -> Block[Any]:
     tablename = into if isinstance(into, Block) else raw(into.tablename)
 

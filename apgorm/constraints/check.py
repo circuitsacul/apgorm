@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from apgorm.sql.sql import Block, raw
 
@@ -42,7 +42,7 @@ class Check(Constraint):
 
         self.check = raw(check) if isinstance(check, str) else check
 
-    def _creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block[Any]:
         return Block(
             raw("CONSTRAINT"),
             raw(self.name),
