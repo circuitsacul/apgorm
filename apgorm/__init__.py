@@ -71,7 +71,7 @@ from .sql.sql import (
     and_,
     join,
     or_,
-    r,
+    raw,
     sql,
     wrap,
 )
@@ -125,7 +125,7 @@ __all__ = (
     "and_",
     "join",
     "or_",
-    "r",
+    "raw",
     "sql",
     "wrap",
     "types",

@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from apgorm.indexes import IndexType, _IndexType
-from apgorm.sql.sql import Block, join, r, wrap
+from apgorm.sql.sql import Block, join, raw, wrap
 
 from .constraint import Constraint
 
@@ -56,23 +56,23 @@ class Exclude(Constraint):
 
         self.using: _IndexType = using.value
         self.elements = [
-            (r(f) if isinstance(f, str) else f, op) for f, op in elements
+            (raw(f) if isinstance(f, str) else f, op) for f, op in elements
         ]
-        self.where = r(where) if isinstance(where, str) else where
+        self.where = raw(where) if isinstance(where, str) else where
 
     def _creation_sql(self) -> Block:
         sql = Block[Any](
-            r("CONSTRAINT"),
-            r(self.name),
-            r("EXCLUDE USING"),
-            r(self.using.name),
+            raw("CONSTRAINT"),
+            raw(self.name),
+            raw("EXCLUDE USING"),
+            raw(self.using.name),
             join(
-                r(","),
-                *[wrap(f, r("WITH"), r(op)) for f, op in self.elements],
+                raw(","),
+                *[wrap(f, raw("WITH"), raw(op)) for f, op in self.elements],
                 wrap=True,
             ),
         )
         if self.where is not None:
-            sql += Block(r("WHERE"), wrap(self.where))
+            sql += Block(raw("WHERE"), wrap(self.where))
 
         return sql

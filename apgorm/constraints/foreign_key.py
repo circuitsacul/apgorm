@@ -28,7 +28,7 @@ from typing import cast as typingcast
 
 from apgorm.exceptions import BadArgument
 from apgorm.field import BaseField
-from apgorm.sql.sql import Block, join, r
+from apgorm.sql.sql import Block, join, raw
 
 from .constraint import Constraint
 
@@ -80,11 +80,11 @@ class ForeignKey(Constraint):
         """
 
         self.fields: Sequence[BaseField | Block] = [
-            r(f) if isinstance(f, str) else f
+            raw(f) if isinstance(f, str) else f
             for f in (fields if isinstance(fields, Sequence) else [fields])
         ]
         self.ref_fields: Sequence[BaseField | Block] = [
-            r(f) if isinstance(f, str) else f
+            raw(f) if isinstance(f, str) else f
             for f in (
                 ref_fields
                 if isinstance(ref_fields, Sequence)
@@ -92,7 +92,7 @@ class ForeignKey(Constraint):
             )
         ]
         self.ref_table = (
-            r(ref_table) if isinstance(ref_table, str) else ref_table
+            raw(ref_table) if isinstance(ref_table, str) else ref_table
         )
         self.match_full = match_full
         self.on_delete = on_delete
@@ -133,30 +133,34 @@ class ForeignKey(Constraint):
                 )
             _ref_fields = typingcast(Sequence[BaseField], _ref_fields)
 
-            ref_table = r(_ref_fields[0].model.tablename)
+            ref_table = raw(_ref_fields[0].model.tablename)
 
         else:
             ref_table = self.ref_table
 
         ref_fields = [
-            r(f.name) if isinstance(f, BaseField) else f
+            raw(f.name) if isinstance(f, BaseField) else f
             for f in self.ref_fields
         ]
         fields = [
-            r(f.name) if isinstance(f, BaseField) else f for f in self.fields
+            raw(f.name) if isinstance(f, BaseField) else f for f in self.fields
         ]
 
         return Block(
-            r("CONSTRAINT"),
-            r(self.name),
-            r("FOREIGN KEY ("),
-            join(r(","), *fields),
-            r(") REFERENCES"),
+            raw("CONSTRAINT"),
+            raw(self.name),
+            raw("FOREIGN KEY ("),
+            join(raw(","), *fields),
+            raw(") REFERENCES"),
             ref_table,
-            r("("),
-            join(r(","), *ref_fields),
-            (r(") MATCH FULL") if self.match_full else r(") MATCH SIMPLE")),
-            r(f"ON DELETE {self.on_delete.value}"),
-            r(f"ON UPDATE {self.on_update.value}"),
+            raw("("),
+            join(raw(","), *ref_fields),
+            (
+                raw(") MATCH FULL")
+                if self.match_full
+                else raw(") MATCH SIMPLE")
+            ),
+            raw(f"ON DELETE {self.on_delete.value}"),
+            raw(f"ON UPDATE {self.on_update.value}"),
             wrap=True,
         )

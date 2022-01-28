@@ -148,16 +148,16 @@ def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
 def or_(*pieces: SQL[bool]) -> Block[Bool]:
     """Shortcut for `join(r("OR"), value1, value2, ...)`."""
 
-    return join(r("OR"), *pieces, wrap=True)
+    return join(raw("OR"), *pieces, wrap=True)
 
 
 def and_(*pieces: SQL[bool]) -> Block[Bool]:
     """Shortcut for `join(r("AND"), value1, value2, ...)`."""
 
-    return join(r("AND"), *pieces, wrap=True)
+    return join(raw("AND"), *pieces, wrap=True)
 
 
-def r(string: str) -> Block:
+def raw(string: str) -> Block:
     """Treat the string as raw SQL and return a Block.
 
     Never, ever, ever wrap user input in `r()`. A good rule of thumb is that
@@ -191,7 +191,7 @@ class _Op(Generic[_SQLT]):
     ) -> Callable[[SQL], Block[_SQLT]]:
         def operator(other: SQL) -> Block[_SQLT]:
             assert isinstance(inst, Comparable)
-            return wrap(inst._get_block(), r(self.op), other)
+            return wrap(inst._get_block(), raw(self.op), other)
 
         return operator
 
@@ -204,8 +204,8 @@ class _Func(Generic[_SQLT]):
     def __get__(self, inst: object, cls: Type[object]) -> Block[_SQLT]:
         assert isinstance(inst, Comparable)
         if self.rside:
-            return wrap(wrap(inst._get_block()), r(self.func))
-        return sql(r(self.func), wrap(inst._get_block()))
+            return wrap(wrap(inst._get_block()), raw(self.func))
+        return sql(raw(self.func), wrap(inst._get_block()))
 
 
 class Comparable:
@@ -213,7 +213,7 @@ class Comparable:
         raise NotImplementedError  # pragma: no cover
 
     def cast(self, type_: _SQLT) -> Block[_SQLT]:
-        return wrap(self._get_block(), r("::"), r(type_._sql))
+        return wrap(self._get_block(), raw("::"), raw(type_._sql))
 
     # comparison
     is_null = _Func["Bool"]("IS NULL", True)

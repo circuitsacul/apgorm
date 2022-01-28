@@ -22,39 +22,39 @@
 
 from __future__ import annotations
 
-from apgorm.sql.sql import SQL, Block, r
+from apgorm.sql.sql import SQL, Block, raw
 
 
 def add_table(tablename: Block) -> Block:
-    return Block(r("CREATE TABLE"), tablename, r("()"))
+    return Block(raw("CREATE TABLE"), tablename, raw("()"))
 
 
 def drop_table(tablename: Block) -> Block:
-    return Block(r("DROP TABLE"), tablename)
+    return Block(raw("DROP TABLE"), tablename)
 
 
 def add_index(raw_sql: str) -> Block:
-    return Block(r("CREATE"), r(raw_sql))
+    return Block(raw("CREATE"), raw(raw_sql))
 
 
 def drop_index(name: Block) -> Block:
-    return Block(r("DROP INDEX"), name)
+    return Block(raw("DROP INDEX"), name)
 
 
 def _alter_table(tablename: Block, sql: SQL) -> Block:
-    return Block(r("ALTER TABLE"), tablename, sql)
+    return Block(raw("ALTER TABLE"), tablename, sql)
 
 
 def add_constraint(
     tablename: Block,
     constraint_raw_sql: str,
 ) -> Block:
-    return _alter_table(tablename, Block(r("ADD"), r(constraint_raw_sql)))
+    return _alter_table(tablename, Block(raw("ADD"), raw(constraint_raw_sql)))
 
 
 def drop_constraint(tablename: Block, constraint_name: Block) -> Block:
     return _alter_table(
-        tablename, Block(r("DROP CONSTRAINT"), constraint_name)
+        tablename, Block(raw("DROP CONSTRAINT"), constraint_name)
     )
 
 
@@ -62,7 +62,7 @@ def add_field(tablename: Block, fieldname: Block, type_: Block) -> Block:
     return _alter_table(
         tablename,
         Block(
-            r("ADD COLUMN"),
+            raw("ADD COLUMN"),
             fieldname,
             type_,
         ),
@@ -70,14 +70,14 @@ def add_field(tablename: Block, fieldname: Block, type_: Block) -> Block:
 
 
 def drop_field(tablename: Block, fieldname: Block) -> Block:
-    return _alter_table(tablename, Block(r("DROP COLUMN"), fieldname))
+    return _alter_table(tablename, Block(raw("DROP COLUMN"), fieldname))
 
 
 def _alter_field(tablename: Block, fieldname: Block, sql: SQL) -> Block:
     return _alter_table(
         tablename,
         Block(
-            r("ALTER COLUMN"),
+            raw("ALTER COLUMN"),
             fieldname,
             sql,
         ),
@@ -91,6 +91,6 @@ def set_field_not_null(
         tablename,
         fieldname,
         Block(
-            r("SET NOT NULL") if not_null else r("DROP NOT NULL"),
+            raw("SET NOT NULL") if not_null else raw("DROP NOT NULL"),
         ),
     )

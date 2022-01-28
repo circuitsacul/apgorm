@@ -111,7 +111,7 @@ def test_fqb_exists(mocker):
     m.tablename = "tablename"
 
     f = mocker.patch.object(q, "_get_block")
-    f.return_value = apgorm.r("hello")
+    f.return_value = apgorm.raw("hello")
 
     assert q.exists().render() == ("EXISTS ( hello )", [])
 

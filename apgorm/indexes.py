@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Sequence, Type
 from .exceptions import BadArgument
 from .field import BaseField
 from .migrations.describe import DescribeIndex
-from .sql.sql import Block, join, r, wrap
+from .sql.sql import Block, join, raw, wrap
 
 if TYPE_CHECKING:  # pragma: no cover
     from .model import Model
@@ -87,7 +87,7 @@ class Index:
         self.type_: _IndexType = type_.value
         if not isinstance(fields, Sequence):
             fields = [fields]
-        self.fields = [r(f) if isinstance(f, str) else f for f in fields]
+        self.fields = [raw(f) if isinstance(f, str) else f for f in fields]
         self.table = table
         self.unique = unique
 
@@ -118,20 +118,20 @@ class Index:
 
     def _creation_sql(self) -> Block:
         names = [
-            wrap(f) if isinstance(f, Block) else wrap(r(f.name))
+            wrap(f) if isinstance(f, Block) else wrap(raw(f.name))
             for f in self.fields
         ]
 
         return Block(
-            (r("UNIQUE INDEX") if self.unique else r("INDEX")),
-            r(self.get_name()),
-            r("ON"),
-            r(self.table.tablename),
-            r("USING"),
-            r(self.type_.name),
-            r("("),
-            join(r(","), *names),
-            r(")"),
+            (raw("UNIQUE INDEX") if self.unique else raw("INDEX")),
+            raw(self.get_name()),
+            raw("ON"),
+            raw(self.table.tablename),
+            raw("USING"),
+            raw(self.type_.name),
+            raw("("),
+            join(raw(","), *names),
+            raw(")"),
         )
 
     def _describe(self) -> DescribeIndex:
