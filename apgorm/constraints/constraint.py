@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Any
+
 from apgorm.migrations.describe import DescribeConstraint
 from apgorm.sql.sql import Block
 
@@ -33,7 +35,7 @@ class Constraint:
     Populated by Database and will not exist until an instance
     of Database has been created."""
 
-    def _creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block[Any]:
         raise NotImplementedError  # pragma: no cover
 
     def _describe(self) -> DescribeConstraint:

@@ -69,7 +69,7 @@ class Database(apgorm.Database):
     players = Player
 
 
-async def _main(db: Database):
+async def _main(db: Database) -> None:
     # migrations
     if db.must_create_migrations():
         db.create_migrations()
@@ -138,7 +138,7 @@ async def _main(db: Database):
     print("Circuits Games: {}\n".format(await circuit.games.fetchmany()))
 
 
-async def main():
+async def main() -> None:
     db = Database(Path("examples/manytomany/migrations"))
     await db.connect(database="apgorm_testing_database")
     try:

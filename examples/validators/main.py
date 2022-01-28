@@ -47,7 +47,7 @@ class Database(apgorm.Database):
     users = User
 
 
-def main():
+def main() -> None:
     Database(Path("examples/validators/migrations"))
 
     user = User(username="Circuit")

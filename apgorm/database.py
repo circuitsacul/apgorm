@@ -210,7 +210,7 @@ class Database:
             await self._apply_migration(m)
 
     # database functions
-    async def connect(self, **connect_kwargs) -> None:
+    async def connect(self, **connect_kwargs: Any) -> None:
         """Connect to a database. Any kwargs that can be passed to
         asyncpg.create_pool() can be used here.
         """

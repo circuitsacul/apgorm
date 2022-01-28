@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, cast
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
-    from .field import Field
+    from .field import BaseField
     from .model import Model
     from .utils.lazy_list import LazyList
 
@@ -120,7 +120,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
     async def fetchmany(
         self, con: Connection | None = None
-    ) -> LazyList[dict, _REF]:
+    ) -> LazyList[dict[str, Any], _REF]:
         """Fetch all rows from the final table that belong to this instance.
 
         Returns:
@@ -165,7 +165,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
     async def remove(
         self, other: _REF, con: Connection | None = None
-    ) -> LazyList[dict, _THROUGH]:
+    ) -> LazyList[dict[str, Any], _THROUGH]:
         """Remove one or models from this ManyToMany.
 
         Each of these lines does the exact same thing:
@@ -190,7 +190,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
     async def clear(
         self, con: Connection | None = None
-    ) -> LazyList[dict, _THROUGH]:
+    ) -> LazyList[dict[str, Any], _THROUGH]:
         """Remove all instances of the other model from this instance.
 
         Both of these lines do the same thing:
@@ -208,7 +208,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
         raise NotImplementedError  # pragma: no cover
 
-    def _generate_mtm(self, inst: Model) -> ManyToMany:
+    def _generate_mtm(self, inst: Model) -> ManyToMany[_REF, _THROUGH]:
         # NOTE: see comment under _RealManyToMany
         if TYPE_CHECKING:  # pragma: no cover
             return self
@@ -224,7 +224,7 @@ class _RealManyToMany:
     # problem since the only user-facing method is fetchmany().
     def __init__(
         self,
-        orig: ManyToMany,
+        orig: ManyToMany[Any, Any],
         model_inst: Model,
     ) -> None:
         # NOTE: all these casts are ugly, but truthfully
@@ -243,17 +243,24 @@ class _RealManyToMany:
             "Type[Model]", getattr(model_inst.database, mm_h_model)
         )
 
-        mm_h_field = cast("Field", getattr(mm_model, _mm_h_field))
-        mm_o_field = cast("Field", getattr(mm_model, _mm_o_field))
+        mm_h_field = cast(
+            "BaseField[Any, Any, Any]", getattr(mm_model, _mm_h_field)
+        )
+        mm_o_field = cast(
+            "BaseField[Any, Any, Any]", getattr(mm_model, _mm_o_field)
+        )
 
         _ot_model, _ot_field = self.orig._other.split(".")
         ot_model = cast("Type[Model]", getattr(model_inst.database, _ot_model))
 
-        ot_field = cast("Field", getattr(ot_model, _ot_field))
+        ot_field = cast(
+            "BaseField[Any, Any, Any]", getattr(ot_model, _ot_field)
+        )
 
         self.model = model_inst
         self.field = cast(
-            "Field", getattr(model_inst.__class__, self.orig._here)
+            "BaseField[Any, Any, Any]",
+            getattr(model_inst.__class__, self.orig._here),
         )
         self.mm_model = mm_model
         self.mm_h_field = mm_h_field
@@ -266,7 +273,7 @@ class _RealManyToMany:
 
     async def fetchmany(
         self, con: Connection | None = None
-    ) -> LazyList[dict, Model]:
+    ) -> LazyList[dict[str, Any], Model]:
         return (
             await self.ot_model.fetch_query(con=con)
             .where(
@@ -291,7 +298,7 @@ class _RealManyToMany:
 
     async def clear(
         self, con: Connection | None = None
-    ) -> LazyList[dict, Model]:
+    ) -> LazyList[dict[str, Any], Model]:
         return (
             await self.mm_model.delete_query(con=con)
             .where(self.mm_h_field.eq(self.model._raw_values[self.field.name]))
@@ -307,7 +314,7 @@ class _RealManyToMany:
 
     async def remove(
         self, other: Model, con: Connection | None = None
-    ) -> LazyList[dict, Model]:
+    ) -> LazyList[dict[str, Any], Model]:
         values = {
             self.mm_h_field.name: self.model._raw_values[self.field.name],
             self.mm_o_field.name: other._raw_values[self.ot_field.name],

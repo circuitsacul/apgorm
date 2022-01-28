@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Sequence, Type
+from typing import TYPE_CHECKING, Any, Sequence, Type
 
 from .exceptions import BadArgument
 from .field import BaseField
@@ -80,7 +80,10 @@ class Index:
     def __init__(
         self,
         table: Type[Model],
-        fields: Sequence[BaseField | Block | str] | BaseField | Block | str,
+        fields: Sequence[BaseField[Any, Any, Any] | Block[Any] | str]
+        | BaseField[Any, Any, Any]
+        | Block[Any]
+        | str,
         type_: IndexType = IndexType.BTREE,
         unique: bool = False,
     ) -> None:
@@ -116,7 +119,7 @@ class Index:
             cols="_".join(fields),
         ).lower()
 
-    def _creation_sql(self) -> Block:
+    def _creation_sql(self) -> Block[Any]:
         names = [
             wrap(f) if isinstance(f, Block) else wrap(raw(f.name))
             for f in self.fields

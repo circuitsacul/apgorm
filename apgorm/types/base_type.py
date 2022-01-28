@@ -22,13 +22,13 @@
 
 from __future__ import annotations
 
-from typing import Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
 from apgorm.field import Field
 from apgorm.undefined import UNDEF
 
 _T = TypeVar("_T", covariant=True)
-_S = TypeVar("_S", bound="SqlType", covariant=True)
+_S = TypeVar("_S", bound="SqlType[Any]", covariant=True)
 
 
 class SqlType(Generic[_T]):

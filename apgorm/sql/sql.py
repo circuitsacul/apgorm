@@ -42,8 +42,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _T = TypeVar("_T", covariant=True)
 _T2 = TypeVar("_T2")
-_SQLT_CO = TypeVar("_SQLT_CO", bound="SqlType", covariant=True)
-_SQLT = TypeVar("_SQLT", bound="SqlType")
+_SQLT_CO = TypeVar("_SQLT_CO", bound="SqlType[Any]", covariant=True)
+_SQLT = TypeVar("_SQLT", bound="SqlType[Any]")
 SQL = Union[
     "BaseField[SqlType[_T], _T, Any]",
     "Block[SqlType[_T]]",
@@ -89,11 +89,11 @@ def sql(piece: SQL[_T2], /, *, wrap: bool = ...) -> Block[SqlType[_T2]]:
 
 
 @overload
-def sql(*pieces: SQL, wrap: bool = ...) -> Block:
+def sql(*pieces: SQL[Any], wrap: bool = ...) -> Block[Any]:
     ...
 
 
-def sql(*pieces: SQL, wrap: bool = False) -> Block:
+def sql(*pieces: SQL[Any], wrap: bool = False) -> Block[Any]:
     """Convenience function to wrap content in a Block.
 
     It is safe to pass user input to this function.
@@ -116,13 +116,15 @@ def sql(*pieces: SQL, wrap: bool = False) -> Block:
     return Block(*pieces, wrap=wrap)
 
 
-def wrap(*pieces: SQL) -> Block:
+def wrap(*pieces: SQL[Any]) -> Block[Any]:
     """Return the SQL pieces as a Block, wrapping them in parantheses."""
 
     return sql(*pieces, wrap=True)
 
 
-def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
+def join(
+    joiner: SQL[Any], *values: SQL[Any], wrap: bool = False
+) -> Block[Any]:
     """SQL version of "delim".join(values). For example:
 
     ```
@@ -137,7 +139,7 @@ def join(joiner: SQL, *values: SQL, wrap: bool = False) -> Block:
         False.
     """
 
-    new_values: list[SQL] = []
+    new_values: list[SQL[Any]] = []
     for x, v in enumerate(values):
         new_values.append(v)
         if x != len(values) - 1:
@@ -157,7 +159,7 @@ def and_(*pieces: SQL[bool]) -> Block[Bool]:
     return join(raw("AND"), *pieces, wrap=True)
 
 
-def raw(string: str) -> Block:
+def raw(string: str) -> Block[Any]:
     """Treat the string as raw SQL and return a Block.
 
     Never, ever, ever wrap user input in `r()`. A good rule of thumb is that
@@ -188,8 +190,8 @@ class _Op(Generic[_SQLT]):
 
     def __get__(
         self, inst: object, cls: Type[object]
-    ) -> Callable[[SQL], Block[_SQLT]]:
-        def operator(other: SQL) -> Block[_SQLT]:
+    ) -> Callable[[SQL[Any]], Block[_SQLT]]:
+        def operator(other: SQL[Any]) -> Block[_SQLT]:
             assert isinstance(inst, Comparable)
             return wrap(inst._get_block(), raw(self.op), other)
 
@@ -209,7 +211,7 @@ class _Func(Generic[_SQLT]):
 
 
 class Comparable:
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         raise NotImplementedError  # pragma: no cover
 
     def cast(self, type_: _SQLT) -> Block[_SQLT]:
@@ -237,7 +239,7 @@ class Comparable:
 class Block(Comparable, Generic[_SQLT_CO]):
     """Represents a list of raw sql and parameters."""
 
-    def __init__(self, *pieces: SQL | Raw, wrap: bool = False) -> None:
+    def __init__(self, *pieces: SQL[Any] | Raw, wrap: bool = False) -> None:
         """Create a Block. You may find it more convienient to use the `sql()`
         helper function (or `wrap(sql())` if you want the result to be wrapped
         in "( )").
@@ -252,7 +254,7 @@ class Block(Comparable, Generic[_SQLT_CO]):
         ```
         """
 
-        self._pieces: list[Raw | Parameter] = []
+        self._pieces: list[Raw | Parameter[Any]] = []
 
         if len(pieces) == 1 and isinstance(pieces[0], Block):
             block = pieces[0]
@@ -296,16 +298,16 @@ class Block(Comparable, Generic[_SQLT_CO]):
 
     def get_pieces(
         self, force_wrap: bool | None = None
-    ) -> list[Raw | Parameter]:
+    ) -> list[Raw | Parameter[Any]]:
         wrap = self._wrap if force_wrap is None else force_wrap
         if wrap:
             return [Raw("("), *self._pieces, Raw(")")]
         return self._pieces
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         return self
 
-    def __iadd__(self, other: object):
+    def __iadd__(self, other: object) -> Block[Any]:
         if isinstance(other, Block):
             self._pieces.extend(other.get_pieces())
         elif isinstance(other, Parameter):
@@ -325,7 +327,7 @@ class Renderer:
         self._curr_value_id += 1
         return self._curr_value_id
 
-    def render(self, sql: Block) -> tuple[str, list[Any]]:
+    def render(self, sql: Block[Any]) -> tuple[str, list[Any]]:
         sql_pieces: list[str] = []
         params: list[Any] = []
 

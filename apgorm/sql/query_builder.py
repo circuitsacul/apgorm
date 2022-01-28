@@ -61,13 +61,13 @@ class BaseQueryBuilder(Generic[_T]):
         self.model = model
         self.con = con or model.database
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         """Convert the data in the query builder to a Block."""
 
         raise NotImplementedError  # pragma: no cover
 
 
-_S = TypeVar("_S", bound="FilterQueryBuilder")
+_S = TypeVar("_S", bound="FilterQueryBuilder[Any]")
 
 
 class FilterQueryBuilder(BaseQueryBuilder[_T]):
@@ -78,7 +78,7 @@ class FilterQueryBuilder(BaseQueryBuilder[_T]):
 
         self._filters: list[Block[Bool]] = []
 
-    def where(self: _S, *filters: Block[Bool], **values: SQL) -> _S:
+    def where(self: _S, *filters: Block[Bool], **values: SQL[Any]) -> _S:
         """Extend the current where logic.
 
         Example:
@@ -114,12 +114,12 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self._order_by_logic: SQL | UNDEF = UNDEF.UNDEF
+        self._order_by_logic: SQL[Any] | UNDEF = UNDEF.UNDEF
         self._reverse: bool = False
 
     def order_by(
         self,
-        logic: SQL,
+        logic: SQL[Any],
         reverse: bool = False,
     ) -> FetchQueryBuilder[_T]:
         """Specify the order logic of the query.
@@ -155,7 +155,9 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 
         return sql(raw("EXISTS"), wrap(self._get_block()))
 
-    async def fetchmany(self, limit: int | None = None) -> LazyList[dict, _T]:
+    async def fetchmany(
+        self, limit: int | None = None
+    ) -> LazyList[dict[str, Any], _T]:
         """Execute the query and return a list of models.
 
         Args:
@@ -220,7 +222,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self,
         limit: int | None = None,
         count: bool = False,
-    ) -> Block:
+    ) -> Block[Any]:
         if count:
             return select(
                 from_=self.model,
@@ -240,7 +242,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    async def execute(self) -> LazyList[dict, _T]:
+    async def execute(self) -> LazyList[dict[str, Any], _T]:
         """Execute the deletion query.
 
         Returns:
@@ -250,7 +252,7 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
         res = await self.con.fetchmany(*self._get_block().render())
         return LazyList(res, _dict_model_converter(self.model))
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         return delete(
             self.model,
             self._where_logic(),
@@ -264,9 +266,9 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self._set_values: dict[Block, SQL] = {}
+        self._set_values: dict[Block[Any], SQL[Any]] = {}
 
-    def set(self, **values: SQL) -> UpdateQueryBuilder[_T]:
+    def set(self, **values: SQL[Any]) -> UpdateQueryBuilder[_T]:
         """Specify changes in the model.
 
         Example:
@@ -282,7 +284,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         self._set_values.update({raw(k): v for k, v in values.items()})
         return self
 
-    async def execute(self) -> LazyList[dict, _T]:
+    async def execute(self) -> LazyList[dict[str, Any], _T]:
         """Execute the query.
 
         Returns:
@@ -292,7 +294,7 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
         res = await self.con.fetchmany(*self._get_block().render())
         return LazyList(res, _dict_model_converter(self.model))
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         return update(
             self.model,
             {k: v for k, v in self._set_values.items()},
@@ -307,9 +309,9 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
 
-        self._set_values: dict[Block, SQL] = {}
+        self._set_values: dict[Block[Any], SQL[Any]] = {}
 
-    def set(self, **values: SQL) -> InsertQueryBuilder[_T]:
+    def set(self, **values: SQL[Any]) -> InsertQueryBuilder[_T]:
         """Specify values to be set in the database.
 
         ```
@@ -331,11 +333,11 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
             Model: The model that was inserted.
         """
 
-        return self.model._from_raw(
-            **await self.con.fetchrow(*self._get_block().render())
-        )
+        res = await self.con.fetchrow(*self._get_block().render())
+        assert res is not None
+        return self.model._from_raw(**res)
 
-    def _get_block(self) -> Block:
+    def _get_block(self) -> Block[Any]:
         value_names = [n for n in self._set_values.keys()]
         value_values = [v for v in self._set_values.values()]
 

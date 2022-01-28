@@ -78,9 +78,9 @@ class Model:
     `Model.fetch_query`.
     """
 
-    _all_fields: dict[str, BaseField]
+    _all_fields: dict[str, BaseField[Any, Any, Any]]
     _all_constraints: dict[str, Constraint]
-    _all_mtm: dict[str, ManyToMany]
+    _all_mtm: dict[str, ManyToMany[Any, Any]]
     _changed_fields: set[str]
 
     _raw_values: dict[str, Any]
@@ -91,7 +91,7 @@ class Model:
     database: Database  # populated by Database
     """The database instance, populated by Database."""
 
-    primary_key: tuple[BaseField, ...]
+    primary_key: tuple[BaseField[Any, Any, Any], ...]
     """The primary key for the model. All models MUST have a primary key."""
 
     def __init_subclass__(cls) -> None:
@@ -119,7 +119,7 @@ class Model:
             elif isinstance(value, ManyToMany):
                 cls._all_mtm[key] = value
 
-    def __init__(self, **values) -> None:
+    def __init__(self, **values: Any) -> None:
         self._raw_values: dict[str, Any] = {}
 
         for f in self._all_fields.values():
@@ -193,7 +193,7 @@ class Model:
 
     @classmethod
     async def exists(
-        cls: Type[_SELF], con: Connection | None = None, /, **values
+        cls: Type[_SELF], con: Connection | None = None, /, **values: Any
     ) -> _SELF | None:
         """Check if a model with the given values exists.
 
@@ -218,7 +218,7 @@ class Model:
         cls: Type[_SELF],
         con: Connection | None = None,
         /,
-        **values,
+        **values: Any,
     ) -> _SELF:
         """Fetch an exiting model from the database.
 
@@ -244,7 +244,7 @@ class Model:
         cls: Type[_SELF],
         con: Connection | None = None,
         /,
-        **values,
+        **values: Any,
     ) -> int:
         """Get the number of rows matching these params.
 
@@ -287,7 +287,7 @@ class Model:
         return InsertQueryBuilder(model=cls, con=con)
 
     @classmethod
-    def _from_raw(cls: type[_SELF], **values) -> _SELF:
+    def _from_raw(cls: type[_SELF], **values: Any) -> _SELF:
         n = cls()
         n._raw_values = values
         return n

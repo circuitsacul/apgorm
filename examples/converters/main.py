@@ -55,7 +55,7 @@ class Database(apgorm.Database):
     players = Player
 
 
-async def _main():
+async def _main() -> None:
     player = await Player(
         username="Circuit", status=PlayerStatus.NOT_FINISHED
     ).create()
@@ -71,7 +71,7 @@ async def _main():
     await player.delete()
 
 
-async def main():
+async def main() -> None:
     db = Database(Path("examples/converters/migrations"))
     await db.connect(database="apgorm_testing_database")
 
