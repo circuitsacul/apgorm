@@ -60,7 +60,7 @@ print("Created user", user)
 
 assert user == await User.fetch(username="Circuit")
 
-user.email.v = "email@example.com"
+user.email = "email@example.com"
 await user.save()
 
 await user.delete()
