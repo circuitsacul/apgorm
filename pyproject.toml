@@ -17,7 +17,6 @@ keywords = ["postgres", "postgresql", "asyncpg", "asyncio", "orm"]
 python = "^3.8"
 asyncpg = "^0.25.0"
 pydantic = "^1.9.0"
-nox = "^2022.1.7"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
@@ -28,6 +27,7 @@ pytest = "^6.2.5"
 pytest-asyncio = "^0.17.0"
 pytest-mock = "^3.6.1"
 pytest-cov = "^3.0.0"
+nox = "^2022.1.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
