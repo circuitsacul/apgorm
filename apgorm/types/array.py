@@ -22,14 +22,14 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Sequence, Optional
 
 from .base_type import SqlType
 
 _T = TypeVar("_T")
 
 
-class Array(SqlType["list[_T | None]"]):
+class Array(SqlType[Sequence[Optional[_T]]]):
     """SQL array type.
 
     Args:
