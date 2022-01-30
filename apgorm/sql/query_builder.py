@@ -118,9 +118,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         self._reverse: bool = False
 
     def order_by(
-        self,
-        logic: SQL[Any],
-        reverse: bool = False,
+        self, logic: SQL[Any], reverse: bool = False
     ) -> FetchQueryBuilder[_T]:
         """Specify the order logic of the query.
 
@@ -219,9 +217,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
                 yield self.model._from_raw(**res)
 
     def _get_block(
-        self,
-        limit: int | None = None,
-        count: bool = False,
+        self, limit: int | None = None, count: bool = False
     ) -> Block[Any]:
         if count:
             return select(

@@ -107,11 +107,7 @@ class ManyToMany(Generic[_REF, _THROUGH]):
     """
 
     def __init__(
-        self,
-        here: str,
-        here_ref: str,
-        other_ref: str,
-        other: str,
+        self, here: str, here_ref: str, other_ref: str, other: str
     ) -> None:
         self._here = here
         self._here_ref = here_ref
@@ -222,11 +218,7 @@ class _RealManyToMany:
     # ManyToMany is actually _RealManyToMany when a Model is initialized, so a
     # couple things break (such as __init__). This shouldn't really be a
     # problem since the only user-facing method is fetchmany().
-    def __init__(
-        self,
-        orig: ManyToMany[Any, Any],
-        model_inst: Model,
-    ) -> None:
+    def __init__(self, orig: ManyToMany[Any, Any], model_inst: Model) -> None:
         # NOTE: all these casts are ugly, but truthfully
         # there isn't a better way to do this. You can't
         # actually check that these are Models and Fields

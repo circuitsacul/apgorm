@@ -200,8 +200,7 @@ async def test_load_unapplied_none(patch_fetch: tuple[asyncio.Future, Mock]):
 
 @pytest.mark.asyncio
 async def test_load_unapplied_all(
-    patch_fetch: tuple[asyncio.Future, Mock],
-    mocker: MockerFixture,
+    patch_fetch: tuple[asyncio.Future, Mock], mocker: MockerFixture
 ):
     erase_migrations()
     ret, func = patch_fetch
@@ -213,9 +212,7 @@ async def test_load_unapplied_all(
 
 
 @pytest.mark.asyncio
-async def test_load_unapplied_exc(
-    patch_fetch: tuple[asyncio.Future, Mock],
-):
+async def test_load_unapplied_exc(patch_fetch: tuple[asyncio.Future, Mock]):
     erase_migrations()
     UDB.create_migrations()
 
@@ -239,8 +236,7 @@ async def test_must_apply_true(patch_fetch: tuple[asyncio.Future, Mock]):
 
 @pytest.mark.asyncio
 async def test_must_apply_false(
-    patch_fetch: tuple[asyncio.Future, Mock],
-    mocker: MockerFixture,
+    patch_fetch: tuple[asyncio.Future, Mock], mocker: MockerFixture
 ):
     erase_migrations()
     UDB.create_migrations()
@@ -255,8 +251,7 @@ async def test_must_apply_false(
 
 @pytest.mark.asyncio
 async def test_apply_migrations(
-    mocker: MockerFixture,
-    patch_fetch: tuple[asyncio.Future, Mock],
+    mocker: MockerFixture, patch_fetch: tuple[asyncio.Future, Mock]
 ):
     erase_migrations()
     UDB.create_migrations()

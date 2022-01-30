@@ -83,6 +83,5 @@ class LazyList(Generic[_IN, _OUT]):
         else:
             ddd = ""
         return "LazyList([{}{}])".format(
-            ", ".join([repr(c) for c in list(self[0:5])]),
-            ddd,
+            ", ".join([repr(c) for c in list(self[0:5])]), ddd
         )

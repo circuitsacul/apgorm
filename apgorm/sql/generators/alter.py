@@ -48,8 +48,7 @@ def _alter_table(tablename: Block[Any], sql: SQL[Any]) -> Block[Any]:
 
 
 def add_constraint(
-    tablename: Block[Any],
-    constraint_raw_sql: str,
+    tablename: Block[Any], constraint_raw_sql: str
 ) -> Block[Any]:
     return _alter_table(tablename, Block(raw("ADD"), raw(constraint_raw_sql)))
 
@@ -65,14 +64,7 @@ def drop_constraint(
 def add_field(
     tablename: Block[Any], fieldname: Block[Any], type_: Block[Any]
 ) -> Block[Any]:
-    return _alter_table(
-        tablename,
-        Block(
-            raw("ADD COLUMN"),
-            fieldname,
-            type_,
-        ),
-    )
+    return _alter_table(tablename, Block(raw("ADD COLUMN"), fieldname, type_))
 
 
 def drop_field(tablename: Block[Any], fieldname: Block[Any]) -> Block[Any]:
@@ -82,14 +74,7 @@ def drop_field(tablename: Block[Any], fieldname: Block[Any]) -> Block[Any]:
 def _alter_field(
     tablename: Block[Any], fieldname: Block[Any], sql: SQL[Any]
 ) -> Block[Any]:
-    return _alter_table(
-        tablename,
-        Block(
-            raw("ALTER COLUMN"),
-            fieldname,
-            sql,
-        ),
-    )
+    return _alter_table(tablename, Block(raw("ALTER COLUMN"), fieldname, sql))
 
 
 def set_field_not_null(
@@ -98,7 +83,5 @@ def set_field_not_null(
     return _alter_field(
         tablename,
         fieldname,
-        Block(
-            raw("SET NOT NULL") if not_null else raw("DROP NOT NULL"),
-        ),
+        Block(raw("SET NOT NULL") if not_null else raw("DROP NOT NULL")),
     )

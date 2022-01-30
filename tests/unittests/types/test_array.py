@@ -25,10 +25,7 @@ import pytest
 from apgorm.types import Array, Int  # for subtypes
 
 
-@pytest.mark.parametrize(
-    "subtype",
-    [Int(), Array(Int()), Array(Array(Int()))],
-)
+@pytest.mark.parametrize("subtype", [Int(), Array(Int()), Array(Array(Int()))])
 def test_array_init(subtype):
     a = Array(subtype)
 

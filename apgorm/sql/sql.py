@@ -62,10 +62,7 @@ integer: SQL[int] = sql(1).cast(BigInt())  # works
 integer: SQL[int] = sql("hi")  # fails
 """
 
-CASTED = Union[
-    "BaseField[_SQLT, Any, Any]",
-    "Block[_SQLT]",
-]
+CASTED = Union["BaseField[_SQLT, Any, Any]", "Block[_SQLT]",]
 """
 A type alias that allows for any field or raw sql with a specified
 SQL type. For example:

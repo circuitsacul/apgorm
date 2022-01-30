@@ -57,10 +57,7 @@ class Player(apgorm.Model):
     username_fk = ForeignKey(username, User.name)
     gameid_fk = ForeignKey(gameid, Game.id_)
 
-    primary_key = (
-        username,
-        gameid,
-    )
+    primary_key = (username, gameid)
 
 
 class Database(apgorm.Database):

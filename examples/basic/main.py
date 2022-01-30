@@ -80,8 +80,7 @@ async def _main() -> None:
     )
 
     print(
-        "Users after setting nicknames:",
-        await User.fetch_query().fetchmany(),
+        "Users after setting nicknames:", await User.fetch_query().fetchmany()
     )
 
 

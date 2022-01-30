@@ -40,6 +40,5 @@ class Constraint:
 
     def _describe(self) -> DescribeConstraint:
         return DescribeConstraint(
-            name=self.name,
-            raw_sql=self._creation_sql().render_no_params(),
+            name=self.name, raw_sql=self._creation_sql().render_no_params()
         )

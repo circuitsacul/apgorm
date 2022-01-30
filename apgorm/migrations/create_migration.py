@@ -45,10 +45,7 @@ def _handle_constraint_list(
     currd = {c.name: c for c in curr}
 
     new_constraints = [
-        alter.add_constraint(
-            raw(tablename),
-            c.raw_sql,
-        ).render_no_params()
+        alter.add_constraint(raw(tablename), c.raw_sql).render_no_params()
         for c in currd.values()
         if c.name not in origd
     ]
@@ -70,8 +67,7 @@ def _handle_constraint_list(
         )
         drop_constraints.append(
             alter.drop_constraint(
-                raw(tablename),
-                raw(currc.name),
+                raw(tablename), raw(currc.name)
             ).render_no_params()
         )
 
@@ -186,9 +182,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
             if set_nn_to is not None:
                 field_not_nulls.append(
                     alter.set_field_not_null(
-                        raw(tablename),
-                        raw(field.name),
-                        set_nn_to,
+                        raw(tablename), raw(field.name), set_nn_to
                     ).render_no_params()
                 )
 
@@ -237,9 +231,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         if tablename in curr_tables:
             continue
         _, _drop = _handle_constraint_list(
-            tablename,
-            lasttable.fk_constraints,
-            [],
+            tablename, lasttable.fk_constraints, []
         )
         drop_fk_constraints.extend(_drop)
 

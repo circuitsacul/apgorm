@@ -215,10 +215,7 @@ class Model:
 
     @classmethod
     async def fetch(
-        cls: Type[_SELF],
-        con: Connection | None = None,
-        /,
-        **values: Any,
+        cls: Type[_SELF], con: Connection | None = None, /, **values: Any
     ) -> _SELF:
         """Fetch an exiting model from the database.
 
@@ -241,10 +238,7 @@ class Model:
 
     @classmethod
     async def count(
-        cls: Type[_SELF],
-        con: Connection | None = None,
-        /,
-        **values: Any,
+        cls: Type[_SELF], con: Connection | None = None, /, **values: Any
     ) -> int:
         """Get the number of rows matching these params.
 

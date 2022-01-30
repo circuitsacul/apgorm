@@ -83,10 +83,7 @@ class Player(apgorm.Model):
     uid_fk = apgorm.ForeignKey(userid, User.userid)
     gid_fk = apgorm.ForeignKey(gameid, Game.gameid)
 
-    primary_key = (
-        userid,
-        gameid,
-    )
+    primary_key = (userid, gameid)
 
 
 class Database(apgorm.Database):
@@ -195,18 +192,11 @@ async def test_delete_none(db: PatchedDBMethods, mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_save_normal(db: PatchedDBMethods, mocker: MockerFixture):
     async def new_execute(self: apgorm.UpdateQueryBuilder):
-        assert self._where_logic().render() == (
-            "userid = $1",
-            [1],
-        )
+        assert self._where_logic().render() == ("userid = $1", [1])
         set_values = self._set_values
-        assert [
-            (
-                k.render_no_params(),
-                v,
-            )
-            for k, v in set_values.items()
-        ] == [("name", "New Name")]
+        assert [(k.render_no_params(), v) for k, v in set_values.items()] == [
+            ("name", "New Name")
+        ]
         return [User(userid=5)]
 
     mocker.patch.object(apgorm.UpdateQueryBuilder, "execute", new_execute)

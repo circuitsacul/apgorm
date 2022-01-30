@@ -90,9 +90,7 @@ class Numeric(SqlType[Decimal]):
     """
 
     def __init__(
-        self,
-        precision: int | None = None,
-        scale: int | None = None,
+        self, precision: int | None = None, scale: int | None = None
     ) -> None:
         self._precision = precision
         self._scale = scale
@@ -150,24 +148,14 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 
 class _BaseSerial(SqlType[int]):
     def field(  # type: ignore
-        self: _S,
-        use_repr: bool = True,
+        self: _S, use_repr: bool = True
     ) -> Field[_S, int]:
-        return Field(
-            sql_type=self,
-            not_null=True,
-            use_repr=use_repr,
-        )
+        return Field(sql_type=self, not_null=True, use_repr=use_repr)
 
     def nullablefield(  # type: ignore
-        self: _S,
-        use_repr: bool = True,
+        self: _S, use_repr: bool = True
     ) -> Field[_S, int | None]:
-        return Field(
-            sql_type=self,
-            not_null=False,
-            use_repr=use_repr,
-        )
+        return Field(sql_type=self, not_null=False, use_repr=use_repr)
 
 
 class SmallSerial(_BaseSerial):

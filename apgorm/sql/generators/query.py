@@ -103,10 +103,7 @@ def delete(
     if where is not None:
         sql += Block(raw("WHERE"), where)
     if return_fields is not None:
-        sql += Block(
-            raw("RETURNING"),
-            join(raw(","), *return_fields),
-        )
+        sql += Block(raw("RETURNING"), join(raw(","), *return_fields))
     return wrap(sql)
 
 
@@ -130,10 +127,7 @@ def update(
         sql += Block(raw("WHERE"), where)
 
     if return_fields is not None:
-        sql += Block(
-            raw("RETURNING"),
-            join(raw(","), *return_fields),
-        )
+        sql += Block(raw("RETURNING"), join(raw(","), *return_fields))
 
     return wrap(sql)
 
