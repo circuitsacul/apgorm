@@ -39,7 +39,7 @@ class Exclude(Constraint):
         self,
         *elements: tuple[BaseField[Any, Any, Any] | Block[Any] | str, str],
         using: IndexType = IndexType.BTREE,
-        where: Block[Bool] | str | None = None
+        where: Block[Bool] | str | None = None,
     ) -> None:
         """Specify an Exclusion constraint for a table.
 
