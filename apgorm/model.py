@@ -288,8 +288,10 @@ class Model:
 
     @classmethod
     def _from_raw(cls: type[_SELF], **values: Any) -> _SELF:
-        n = cls()
+        n = super().__new__(cls)
         n._raw_values = values
+        for name, mtm in cls._all_mtm.items():
+            setattr(n, name, mtm._generate_mtm(n))
         return n
 
     @classmethod
@@ -340,7 +342,7 @@ class Model:
             f"<{self.__class__.__name__} "
             + " ".join(
                 [
-                    f"{f.name}:{self._raw_values[f.name]!r}"
+                    f"{f.name}:{getattr(self, f.name)!r}"
                     for f in self._all_fields.values()
                     if f.use_repr and f.name in self._raw_values
                 ]
