@@ -288,8 +288,10 @@ class Model:
 
     @classmethod
     def _from_raw(cls: type[_SELF], **values: Any) -> _SELF:
-        n = cls()
+        n = super().__new__(cls)
         n._raw_values = values
+        for name, mtm in cls._all_mtm.items():
+            setattr(n, name, mtm._generate_mtm(n))
         return n
 
     @classmethod
