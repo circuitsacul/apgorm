@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeVar, Sequence, Optional
+from typing import Any, Optional, Sequence, TypeVar
 
 from .base_type import SqlType
 
