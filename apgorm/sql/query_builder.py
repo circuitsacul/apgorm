@@ -33,6 +33,7 @@ from typing import (
     cast,
 )
 
+from apgorm.connection import Connection
 from apgorm.undefined import UNDEF
 from apgorm.utils.lazy_list import LazyList
 
@@ -40,7 +41,6 @@ from .generators.query import delete, insert, select, update
 from .sql import SQL, Block, and_, raw, sql, wrap
 
 if TYPE_CHECKING:  # pragma: no cover
-    from apgorm.connection import Connection
     from apgorm.model import Model
     from apgorm.types.boolean import Bool
 
