@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-apgorm is a full type-checked asynchronous ORM wrapped around asyncpg.
+apgorm is a fully type-checked asynchronous ORM wrapped around asyncpg.
 
 apgorm is licensed under the MIT license.
 
