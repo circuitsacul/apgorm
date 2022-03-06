@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Coroutine
+from typing import Any, Coroutine, Iterable
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -32,6 +32,8 @@ from .utils.lazy_list import LazyList
 
 
 class PoolAcquireContext:
+    __slots__: Iterable[str] = ("pac",)
+
     def __init__(self, pac: asyncpg.pool.PoolAcquireContext) -> None:
         self.pac = pac
 
@@ -43,6 +45,8 @@ class PoolAcquireContext:
 
 
 class Pool:
+    __slots__: Iterable[str] = ("pool",)
+
     def __init__(self, pool: asyncpg.Pool) -> None:
         self.pool = pool
 
@@ -55,6 +59,8 @@ class Pool:
 
 class Connection:
     """Wrapper around asyncpg.Connection."""
+
+    __slots__: Iterable[str] = ("con",)
 
     def __init__(self, con: asyncpg.Connection) -> None:
         self.con = con

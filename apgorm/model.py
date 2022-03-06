@@ -22,7 +22,7 @@
 
 from __future__ import annotations, print_function
 
-from typing import TYPE_CHECKING, Any, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Iterable, Type, TypeVar
 
 from .constraints.check import Check
 from .constraints.constraint import Constraint
@@ -77,6 +77,8 @@ class Model:
     If you wish to fetch an existing model, please use `Model.fetch` or
     `Model.fetch_query`.
     """
+
+    __slots__: Iterable[str] = ("_raw_values",)
 
     _all_fields: dict[str, BaseField[Any, Any, Any]]
     _all_constraints: dict[str, Constraint]

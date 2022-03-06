@@ -63,7 +63,7 @@ def test_updates_models_and_fields():
 
 
 def test_str_folder():
-    STR = apgorm.Database("tests/migrations")
+    STR = Database("tests/migrations")
     assert isinstance(STR._migrations_folder, Path)
     assert STR._migrations_folder == DB._migrations_folder
 

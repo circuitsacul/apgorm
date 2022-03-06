@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Type, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, Iterable, Type, TypeVar, cast
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
@@ -105,6 +105,8 @@ class ManyToMany(Generic[_REF, _THROUGH]):
     If you want typehints to work properly, use
     `games = ManyToMany["Game"](...)`.
     """
+
+    __slots__: Iterable[str] = ("_here", "_here_ref", "_other_ref", "_other")
 
     def __init__(
         self, here: str, here_ref: str, other_ref: str, other: str
@@ -212,6 +214,17 @@ class ManyToMany(Generic[_REF, _THROUGH]):
 
 
 class _RealManyToMany:
+    __slots__: Iterable[str] = (
+        "orig",
+        "model",
+        "field",
+        "mm_model",
+        "mm_h_field",
+        "mm_o_field",
+        "ot_model",
+        "ot_field",
+    )
+
     # HACK: ManyToMany doesn't store a reference to the model instance, which
     # is necessary in order to properly carry out the query. This was the
     # easiest solution. No type checker will know that the value of the

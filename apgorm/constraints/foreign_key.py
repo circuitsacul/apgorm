@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Sequence
+from typing import Any, Iterable, Sequence
 from typing import cast as typingcast
 
 from apgorm.exceptions import BadArgument
@@ -45,6 +45,15 @@ class ForeignKeyAction(Enum):
 
 
 class ForeignKey(Constraint):
+    __slots__: Iterable[str] = (
+        "fields",
+        "ref_fields",
+        "ref_table",
+        "match_full",
+        "on_delete",
+        "on_update",
+    )
+
     def __init__(
         self,
         fields: Sequence[Block[Any] | BaseField[Any, Any, Any] | str]

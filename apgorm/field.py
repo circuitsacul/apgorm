@@ -27,6 +27,7 @@ from typing import (
     Any,
     Callable,
     Generic,
+    Iterable,
     Type,
     TypeVar,
     overload,
@@ -53,6 +54,17 @@ VALIDATOR = Callable[[_C], bool]
 
 class BaseField(Comparable, Generic[_F, _T, _C]):
     """Represents a field for a table."""
+
+    __slots__: Iterable[str] = (
+        "name",
+        "model",
+        "sql_type",
+        "_default",
+        "_default_factory",
+        "not_null",
+        "use_repr",
+        "_validators",
+    )
 
     name: str  # populated by Database
     """The name of the field, populated when Database is initialized."""
@@ -147,6 +159,8 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
 
 class Field(BaseField[_F, _T, _T]):
+    __slots__: Iterable[str] = tuple()
+
     if not TYPE_CHECKING:
 
         def __get__(self, inst, cls):
@@ -186,6 +200,8 @@ class Field(BaseField[_F, _T, _T]):
 
 
 class ConverterField(BaseField[_F, _T, _C]):
+    __slots__: Iterable[str] = ("converter",)
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.converter: Converter[_T, _C] = kwargs.pop("converter")
         super().__init__(*args, **kwargs)

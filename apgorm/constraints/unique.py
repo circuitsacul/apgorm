@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from apgorm.sql.sql import Block, join, raw
 
@@ -33,6 +33,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Unique(Constraint):
+    __slots__: Iterable[str] = ("fields",)
+
     def __init__(
         self, *fields: BaseField[Any, Any, Any] | Block[Any] | str
     ) -> None:

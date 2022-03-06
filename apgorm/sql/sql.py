@@ -28,6 +28,7 @@ from typing import (
     Any,
     Callable,
     Generic,
+    Iterable,
     Type,
     TypeVar,
     Union,
@@ -173,15 +174,19 @@ def raw(string: str) -> Block[Any]:
 
 
 class Raw(UserString):
-    pass
+    __slots__: Iterable[str] = tuple()
 
 
 class Parameter(Generic[_T]):
+    __slots__: Iterable[str] = ("value",)
+
     def __init__(self, value: _T) -> None:
         self.value = value
 
 
 class _Op(Generic[_SQLT]):
+    __slots__: Iterable[str] = ("op",)
+
     def __init__(self, op: str) -> None:
         self.op = op
 
@@ -196,6 +201,8 @@ class _Op(Generic[_SQLT]):
 
 
 class _Func(Generic[_SQLT]):
+    __slots__: Iterable[str] = ("func", "rside")
+
     def __init__(self, func: str, rside: bool = False) -> None:
         self.func = func
         self.rside = rside
@@ -208,6 +215,8 @@ class _Func(Generic[_SQLT]):
 
 
 class Comparable:
+    __slots__: Iterable[str] = tuple()
+
     def _get_block(self) -> Block[Any]:
         raise NotImplementedError  # pragma: no cover
 
@@ -235,6 +244,8 @@ class Comparable:
 
 class Block(Comparable, Generic[_SQLT_CO]):
     """Represents a list of raw sql and parameters."""
+
+    __slots__: Iterable[str] = ("_pieces", "_wrap")
 
     def __init__(self, *pieces: SQL[Any] | Raw, wrap: bool = False) -> None:
         """Create a Block. You may find it more convienient to use the `sql()`
@@ -316,6 +327,8 @@ class Block(Comparable, Generic[_SQLT_CO]):
 
 
 class Renderer:
+    __slots__: Iterable[str] = ("_curr_value_id",)
+
     def __init__(self) -> None:
         self._curr_value_id: int = 0
 

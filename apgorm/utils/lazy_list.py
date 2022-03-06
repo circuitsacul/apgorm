@@ -27,6 +27,7 @@ from typing import (
     Callable,
     Generator,
     Generic,
+    Iterable,
     Sequence,
     TypeVar,
     overload,
@@ -42,6 +43,8 @@ class LazyList(Generic[_IN, _OUT]):
     Incredible useful for casting `list[asyncpg.Record]` to `list[dict]`, and
     then `list[dict]` to `list[Model]`, especially when there are many rows.
     """
+
+    __slots__: Iterable[str] = ("_data", "_converter")
 
     def __init__(
         self,

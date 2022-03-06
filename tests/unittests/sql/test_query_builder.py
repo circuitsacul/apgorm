@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import pytest
 
-import apgorm
 from apgorm import (
     DeleteQueryBuilder,
     FetchQueryBuilder,
@@ -110,10 +109,10 @@ def test_fqb_exists(mocker):
     q = FetchQueryBuilder(m := mocker.Mock())
     m.tablename = "tablename"
 
-    f = mocker.patch.object(q, "_get_block")
-    f.return_value = apgorm.raw("hello")
+    # f = mocker.patch.object(q, "_get_block")
+    # f.return_value = apgorm.raw("hello")
 
-    assert q.exists().render() == ("EXISTS ( hello )", [])
+    assert q.exists().render() == ("EXISTS ( SELECT * FROM tablename )", [])
 
 
 @pytest.mark.asyncio

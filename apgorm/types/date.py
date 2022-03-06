@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import datetime
 from enum import Enum
+from typing import Iterable
 
 from .base_type import SqlType
 
@@ -36,6 +37,8 @@ class Timestamp(SqlType[datetime.datetime]):
 
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
+
+    __slots__: Iterable[str] = ("_precision",)
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
@@ -63,6 +66,8 @@ class TimestampTZ(SqlType[datetime.datetime]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
+    __slots__: Iterable[str] = ("_precision",)
+
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self._sql = "TIMESTAMPTZ"
@@ -88,6 +93,8 @@ class Time(SqlType[datetime.time]):
 
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
+
+    __slots__: Iterable[str] = ("_precision",)
 
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
@@ -115,6 +122,8 @@ class TimeTZ(SqlType[datetime.time]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
+    __slots__: Iterable[str] = ("_precision",)
+
     def __init__(self, precision: int | None = None) -> None:
         self._precision = precision
         self._sql = "TIMETZ"
@@ -137,6 +146,8 @@ class Date(SqlType[datetime.date]):
 
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "DATE"
 
@@ -167,6 +178,8 @@ class Interval(SqlType[datetime.timedelta]):
 
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
+
+    __slots__: Iterable[str] = ("_interval_field", "_precision")
 
     def __init__(
         self,

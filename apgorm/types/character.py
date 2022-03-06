@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+from typing import Iterable
+
 from .base_type import SqlType
 
 
@@ -34,6 +36,8 @@ class VarChar(SqlType[str]):
 
     https://www.postgresql.org/docs/14/datatype-character.html
     """
+
+    __slots__: Iterable[str] = ("_max_length",)
 
     def __init__(self, max_length: int | None = None) -> None:
         self._max_length = max_length

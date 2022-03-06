@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, Iterable, TypeVar
 
 from apgorm.field import Field
 from apgorm.undefined import UNDEF
@@ -33,6 +33,8 @@ _S = TypeVar("_S", bound="SqlType[Any]", covariant=True)
 
 class SqlType(Generic[_T]):
     """Base type for all SQL types."""
+
+    __slots__: Iterable[str] = ("_sql",)
 
     _sql: str
     """The raw sql for the type."""

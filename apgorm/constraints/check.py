@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from apgorm.sql.sql import Block, raw
 
@@ -33,6 +33,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Check(Constraint):
+    __slots__: Iterable[str] = ("check",)
+
     def __init__(self, check: Block[Bool] | str) -> None:
         """Specify a check constraint for a table.
 

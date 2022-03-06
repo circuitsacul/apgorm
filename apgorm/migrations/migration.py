@@ -24,12 +24,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Iterable
 
 from .describe import Describe
 
 
 class Migration:
     """Represents a single migrations."""
+
+    __slots__: Iterable[str] = ("describe", "migrations", "path")
 
     def __init__(
         self, describe: Describe, migrations: str, path: Path

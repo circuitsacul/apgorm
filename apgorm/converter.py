@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, IntFlag
-from typing import Generic, Type, TypeVar, Union, cast
+from typing import Generic, Iterable, Type, TypeVar, Union, cast
 
 _ORIG = TypeVar("_ORIG")
 _CONV = TypeVar("_CONV")
@@ -31,6 +31,8 @@ _CONV = TypeVar("_CONV")
 
 class Converter(Generic[_ORIG, _CONV]):
     """Base class that must be used for all field converters."""
+
+    __slots__: Iterable[str] = tuple()
 
     def from_stored(self, value: _ORIG) -> _CONV:
         """Take the value given by the database and convert it to the type
@@ -58,6 +60,8 @@ class IntEFConverter(Converter[int, _INTEF], Generic[_INTEF]):
     Args:
         type_ (Type[IntEnum] | Type[IntFlag]): The IntEnum or IntFlag to use.
     """
+
+    __slots__: Iterable[str] = ("_type",)
 
     def __init__(self, type_: Type[_INTEF]):
         self._type: Type[_INTEF] = type_

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Sequence, Type
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, Type
 
 from .exceptions import BadArgument
 from .field import BaseField
@@ -76,6 +76,8 @@ class Index:
     Raises:
         BadArgument: Bad arguments were passed to Index.
     """
+
+    __slots__: Iterable[str] = ("type_", "fields", "table", "unique")
 
     def __init__(
         self,
