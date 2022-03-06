@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import ipaddress as ipaddr
-from typing import Union
+from typing import Iterable, Union
 
 from .base_type import SqlType
 
@@ -34,6 +34,8 @@ class CIDR(SqlType[Union[ipaddr.IPv4Network, ipaddr.IPv6Network]]):
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-CIDR
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "CIDR"
 
@@ -54,6 +56,8 @@ class INET(
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-INET-VS-CIDR
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "INET"
 
 
@@ -63,6 +67,8 @@ class MacAddr(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "MACADDR"
 
 
@@ -71,5 +77,7 @@ class MacAddr8(SqlType[str]):
 
     https://www.postgresql.org/docs/14/datatype-net-types.html#DATATYPE-MACADDR8
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "MACADDR8"

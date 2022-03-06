@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Awaitable, Sequence, Type
+from typing import Any, AsyncGenerator, Awaitable, Iterable, Sequence
 
 import asyncpg
 from asyncpg.cursor import CursorFactory
@@ -57,11 +57,33 @@ class Database:
     ```
     """
 
-    _migrations = AppliedMigration
+    __slots__: Iterable[str] = (
+        "_all_models",
+        "_migrations_folder",
+        "pool",
+        "_migrations",
+    )
+
+    _migrations: type[AppliedMigration]
     """Internal table to track applied migrations."""
+    _all_models: list[type[Model]]
+    """A list of all models on this database."""
 
     indexes: Sequence[Index] | None = None
     """A list of indexes for the database."""
+
+    def __init_subclass__(cls) -> None:
+        cls._migrations = AppliedMigration
+        cls._all_models = []
+
+        for attr_name, model in cls.__dict__.items():
+            if not isinstance(model, type):
+                continue
+            if not issubclass(model, Model):
+                continue
+
+            model.tablename = attr_name
+            cls._all_models.append(model)
 
     def __init__(self, migrations_folder: Path | str) -> None:
         """Initialize the database.
@@ -76,22 +98,9 @@ class Database:
             if isinstance(migrations_folder, str)
             else migrations_folder
         )
-        self._all_models: list[Type[Model]] = []
 
-        for attr_name in dir(self):
-            try:
-                attr = getattr(self, attr_name)
-            except AttributeError:  # pragma: no cover
-                continue
-
-            if not isinstance(attr, type):
-                continue
-            if not issubclass(attr, Model):
-                continue
-
-            attr.database = self
-            attr.tablename = attr_name
-            self._all_models.append(attr)
+        for model in self._all_models:
+            model.database = self
 
         self.pool: Pool | None = None
 

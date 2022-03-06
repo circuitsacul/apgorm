@@ -28,6 +28,7 @@ from typing import (
     AsyncGenerator,
     Callable,
     Generic,
+    Iterable,
     Type,
     TypeVar,
     cast,
@@ -57,6 +58,8 @@ def _dict_model_converter(model: Type[_T]) -> Callable[[dict[str, Any]], _T]:
 class BaseQueryBuilder(Generic[_T]):
     """Base class for query builders."""
 
+    __slots__: Iterable[str] = ("model", "con")
+
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         self.model = model
         self.con = con or model.database
@@ -72,6 +75,8 @@ _S = TypeVar("_S", bound="FilterQueryBuilder[Any]")
 
 class FilterQueryBuilder(BaseQueryBuilder[_T]):
     """Base class for query builders that have "where logic"."""
+
+    __slots__: Iterable[str] = ("_filters",)
 
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
@@ -110,6 +115,8 @@ class FilterQueryBuilder(BaseQueryBuilder[_T]):
 
 class FetchQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for fetching models."""
+
+    __slots__: Iterable[str] = ("_order_by_logic", "_reverse")
 
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
@@ -238,6 +245,8 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
+    __slots__: Iterable[str] = tuple()
+
     async def execute(self) -> LazyList[dict[str, Any], _T]:
         """Execute the deletion query.
 
@@ -258,6 +267,8 @@ class DeleteQueryBuilder(FilterQueryBuilder[_T]):
 
 class UpdateQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for updating models."""
+
+    __slots__: Iterable[str] = ("_set_values",)
 
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)
@@ -301,6 +312,8 @@ class UpdateQueryBuilder(FilterQueryBuilder[_T]):
 
 class InsertQueryBuilder(BaseQueryBuilder[_T]):
     """Query builder for creating a model."""
+
+    __slots__: Iterable[str] = ("_set_values",)
 
     def __init__(self, model: Type[_T], con: Connection | None = None) -> None:
         super().__init__(model, con)

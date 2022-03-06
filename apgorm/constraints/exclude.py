@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from apgorm.indexes import IndexType, _IndexType
 from apgorm.sql.sql import Block, join, raw, wrap
@@ -35,6 +35,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Exclude(Constraint):
+    __slots__: Iterable[str] = ("using", "elements", "where")
+
     def __init__(
         self,
         *elements: tuple[BaseField[Any, Any, Any] | Block[Any] | str, str],

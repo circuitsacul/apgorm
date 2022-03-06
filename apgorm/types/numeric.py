@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TypeVar, Union
+from typing import Iterable, TypeVar, Union
 
 from apgorm.exceptions import BadArgument
 from apgorm.field import Field
@@ -47,6 +47,8 @@ class SmallInt(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "SMALLINT"
 
 
@@ -55,6 +57,8 @@ class Int(SqlType[int]):
 
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "INTEGER"
 
@@ -67,6 +71,8 @@ class BigInt(SqlType[int]):
 
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "BIGINT"
 
@@ -88,6 +94,8 @@ class Numeric(SqlType[Decimal]):
 
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
+
+    __slots__: Iterable[str] = ("_precision", "_scale")
 
     def __init__(
         self, precision: int | None = None, scale: int | None = None
@@ -131,6 +139,8 @@ class Real(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "REAL"
 
 
@@ -140,6 +150,8 @@ class DoublePrecision(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "DOUBLE PRECISION"
 
 
@@ -147,6 +159,8 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 
 
 class _BaseSerial(SqlType[int]):
+    __slots__: Iterable[str] = tuple()
+
     def field(  # type: ignore
         self: _S, use_repr: bool = True
     ) -> Field[_S, int]:
@@ -167,6 +181,8 @@ class SmallSerial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "SMALLSERIAL"
 
 
@@ -179,6 +195,8 @@ class Serial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "SERIAL"
 
 
@@ -190,5 +208,7 @@ class BigSerial(_BaseSerial):
 
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "BIGSERIAL"

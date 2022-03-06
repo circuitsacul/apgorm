@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+from typing import Iterable
+
 import asyncpg
 
 from .base_type import SqlType
@@ -36,6 +38,8 @@ class Bit(SqlType[asyncpg.BitString]):
 
     https://www.postgresql.org/docs/14/datatype-bit.html
     """
+
+    __slots__: Iterable[str] = ("_length",)
 
     def __init__(self, length: int | None = None) -> None:
         self._length = length

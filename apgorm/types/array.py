@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional, Sequence, TypeVar
+from typing import Any, Iterable, Optional, Sequence, TypeVar
 
 from .base_type import SqlType
 
@@ -44,6 +44,8 @@ class Array(SqlType[Sequence[Optional[_T]]]):
 
     https://www.postgresql.org/docs/14/arrays.html
     """
+
+    __slots__: Iterable[str] = ("_subtype",)
 
     def __init__(self, subtype: SqlType[_T]) -> None:
         self._subtype = subtype

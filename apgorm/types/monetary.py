@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+from typing import Iterable
+
 from .base_type import SqlType
 
 
@@ -31,5 +33,7 @@ class Money(SqlType[str]):
 
     https://www.postgresql.org/docs/14/datatype-money.html
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "MONEY"

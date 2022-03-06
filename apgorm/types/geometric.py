@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+from typing import Iterable
+
 import asyncpg
 
 from .base_type import SqlType
@@ -33,6 +35,8 @@ class Point(SqlType[asyncpg.Point]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.5
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "POINT"
 
 
@@ -41,6 +45,8 @@ class Line(SqlType[asyncpg.Line]):
 
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-LINE
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "LINE"
 
@@ -51,6 +57,8 @@ class LineSegment(SqlType[asyncpg.LineSegment]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-LSEG
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "LSEG"
 
 
@@ -59,6 +67,8 @@ class Box(SqlType[asyncpg.Box]):
 
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.8
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "BOX"
 
@@ -70,6 +80,8 @@ class Path(SqlType[asyncpg.Path]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#id-1.5.7.16.9
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "PATH"
 
 
@@ -79,6 +91,8 @@ class Polygon(SqlType[asyncpg.Polygon]):
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-POLYGON
     """
 
+    __slots__: Iterable[str] = tuple()
+
     _sql = "POLYGON"
 
 
@@ -87,5 +101,7 @@ class Circle(SqlType[asyncpg.Circle]):
 
     https://www.postgresql.org/docs/14/datatype-geometric.html#DATATYPE-CIRCLE
     """
+
+    __slots__: Iterable[str] = tuple()
 
     _sql = "CIRCLE"

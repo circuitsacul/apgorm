@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Any
+from typing import Any, Iterable
 
 from apgorm.migrations.describe import DescribeConstraint
 from apgorm.sql.sql import Block
@@ -28,6 +28,8 @@ from apgorm.sql.sql import Block
 
 class Constraint:
     """The base class for all constraints."""
+
+    __slots__: Iterable[str] = ("name",)
 
     name: str
     """The name of the constraint.
