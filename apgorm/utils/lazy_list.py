@@ -54,10 +54,6 @@ class LazyList(Generic[_IN, _OUT]):
         self._data = data
         self._converter = converter
 
-    def _convert(self, values: Sequence[_IN] | None = None) -> list[_OUT]:
-        _values = self._data if not values else values
-        return [self._converter(v) for v in _values]
-
     @overload
     def __getitem__(self, index: int) -> _OUT:
         ...  # pragma: no cover
@@ -68,7 +64,7 @@ class LazyList(Generic[_IN, _OUT]):
 
     def __getitem__(self, index: int | slice) -> LazyList[_IN, _OUT] | _OUT:
         if isinstance(index, int):
-            return self._convert([self._data[index]])[0]
+            return self._converter(self._data[index])
         return LazyList(self._data[index], self._converter)
 
     def __iter__(self) -> Generator[_OUT, None, None]:
