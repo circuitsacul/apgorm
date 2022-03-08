@@ -125,13 +125,10 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
     def _validate(self, value: _C) -> None:
         for v in self._validators:
-            try:
-                if not v(value):
-                    raise InvalidFieldValue(
-                        f"Validator on {self.name} failed for {value!r}"
-                    )
-            except InvalidFieldValue:
-                raise
+            if not v(value):
+                raise InvalidFieldValue(
+                    f"Validator on {self.name} failed for {value!r}"
+                )
 
     def _describe(self) -> DescribeField:
         return DescribeField(
