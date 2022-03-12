@@ -215,7 +215,9 @@ class Database:
     async def apply_migrations(self) -> None:
         """Applies all migrations that need to be applied."""
 
-        for m in await self.load_unapplied_migrations():
+        unapplied = await self.load_unapplied_migrations()
+        unapplied.sort(key=lambda m: m.migration_id)
+        for m in unapplied:
             await self._apply_migration(m)
 
     # database functions
