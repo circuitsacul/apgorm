@@ -199,7 +199,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
         return self.model._from_raw(**res)
 
     async def count(self) -> int:
-        """SELECT COUNT(1) ...
+        """SELECT COUNT(*) ...
 
         Returns:
             int: The count.

@@ -70,7 +70,7 @@ def select(
     sql = Block[Any](raw("SELECT"))
 
     if count:
-        sql += Block(raw("COUNT(1)"))
+        sql += Block(raw("COUNT(*)"))
     elif fields is not None:
         sql += join(raw(","), *fields, wrap=True)
     else:

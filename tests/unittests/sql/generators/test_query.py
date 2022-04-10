@@ -73,4 +73,4 @@ def test_where_logic():
 
 def test_count():
     q = query.select(from_=MyModel, count=True)
-    assert q.render() == ("SELECT COUNT(1) FROM mymodel", [])
+    assert q.render() == ("SELECT COUNT(*) FROM mymodel", [])
