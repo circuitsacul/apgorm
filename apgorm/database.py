@@ -62,6 +62,7 @@ class Database:
         "_migrations_folder",
         "pool",
         "_migrations",
+        "default_padding",
     )
 
     _migrations: type[AppliedMigration]
@@ -85,7 +86,9 @@ class Database:
             model.tablename = attr_name
             cls._all_models.append(model)
 
-    def __init__(self, migrations_folder: Path | str) -> None:
+    def __init__(
+        self, migrations_folder: Path | str, padding: int = 4
+    ) -> None:
         """Initialize the database.
 
         Args:
@@ -102,6 +105,7 @@ class Database:
         for model in self._all_models:
             model.database = self
 
+        self.default_padding = padding
         self.pool: Pool | None = None
 
     # migration functions
@@ -146,7 +150,9 @@ class Database:
         """
 
         return Migration._from_path(
-            Migration._path_from_id(migration_id, self._migrations_folder)
+            Migration._path_from_id(
+                migration_id, self._migrations_folder, self.default_padding
+            )
         )
 
     def must_create_migrations(self) -> bool:
@@ -180,7 +186,7 @@ class Database:
         sql = self._create_next_migration()
         sql = sql or ""
         return Migration._create_migration(
-            self.describe(), sql, self._migrations_folder
+            self.describe(), sql, self._migrations_folder, self.default_padding
         )
 
     async def load_unapplied_migrations(self) -> list[Migration]:
