@@ -35,7 +35,7 @@ class Migration:
     __slots__: Iterable[str] = ("describe", "migrations", "path")
 
     def __init__(
-        self, describe: Describe, migrations: str, path: Path
+        self, describe: Describe, migrations: str, path: Path, padding: int = 0
     ) -> None:
         self.describe = describe
         """The Database.describe() at the time this migration was created."""
@@ -62,11 +62,11 @@ class Migration:
         with (path / "migrations.sql").open("r") as f:
             sql = f.read()
 
-        return cls(describe, sql, path)
+        return cls(describe, sql, path, padding=len(path.name))
 
     @staticmethod
-    def _path_from_id(migration_id: int, folder: Path) -> Path:
-        return folder / str(migration_id)
+    def _path_from_id(migration_id: int, folder: Path, padding: int) -> Path:
+        return folder / str(migration_id).zfill(padding)
 
     @staticmethod
     def _id_from_path(path: Path) -> int:
@@ -96,21 +96,25 @@ class Migration:
 
     @classmethod
     def _create_migration(
-        cls, describe: Describe, migrations: str, folder: Path
+        cls,
+        describe: Describe,
+        migrations: str,
+        folder: Path,
+        padding: int = 0,
     ) -> Migration:
         last_migration = cls._load_last_migration(folder)
         if last_migration:
             next_id = last_migration.migration_id + 1
         else:
             next_id = 0
-        next_path = folder / str(next_id)
+        next_path = folder / str(next_id).zfill(padding)
         next_path.mkdir(parents=True, exist_ok=False)
         with (next_path / "describe.json").open("w+") as f:
             f.write(json.dumps(describe.dict(), indent=4))
         with (next_path / "migrations.sql").open("w+") as f:
             f.write(migrations)
 
-        return cls(describe, migrations, next_path)
+        return cls(describe, migrations, next_path, padding=padding)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Migration):
