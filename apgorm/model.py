@@ -119,6 +119,7 @@ class Model:
                 cls._all_constraints[key] = value
 
             elif isinstance(value, ManyToMany):
+                value._attribute_name = key
                 cls._all_mtm[key] = value
 
     def __init__(self, **values: Any) -> None:
@@ -130,10 +131,6 @@ class Model:
             elif (d := f._get_default()) is not UNDEF.UNDEF:
                 self._raw_values[f.name] = d
             self._changed_fields.clear()
-
-        for name, mtm in self._all_mtm.items():
-            mtm = mtm._generate_mtm(self)
-            setattr(self, name, mtm)
 
     async def delete(self: _SELF, con: Connection | None = None) -> _SELF:
         """Delete the model. Does not update the values of this model,
@@ -286,8 +283,6 @@ class Model:
     def _from_raw(cls: type[_SELF], **values: Any) -> _SELF:
         n = super().__new__(cls)
         n._raw_values = values
-        for name, mtm in cls._all_mtm.items():
-            setattr(n, name, mtm._generate_mtm(n))
         return n
 
     @classmethod
