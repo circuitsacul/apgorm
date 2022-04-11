@@ -22,7 +22,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Iterable, Type, TypeVar, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    Iterable,
+    Type,
+    TypeVar,
+    cast,
+    overload,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
@@ -106,7 +115,16 @@ class ManyToMany(Generic[_REF, _THROUGH]):
     `games = ManyToMany["Game"](...)`.
     """
 
-    __slots__: Iterable[str] = ("_here", "_here_ref", "_other_ref", "_other")
+    __slots__: Iterable[str] = (
+        "_here",
+        "_here_ref",
+        "_other_ref",
+        "_other",
+        "_attribute_name",
+    )
+
+    _attribute_name: str
+    # populated by Model on __init_subclass__
 
     def __init__(
         self, here: str, here_ref: str, other_ref: str, other: str
@@ -116,104 +134,32 @@ class ManyToMany(Generic[_REF, _THROUGH]):
         self._other_ref = other_ref
         self._other = other
 
-    async def fetchmany(
-        self, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], _REF]:
-        """Fetch all rows from the final table that belong to this instance.
+    @overload
+    def __get__(
+        self, inst: Model, cls: Type[Model]
+    ) -> _RealManyToMany[_REF, _THROUGH]:
+        ...
 
-        Returns:
-            LazyList[dict, Model]: A lazy-list of returned Models.
-        """
+    @overload
+    def __get__(
+        self, inst: None, cls: Type[Model]
+    ) -> ManyToMany[_REF, _THROUGH]:
+        ...
 
-        raise NotImplementedError  # pragma: no cover
-
-    async def count(self, con: Connection | None = None) -> int:
-        """Returns the count.
-
-        Warning: To be efficient, this returns the count of *middle* models,
-        which may differ from the number of final models if you did not use
-        ForeignKeys properly.
-
-        Returns:
-            int: The count.
-        """
-
-        raise NotImplementedError  # pragma: no cover
-
-    async def add(
-        self, other: _REF, con: Connection | None = None
-    ) -> _THROUGH:
-        """Add one or more models to this ManyToMany.
-
-        Each of these lines does the exact same thing:
-        ```
-        player = await user.games.add(game)
-        # OR
-        player = await games.users.add(user)
-        # OR
-        player = await Player(username=user.name, gameid=game.id).create()
-        ```
-
-        Returns:
-            Model: The reference model that lines this model and the other
-            model. In the example, the return would be a Player.
-        """
-
-        raise NotImplementedError  # pragma: no cover
-
-    async def remove(
-        self, other: _REF, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], _THROUGH]:
-        """Remove one or models from this ManyToMany.
-
-        Each of these lines does the exact same thing:
-        ```
-        deleted_players = await user.games.remove(game)
-        # OR
-        deleted_players = await games.user.remove(user)
-        # OR
-        deleted_players = await Player.delete_query().where(
-            username=user.name, gameid=game.id
-        ).execute()
-        ```
-
-        Note: The fact that .remove() returns a list instead of a single model
-        was intentional. The reason is ManyToMany does not enforce uniqueness
-        in any way, so there could be multiple Players that link a single user
-        to a single game. Thus, user.remove(game) could actually end up
-        deleting multiple players.
-        """
-
-        raise NotImplementedError  # pragma: no cover
-
-    async def clear(
-        self, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], _THROUGH]:
-        """Remove all instances of the other model from this instance.
-
-        Both of these lines do the same thing:
-        ```
-        deleted_players = await user.games.clear()
-        deleted_players = await Player.delete_query().where(
-            username=user.name
-        ).execute()
-        ```
-
-        Returns:
-            LazyList[dict, _REF]: A lazy-list of deleted through models (in
-            the example, it would be a list of Player).
-        """
-
-        raise NotImplementedError  # pragma: no cover
-
-    def _generate_mtm(self, inst: Model) -> ManyToMany[_REF, _THROUGH]:
-        # NOTE: see comment under _RealManyToMany
-        if TYPE_CHECKING:  # pragma: no cover
+    def __get__(
+        self, inst: Model | None, cls: type[Model]
+    ) -> ManyToMany[_REF, _THROUGH] | _RealManyToMany[_REF, _THROUGH]:
+        if inst is None:
             return self
+        real_m2m = self._generate_mtm(inst)
+        setattr(inst, self._attribute_name, real_m2m)
+        return real_m2m
+
+    def _generate_mtm(self, inst: Model) -> _RealManyToMany[_REF, _THROUGH]:
         return _RealManyToMany(self, inst)
 
 
-class _RealManyToMany:
+class _RealManyToMany(Generic[_REF, _THROUGH]):
     __slots__: Iterable[str] = (
         "orig",
         "model",
@@ -225,13 +171,9 @@ class _RealManyToMany:
         "ot_field",
     )
 
-    # HACK: ManyToMany doesn't store a reference to the model instance, which
-    # is necessary in order to properly carry out the query. This was the
-    # easiest solution. No type checker will know that the value of the
-    # ManyToMany is actually _RealManyToMany when a Model is initialized, so a
-    # couple things break (such as __init__). This shouldn't really be a
-    # problem since the only user-facing method is fetchmany().
-    def __init__(self, orig: ManyToMany[Any, Any], model_inst: Model) -> None:
+    def __init__(
+        self, orig: ManyToMany[_REF, _THROUGH], model_inst: Model
+    ) -> None:
         # NOTE: all these casts are ugly, but truthfully
         # there isn't a better way to do this. You can't
         # actually check that these are Models and Fields
@@ -279,6 +221,12 @@ class _RealManyToMany:
     async def fetchmany(
         self, con: Connection | None = None
     ) -> LazyList[dict[str, Any], Model]:
+        """Fetch all rows from the final table that belong to this instance.
+
+        Returns:
+            LazyList[dict, Model]: A lazy-list of returned Models.
+        """
+
         return (
             await self.ot_model.fetch_query(con=con)
             .where(
@@ -295,6 +243,16 @@ class _RealManyToMany:
         )
 
     async def count(self, con: Connection | None = None) -> int:
+        """Returns the count.
+
+        Warning: To be efficient, this returns the count of *middle* models,
+        which may differ from the number of final models if you did not use
+        ForeignKeys properly.
+
+        Returns:
+            int: The count.
+        """
+
         return (
             await self.mm_model.fetch_query(con=con)
             .where(self.mm_h_field.eq(self.model._raw_values[self.field.name]))
@@ -304,6 +262,21 @@ class _RealManyToMany:
     async def clear(
         self, con: Connection | None = None
     ) -> LazyList[dict[str, Any], Model]:
+        """Remove all instances of the other model from this instance.
+
+        Both of these lines do the same thing:
+        ```
+        deleted_players = await user.games.clear()
+        deleted_players = await Player.delete_query().where(
+            username=user.name
+        ).execute()
+        ```
+
+        Returns:
+            LazyList[dict, _REF]: A lazy-list of deleted through models (in
+            the example, it would be a list of Player).
+        """
+
         return (
             await self.mm_model.delete_query(con=con)
             .where(self.mm_h_field.eq(self.model._raw_values[self.field.name]))
@@ -311,6 +284,22 @@ class _RealManyToMany:
         )
 
     async def add(self, other: Model, con: Connection | None = None) -> Model:
+        """Add one or more models to this ManyToMany.
+
+        Each of these lines does the exact same thing:
+        ```
+        player = await user.games.add(game)
+        # OR
+        player = await games.users.add(user)
+        # OR
+        player = await Player(username=user.name, gameid=game.id).create()
+        ```
+
+        Returns:
+            Model: The reference model that lines this model and the other
+            model. In the example, the return would be a Player.
+        """
+
         values = {
             self.mm_h_field.name: self.model._raw_values[self.field.name],
             self.mm_o_field.name: other._raw_values[self.ot_field.name],
@@ -320,6 +309,26 @@ class _RealManyToMany:
     async def remove(
         self, other: Model, con: Connection | None = None
     ) -> LazyList[dict[str, Any], Model]:
+        """Remove one or models from this ManyToMany.
+
+        Each of these lines does the exact same thing:
+        ```
+        deleted_players = await user.games.remove(game)
+        # OR
+        deleted_players = await games.user.remove(user)
+        # OR
+        deleted_players = await Player.delete_query().where(
+            username=user.name, gameid=game.id
+        ).execute()
+        ```
+
+        Note: The fact that .remove() returns a list instead of a single model
+        was intentional. The reason is ManyToMany does not enforce uniqueness
+        in any way, so there could be multiple Players that link a single user
+        to a single game. Thus, user.remove(game) could actually end up
+        deleting multiple players.
+        """
+
         values = {
             self.mm_h_field.name: self.model._raw_values[self.field.name],
             self.mm_o_field.name: other._raw_values[self.ot_field.name],
