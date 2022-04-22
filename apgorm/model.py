@@ -78,7 +78,7 @@ class Model:
     `Model.fetch_query`.
     """
 
-    __slots__: Iterable[str] = ("_raw_values",)
+    __slots__: Iterable[str] = ("_raw_values", "_changed_fields")
 
     _all_fields: dict[str, BaseField[Any, Any, Any]]
     _all_constraints: dict[str, Constraint]
@@ -100,7 +100,6 @@ class Model:
         cls._all_fields = {}
         cls._all_constraints = {}
         cls._all_mtm = {}
-        cls._changed_fields = set()
         cls._columns = set()
 
         for key, value in cls.__dict__.items():
@@ -124,13 +123,14 @@ class Model:
 
     def __init__(self, **values: Any) -> None:
         self._raw_values: dict[str, Any] = {}
+        self._changed_fields = set()
 
         for f in self._all_fields.values():
             if f.name in values:
                 f.__set__(self, values[f.name])
             elif (d := f._get_default()) is not UNDEF.UNDEF:
                 self._raw_values[f.name] = d
-            self._changed_fields.clear()
+        self._changed_fields.clear()
 
     async def delete(self: _SELF, con: Connection | None = None) -> _SELF:
         """Delete the model. Does not update the values of this model,
@@ -283,6 +283,7 @@ class Model:
     def _from_raw(cls: type[_SELF], **values: Any) -> _SELF:
         n = super().__new__(cls)
         n._raw_values = values
+        n._changed_fields = set()
         return n
 
     @classmethod
