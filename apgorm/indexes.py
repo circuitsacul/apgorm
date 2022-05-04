@@ -114,7 +114,7 @@ class Index:
             str: The name.
         """
 
-        fields = [f.name for f in self.fields if isinstance(f, BaseField)]
+        fields = (f.name for f in self.fields if isinstance(f, BaseField))
         return "_{type_}_index_{table}__{cols}".format(
             type_=self.type_.name,
             table=self.table.tablename,
@@ -122,10 +122,10 @@ class Index:
         ).lower()
 
     def _creation_sql(self) -> Block[Any]:
-        names = [
+        names = (
             wrap(f) if isinstance(f, Block) else wrap(raw(f.name))
             for f in self.fields
-        ]
+        )
 
         return Block(
             (raw("UNIQUE INDEX") if self.unique else raw("INDEX")),

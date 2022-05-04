@@ -70,7 +70,7 @@ class Exclude(Constraint):
             raw(self.using.name),
             join(
                 raw(","),
-                *[wrap(f, raw("WITH"), raw(op)) for f, op in self.elements],
+                *(wrap(f, raw("WITH"), raw(op)) for f, op in self.elements),
                 wrap=True,
             ),
         )

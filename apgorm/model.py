@@ -112,7 +112,7 @@ class Model:
             elif isinstance(value, Constraint):
                 if isinstance(value, PrimaryKey):
                     raise SpecifiedPrimaryKey(
-                        cls.__name__, [str(f) for f in value.fields]
+                        cls.__name__, map(str, value.fields)
                     )
                 value.name = key
                 cls._all_constraints[key] = value
@@ -333,11 +333,9 @@ class Model:
         return (
             f"<{self.__class__.__name__} "
             + " ".join(
-                [
-                    f"{f.name}:{getattr(self, f.name)!r}"
-                    for f in self._all_fields.values()
-                    if f.use_repr and f.name in self._raw_values
-                ]
+                f"{f.name}:{getattr(self, f.name)!r}"
+                for f in self._all_fields.values()
+                if f.use_repr and f.name in self._raw_values
             )
             + ">"
         )
