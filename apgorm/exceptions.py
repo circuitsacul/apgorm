@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Sequence, Type
+from typing import TYPE_CHECKING, Any, Iterable, Type
 
 if TYPE_CHECKING:  # pragma: no cover
     from .field import BaseField
@@ -101,7 +101,7 @@ class SpecifiedPrimaryKey(ApgormException):
 
     __slots__: Iterable[str] = ()
 
-    def __init__(self, cls: str, fields: Sequence[str]) -> None:
+    def __init__(self, cls: str, fields: Iterable[str]) -> None:
         super().__init__(
             f"You tried to specify a primary key on {cls} by using "
             f"the PrimaryKey constraint. Please use {cls}.primary_key "
