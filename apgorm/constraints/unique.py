@@ -52,14 +52,14 @@ class Unique(Constraint):
         self.fields = fields
 
     def _creation_sql(self) -> Block[Any]:
-        fields = [
+        fields = (
             raw(f)
             if isinstance(f, str)
             else f
             if isinstance(f, Block)
             else raw(f.name)
             for f in self.fields
-        ]
+        )
         return Block(
             raw("CONSTRAINT"),
             raw(self.name),
