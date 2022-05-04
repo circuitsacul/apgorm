@@ -89,7 +89,7 @@ class Migration:
     @classmethod
     def _load_last_migration(cls, folder: Path) -> Migration | None:
         migrations = cls._load_all_migrations(folder)
-        if len(migrations) == 0:
+        if not migrations:
             return None
         migrations.sort(key=lambda m: m.migration_id)
         return migrations[-1]

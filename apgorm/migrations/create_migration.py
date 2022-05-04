@@ -170,7 +170,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
             )
             set_nn_to: bool | None = None
             if last_not_null is UNDEF.UNDEF:
-                if field.not_null is True:
+                if field.not_null:
                     set_nn_to = True
             elif last_not_null != field.not_null:
                 set_nn_to = field.not_null
@@ -259,6 +259,6 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(add_fk_constraints)
     migrations.extend(add_exclude_constraints)
 
-    if len(migrations) == 0:
+    if not migrations:
         return None
     return ";\n".join(migrations) + ";"

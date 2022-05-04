@@ -142,10 +142,10 @@ def insert(
     tablename = into if isinstance(into, Block) else raw(into.tablename)
 
     sql = Block[Any](raw("INSERT INTO"), tablename)
-    if len(fields) > 0:
+    if fields:
         sql += join(raw(","), *fields, wrap=True)
 
-    if len(values) > 0:
+    if values:
         sql += Block[Any](raw("VALUES"), join(raw(","), *values, wrap=True))
     else:
         sql += Block[Any](raw("DEFAULT VALUES"))

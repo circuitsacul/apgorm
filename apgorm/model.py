@@ -145,7 +145,7 @@ class Model:
             .where(**(f := self._pk_fields()))
             .execute()
         )
-        if len(deleted) == 0:
+        if not deleted:
             raise ModelNotFound(self.__class__, f)
         return deleted[0]
 
@@ -154,7 +154,7 @@ class Model:
         of this model."""
 
         changed_fields = self._get_changed_fields()
-        if len(changed_fields) == 0:
+        if not changed_fields:
             return
         q = self.update_query(con=con).where(**self._pk_fields())
         q.set(**changed_fields)

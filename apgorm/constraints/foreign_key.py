@@ -115,7 +115,7 @@ class ForeignKey(Constraint):
                 "Must have same number of fields and ref_fields."
             )
 
-        if len(self.fields) == 0:
+        if not self.fields:
             raise BadArgument("Must specify at least on field and ref_field.")
 
     def _creation_sql(self) -> Block[Any]:
@@ -167,11 +167,8 @@ class ForeignKey(Constraint):
             ref_table,
             raw("("),
             join(raw(","), *ref_fields),
-            (
-                raw(") MATCH FULL")
-                if self.match_full
-                else raw(") MATCH SIMPLE")
-            ),
+            raw(") MATCH"),
+            raw("FULL" if self.match_full else "SIMPLE"),
             raw(f"ON DELETE {self.on_delete.value}"),
             raw(f"ON UPDATE {self.on_update.value}"),
             wrap=True,

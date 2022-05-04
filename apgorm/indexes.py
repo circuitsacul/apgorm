@@ -96,7 +96,7 @@ class Index:
         self.table = table
         self.unique = unique
 
-        if len(fields) == 0:
+        if not fields:
             raise BadArgument("Must specify at least one field for index.")
 
         if (not self.type_.multi) and len(fields) > 1:
