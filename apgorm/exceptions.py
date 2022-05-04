@@ -137,7 +137,6 @@ class ModelNotFound(SqlException):
         self.values = values
 
         super().__init__(
-            "No Model was found for the following parameters:\n"
-            " - "
-            + ("\n - ".join([f"{k!r} = {v!r}" for k, v in values.items()]))
+            "No Model was found for the following parameters:\n - "
+            + ("\n - ".join(f"{k!r} = {v!r}" for k, v in values.items()))
         )

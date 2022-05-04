@@ -289,10 +289,8 @@ class Model:
     @classmethod
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
-        pk.name = (
-            f"_{cls.tablename}_"
-            + "{}".format("_".join([f.name for f in cls.primary_key]))
-            + "_primary_key"
+        pk.name = f"_{cls.tablename}_{{}}_primary_key".format(
+            "_".join(f.name for f in cls.primary_key)
         )
         return pk
 
