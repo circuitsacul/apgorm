@@ -36,7 +36,7 @@ class Migration:
     __slots__: Iterable[str] = ("describe", "migrations", "path")
 
     def __init__(
-        self, describe: Describe, migrations: str, path: Path, padding: int = 0
+        self, describe: Describe, migrations: str, path: Path
     ) -> None:
         self.describe = describe
         """The Database.describe() at the time this migration was created."""
@@ -63,7 +63,7 @@ class Migration:
         with (path / "migrations.sql").open("r") as f:
             sql = f.read()
 
-        return cls(describe, sql, path, padding=len(path.name))
+        return cls(describe, sql, path)
 
     @staticmethod
     def _path_from_id(migration_id: int, folder: Path, padding: int) -> Path:
@@ -113,7 +113,7 @@ class Migration:
         with (next_path / "migrations.sql").open("w+") as f:
             f.write(migrations)
 
-        return cls(describe, migrations, next_path, padding=padding)
+        return cls(describe, migrations, next_path)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Migration):
