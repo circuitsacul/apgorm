@@ -347,8 +347,8 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
         return self.model._from_raw(**res)
 
     def _get_block(self) -> Block[Any]:
-        value_names = [n for n in self._set_values.keys()]
-        value_values = [v for v in self._set_values.values()]
+        value_names = list(self._set_values)
+        value_values = list(self._set_values.values())
 
         return insert(
             self.model,
