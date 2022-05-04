@@ -33,6 +33,6 @@ class XML(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-xml.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "XML"

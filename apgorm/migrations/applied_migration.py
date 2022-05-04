@@ -29,7 +29,7 @@ from apgorm.types.numeric import Int
 
 
 class AppliedMigration(Model):
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     id_ = Int().field()
 

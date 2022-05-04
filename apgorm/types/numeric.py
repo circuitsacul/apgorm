@@ -47,7 +47,7 @@ class SmallInt(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "SMALLINT"
 
@@ -58,7 +58,7 @@ class Int(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "INTEGER"
 
@@ -72,7 +72,7 @@ class BigInt(SqlType[int]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "BIGINT"
 
@@ -139,7 +139,7 @@ class Real(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "REAL"
 
@@ -150,7 +150,7 @@ class DoublePrecision(SqlType[float]):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "DOUBLE PRECISION"
 
@@ -159,7 +159,7 @@ _S = TypeVar("_S", bound="_BaseSerial", covariant=True)
 
 
 class _BaseSerial(SqlType[int]):
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def field(  # type: ignore
         self: _S, use_repr: bool = True
@@ -181,7 +181,7 @@ class SmallSerial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "SMALLSERIAL"
 
@@ -195,7 +195,7 @@ class Serial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "SERIAL"
 
@@ -209,6 +209,6 @@ class BigSerial(_BaseSerial):
     https://www.postgresql.org/docs/14/datatype-numeric.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "BIGSERIAL"

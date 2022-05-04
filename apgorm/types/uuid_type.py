@@ -34,6 +34,6 @@ class UUID(SqlType[uuid.UUID]):
     https://www.postgresql.org/docs/14/datatype-uuid.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "UUID"

@@ -36,7 +36,7 @@ class Boolean(SqlType[bool]):
     https://www.postgresql.org/docs/14/datatype-boolean.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "BOOLEAN"
 

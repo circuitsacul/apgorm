@@ -34,6 +34,6 @@ class Money(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-money.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "MONEY"

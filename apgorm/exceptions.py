@@ -32,20 +32,20 @@ if TYPE_CHECKING:  # pragma: no cover
 class ApgormBaseException(Exception):
     """The base clase for all exceptions in apgorm."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 # migration-side exceptions
 class MigrationException(ApgormBaseException):
     """Base class for all exceptions related to migrations."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class NoMigrationsToCreate(MigrationException):
     """The migration for the given id was not found."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self) -> None:
         super().__init__("There are no migrations to create.")
@@ -54,7 +54,7 @@ class NoMigrationsToCreate(MigrationException):
 class MigrationAlreadyApplied(MigrationException):
     """The migration has already been applied."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self, path: str) -> None:
         super().__init__(f"The migration at {path} has already been applied.")
@@ -64,7 +64,7 @@ class MigrationAlreadyApplied(MigrationException):
 class ApgormException(ApgormBaseException):
     """Base class for all exceptions related to the code of apgorm."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class UndefinedFieldValue(ApgormException):
@@ -87,7 +87,7 @@ class UndefinedFieldValue(ApgormException):
 class InvalidFieldValue(ApgormException):
     """The field value failed the validator check."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self, message: str) -> None:
         self.message = message
@@ -99,7 +99,7 @@ class SpecifiedPrimaryKey(ApgormException):
     """You tried to create a primary key constraint by using PrimaryKey
     instead of Model.primary_key."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self, cls: str, fields: Sequence[str]) -> None:
         super().__init__(
@@ -124,7 +124,7 @@ class BadArgument(ApgormException):
 class SqlException(ApgormBaseException):
     """Base class for all exceptions related to SQL."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class ModelNotFound(SqlException):

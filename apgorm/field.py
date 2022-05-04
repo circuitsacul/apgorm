@@ -156,7 +156,7 @@ class BaseField(Comparable, Generic[_F, _T, _C]):
 
 
 class Field(BaseField[_F, _T, _T]):
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     if not TYPE_CHECKING:
 

@@ -32,7 +32,7 @@ _CONV = TypeVar("_CONV")
 class Converter(Generic[_ORIG, _CONV]):
     """Base class that must be used for all field converters."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def from_stored(self, value: _ORIG) -> _CONV:
         """Take the value given by the database and convert it to the type

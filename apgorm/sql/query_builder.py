@@ -245,7 +245,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     async def execute(self) -> LazyList[dict[str, Any], _T]:
         """Execute the deletion query.
