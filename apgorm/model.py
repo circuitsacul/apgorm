@@ -22,6 +22,7 @@
 
 from __future__ import annotations, print_function
 
+from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Iterable, Type, TypeVar
 
 from .constraints.check import Check
@@ -207,10 +208,9 @@ class Model:
             Model | None: The model if it existed, otherwise None.
         """
 
-        try:
+        with suppress(ModelNotFound):
             return await cls.fetch(con, **values)
-        except ModelNotFound:
-            return None
+        return None
 
     @classmethod
     async def fetch(

@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import suppress
 from pathlib import Path
 from typing import Iterable
 
@@ -79,10 +80,8 @@ class Migration:
             if p.is_file():
                 continue
 
-            try:
+            with suppress(FileNotFoundError):
                 migrations.append(cls._from_path(p))
-            except FileNotFoundError:
-                continue
 
         return migrations
 
