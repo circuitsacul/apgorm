@@ -128,7 +128,7 @@ class Connection:
         res = await self.con.fetchrow(query, *params)
         if res is not None:
             res = dict(res)
-        assert isinstance(res, (dict, type(None)))
+        assert res is None or isinstance(res, dict)
         return res
 
     async def fetchmany(
