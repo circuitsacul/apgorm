@@ -177,7 +177,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             LazyList[dict, Model]: The list of models matching the query.
         """
 
-        if limit is not None and not isinstance(limit, int):
+        if not (limit is None or isinstance(limit, int)):
             # NOTE: although limit as a string would work, there is a good
             # chance that it's a string because it was user input, meaning
             # that allowing limit to be a string would create an SQL-injection
