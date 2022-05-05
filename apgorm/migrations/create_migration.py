@@ -55,7 +55,7 @@ def _handle_constraint_list(
         if c.name not in currd
     ]
 
-    common = [(currd[k], origd[k]) for k in currd.keys() & origd.keys()]
+    common = ((currd[k], origd[k]) for k in currd.keys() & origd.keys())
     for currc, origc in common:
         if currc.raw_sql == origc.raw_sql:
             continue
@@ -97,10 +97,10 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     # everything else
     curr_indexes = {c.name: c for c in cd.indexes}
     last_indexes = {c.name: c for c in lm.describe.indexes} if lm else {}
-    comm_indexes = [
+    comm_indexes = (
         (curr_indexes[k], last_indexes[k])
         for k in curr_indexes.keys() & last_indexes.keys()
-    ]
+    )
     add_indexes: list[str] = [
         alter.add_index(c.raw_sql).render_no_params()
         for name, c in curr_indexes.items()
@@ -149,20 +149,16 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
         )
 
         add_fields.extend(
-            [
-                alter.add_field(
-                    raw(tablename), raw(key), raw(f.type_)
-                ).render_no_params()
-                for key, f in curr_fields.items()
-                if key not in last_fields
-            ]
+            alter.add_field(
+                raw(tablename), raw(key), raw(f.type_)
+            ).render_no_params()
+            for key, f in curr_fields.items()
+            if key not in last_fields
         )
         drop_fields.extend(
-            [
-                alter.drop_field(raw(tablename), raw(key)).render_no_params()
-                for key, f in last_fields.items()
-                if key not in curr_fields
-            ]
+            alter.drop_field(raw(tablename), raw(key)).render_no_params()
+            for key, f in last_fields.items()
+            if key not in curr_fields
         )
 
         # field not nulls:
@@ -174,7 +170,7 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
             )
             set_nn_to: bool | None = None
             if last_not_null is UNDEF.UNDEF:
-                if field.not_null is True:
+                if field.not_null:
                     set_nn_to = True
             elif last_not_null != field.not_null:
                 set_nn_to = field.not_null
@@ -263,6 +259,6 @@ def create_next_migration(cd: Describe, folder: Path) -> str | None:
     migrations.extend(add_fk_constraints)
     migrations.extend(add_exclude_constraints)
 
-    if len(migrations) == 0:
+    if not migrations:
         return None
     return ";\n".join(migrations) + ";"

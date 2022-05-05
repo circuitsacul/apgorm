@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Sequence, Type
+from typing import TYPE_CHECKING, Any, Iterable, Type
 
 if TYPE_CHECKING:  # pragma: no cover
     from .field import BaseField
@@ -32,20 +32,20 @@ if TYPE_CHECKING:  # pragma: no cover
 class ApgormBaseException(Exception):
     """The base clase for all exceptions in apgorm."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 # migration-side exceptions
 class MigrationException(ApgormBaseException):
     """Base class for all exceptions related to migrations."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class NoMigrationsToCreate(MigrationException):
     """The migration for the given id was not found."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self) -> None:
         super().__init__("There are no migrations to create.")
@@ -54,7 +54,7 @@ class NoMigrationsToCreate(MigrationException):
 class MigrationAlreadyApplied(MigrationException):
     """The migration has already been applied."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self, path: str) -> None:
         super().__init__(f"The migration at {path} has already been applied.")
@@ -64,7 +64,7 @@ class MigrationAlreadyApplied(MigrationException):
 class ApgormException(ApgormBaseException):
     """Base class for all exceptions related to the code of apgorm."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class UndefinedFieldValue(ApgormException):
@@ -87,7 +87,7 @@ class UndefinedFieldValue(ApgormException):
 class InvalidFieldValue(ApgormException):
     """The field value failed the validator check."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def __init__(self, message: str) -> None:
         self.message = message
@@ -99,9 +99,9 @@ class SpecifiedPrimaryKey(ApgormException):
     """You tried to create a primary key constraint by using PrimaryKey
     instead of Model.primary_key."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
-    def __init__(self, cls: str, fields: Sequence[str]) -> None:
+    def __init__(self, cls: str, fields: Iterable[str]) -> None:
         super().__init__(
             f"You tried to specify a primary key on {cls} by using "
             f"the PrimaryKey constraint. Please use {cls}.primary_key "
@@ -124,7 +124,7 @@ class BadArgument(ApgormException):
 class SqlException(ApgormBaseException):
     """Base class for all exceptions related to SQL."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class ModelNotFound(SqlException):
@@ -137,7 +137,6 @@ class ModelNotFound(SqlException):
         self.values = values
 
         super().__init__(
-            "No Model was found for the following parameters:\n"
-            " - "
-            + ("\n - ".join([f"{k!r} = {v!r}" for k, v in values.items()]))
+            "No Model was found for the following parameters:\n - "
+            + ("\n - ".join(f"{k!r} = {v!r}" for k, v in values.items()))
         )

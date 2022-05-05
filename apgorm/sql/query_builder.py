@@ -108,7 +108,7 @@ class FilterQueryBuilder(BaseQueryBuilder[_T]):
         return self
 
     def _where_logic(self) -> Block[Bool] | None:
-        if len(self._filters) == 0:
+        if not self._filters:
             return None
         return and_(*self._filters)
 
@@ -177,7 +177,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
             LazyList[dict, Model]: The list of models matching the query.
         """
 
-        if limit is not None and not isinstance(limit, int):
+        if not (limit is None or isinstance(limit, int)):
             # NOTE: although limit as a string would work, there is a good
             # chance that it's a string because it was user input, meaning
             # that allowing limit to be a string would create an SQL-injection
@@ -245,7 +245,7 @@ class FetchQueryBuilder(FilterQueryBuilder[_T]):
 class DeleteQueryBuilder(FilterQueryBuilder[_T]):
     """Query builder for deleting models."""
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     async def execute(self) -> LazyList[dict[str, Any], _T]:
         """Execute the deletion query.
@@ -347,8 +347,8 @@ class InsertQueryBuilder(BaseQueryBuilder[_T]):
         return self.model._from_raw(**res)
 
     def _get_block(self) -> Block[Any]:
-        value_names = [n for n in self._set_values.keys()]
-        value_values = [v for v in self._set_values.values()]
+        value_names = list(self._set_values.keys())
+        value_values = list(self._set_values.values())
 
         return insert(
             self.model,

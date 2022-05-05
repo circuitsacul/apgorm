@@ -33,7 +33,7 @@ class Json(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-json.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "JSON"
 
@@ -44,6 +44,6 @@ class JsonB(SqlType[str]):
     https://www.postgresql.org/docs/14/datatype-json.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "JSONB"

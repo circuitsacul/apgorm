@@ -22,6 +22,7 @@
 
 from __future__ import annotations, print_function
 
+from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Iterable, Type, TypeVar
 
 from .constraints.check import Check
@@ -112,7 +113,7 @@ class Model:
             elif isinstance(value, Constraint):
                 if isinstance(value, PrimaryKey):
                     raise SpecifiedPrimaryKey(
-                        cls.__name__, [str(f) for f in value.fields]
+                        cls.__name__, map(str, value.fields)
                     )
                 value.name = key
                 cls._all_constraints[key] = value
@@ -145,7 +146,7 @@ class Model:
             .where(**(f := self._pk_fields()))
             .execute()
         )
-        if len(deleted) == 0:
+        if not deleted:
             raise ModelNotFound(self.__class__, f)
         return deleted[0]
 
@@ -154,7 +155,7 @@ class Model:
         of this model."""
 
         changed_fields = self._get_changed_fields()
-        if len(changed_fields) == 0:
+        if not changed_fields:
             return
         q = self.update_query(con=con).where(**self._pk_fields())
         q.set(**changed_fields)
@@ -207,10 +208,9 @@ class Model:
             Model | None: The model if it existed, otherwise None.
         """
 
-        try:
+        with suppress(ModelNotFound):
             return await cls.fetch(con, **values)
-        except ModelNotFound:
-            return None
+        return None
 
     @classmethod
     async def fetch(
@@ -289,10 +289,8 @@ class Model:
     @classmethod
     def _primary_key(cls) -> PrimaryKey:
         pk = PrimaryKey(*cls.primary_key)
-        pk.name = (
-            f"_{cls.tablename}_"
-            + "{}".format("_".join([f.name for f in cls.primary_key]))
-            + "_primary_key"
+        pk.name = f"_{cls.tablename}_{{}}_primary_key".format(
+            "_".join(f.name for f in cls.primary_key)
         )
         return pk
 
@@ -333,11 +331,9 @@ class Model:
         return (
             f"<{self.__class__.__name__} "
             + " ".join(
-                [
-                    f"{f.name}:{getattr(self, f.name)!r}"
-                    for f in self._all_fields.values()
-                    if f.use_repr and f.name in self._raw_values
-                ]
+                f"{f.name}:{getattr(self, f.name)!r}"
+                for f in self._all_fields.values()
+                if f.use_repr and f.name in self._raw_values
             )
             + ">"
         )

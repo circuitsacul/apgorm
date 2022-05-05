@@ -147,7 +147,7 @@ class Date(SqlType[datetime.date]):
     https://www.postgresql.org/docs/14/datatype-datetime.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "DATE"
 

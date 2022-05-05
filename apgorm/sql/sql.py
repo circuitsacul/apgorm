@@ -174,7 +174,7 @@ def raw(string: str) -> Block[Any]:
 
 
 class Raw(UserString):
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
 
 class Parameter(Generic[_T]):
@@ -215,7 +215,7 @@ class _Func(Generic[_SQLT]):
 
 
 class Comparable:
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     def _get_block(self) -> Block[Any]:
         raise NotImplementedError  # pragma: no cover

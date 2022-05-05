@@ -33,6 +33,6 @@ class ByteA(SqlType[bytes]):
     https://www.postgresql.org/docs/14/datatype-binary.html
     """
 
-    __slots__: Iterable[str] = tuple()
+    __slots__: Iterable[str] = ()
 
     _sql = "BYTEA"

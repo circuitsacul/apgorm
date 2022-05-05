@@ -78,9 +78,7 @@ class Database:
         cls._all_models = []
 
         for attr_name, model in cls.__dict__.items():
-            if not isinstance(model, type):
-                continue
-            if not issubclass(model, Model):
+            if not (isinstance(model, type) and issubclass(model, Model)):
                 continue
 
             model.tablename = attr_name
@@ -163,9 +161,7 @@ class Database:
         """
 
         sql = self._create_next_migration()
-        if sql is None:
-            return False
-        return True
+        return sql is not None
 
     def create_migrations(self, allow_empty: bool = False) -> Migration:
         """Create migrations.
@@ -183,8 +179,7 @@ class Database:
 
         if (not self.must_create_migrations()) and not allow_empty:
             raise NoMigrationsToCreate
-        sql = self._create_next_migration()
-        sql = sql or ""
+        sql = self._create_next_migration() or ""
         return Migration._create_migration(
             self.describe(), sql, self._migrations_folder, self.default_padding
         )
