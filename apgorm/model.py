@@ -42,6 +42,7 @@ from .sql.query_builder import (
     UpdateQueryBuilder,
 )
 from .undefined import UNDEF
+from .utils.lazy_list import LazyList
 
 if TYPE_CHECKING:  # pragma: no cover
     from .connection import Connection
@@ -234,6 +235,18 @@ class Model:
         if res is None:
             raise ModelNotFound(cls, values)
         return res
+
+    @classmethod
+    async def fetchmany(
+        cls: Type[_SELF], con: Connection | None, /, **values: Any
+    ) -> LazyList[dict[str, Any], _SELF]:
+        """Fetch multiple models from the database.
+
+        Returns:
+            LazyList[dict[str, Any], Model]: The list of models.
+        """
+
+        return await cls.fetch_query(con=con).where(**values).fetchmany()
 
     @classmethod
     async def count(
