@@ -238,7 +238,7 @@ class Model:
 
     @classmethod
     async def fetchmany(
-        cls: Type[_SELF], con: Connection | None, /, **values: Any
+        cls: Type[_SELF], con: Connection | None = None, /, **values: Any
     ) -> LazyList[dict[str, Any], _SELF]:
         """Fetch multiple models from the database.
 
