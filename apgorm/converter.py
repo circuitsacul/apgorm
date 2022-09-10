@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import IntEnum, IntFlag
 from typing import Generic, Iterable, Type, TypeVar, Union, cast
 
@@ -7,22 +8,20 @@ _ORIG = TypeVar("_ORIG")
 _CONV = TypeVar("_CONV")
 
 
-class Converter(Generic[_ORIG, _CONV]):
+class Converter(ABC, Generic[_ORIG, _CONV]):
     """Base class that must be used for all field converters."""
 
     __slots__: Iterable[str] = ()
 
+    @abstractmethod
     def from_stored(self, value: _ORIG) -> _CONV:
         """Take the value given by the database and convert it to the type
         used in your code."""
 
-        raise NotImplementedError  # pragma: no cover
-
+    @abstractmethod
     def to_stored(self, value: _CONV) -> _ORIG:
         """Take the type used by your code and convert it to the type
         used to store the value in the database."""
-
-        raise NotImplementedError  # pragma: no cover
 
 
 _INTEF = TypeVar("_INTEF", bound="Union[IntFlag, IntEnum]")
