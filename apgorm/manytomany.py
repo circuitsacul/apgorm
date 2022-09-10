@@ -187,7 +187,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
         assert mm_h_model == mm_o_model
 
         mm_model = cast(
-            "Type[Model]", getattr(model_inst.database, mm_h_model)
+            "Type[_THROUGH]", getattr(model_inst.database, mm_h_model)
         )
 
         mm_h_field = cast(
@@ -198,7 +198,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
         )
 
         _ot_model, _ot_field = self.orig._other.split(".")
-        ot_model = cast("Type[Model]", getattr(model_inst.database, _ot_model))
+        ot_model = cast("Type[_REF]", getattr(model_inst.database, _ot_model))
 
         ot_field = cast(
             "BaseField[Any, Any, Any]", getattr(ot_model, _ot_field)
@@ -220,7 +220,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
 
     async def fetchmany(
         self, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], Model]:
+    ) -> LazyList[dict[str, Any], _REF]:
         """Fetch all rows from the final table that belong to this instance.
 
         Returns:
@@ -261,7 +261,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
 
     async def clear(
         self, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], Model]:
+    ) -> LazyList[dict[str, Any], _THROUGH]:
         """Remove all instances of the other model from this instance.
 
         Both of these lines do the same thing:
@@ -273,7 +273,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
         ```
 
         Returns:
-            LazyList[dict, _REF]: A lazy-list of deleted through models (in
+            LazyList[dict, _THROUGH]: A lazy-list of deleted through models (in
             the example, it would be a list of Player).
         """
 
@@ -308,7 +308,7 @@ class _RealManyToMany(Generic[_REF, _THROUGH]):
 
     async def remove(
         self, other: Model, con: Connection | None = None
-    ) -> LazyList[dict[str, Any], Model]:
+    ) -> LazyList[dict[str, Any], _THROUGH]:
         """Remove one or models from this ManyToMany.
 
         Each of these lines does the exact same thing:
