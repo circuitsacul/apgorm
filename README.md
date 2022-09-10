@@ -26,8 +26,8 @@ Please note that this library is not for those learning SQL or Postgres. Althoug
 Defining a model and database:
 ```py
 class User(apgorm.Model):
-    username = VarChar(32).field()
-    email = VarChar().nullablefield()
+    username = apgorm.types.VarChar(32).field()
+    email = apgorm.types.VarChar().nullablefield()
     
     primary_key = (username,)
     
