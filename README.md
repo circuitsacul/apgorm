@@ -20,7 +20,9 @@ Please note that this library is not for those learning SQL or Postgres. Althoug
 ## Limitations
  - Limited column namespace. For example, you cannot have a column named `tablename` since that is used to store the name of the model.
  - Only supports PostgreSQL with asyncpg.
- - Migrations don't natively support field/table renaming, but you can still write your own migration with raw SQL.
+ - Migrations don't natively support field/table renaming or type changes, but you can still write your own migration with raw SQL.
+ - Converters only work on instances of models and when initializing the model.
+ - Models can only detect assignments. If `User.nicknames` is a list of nicknames, it won't detect `user.nicknames.append("new nick")`. You need to do `user.nicknames = user.nicknames + ["new nick"]`.
 
 ## Basic Usage
 Defining a model and database:
