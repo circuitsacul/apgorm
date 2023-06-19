@@ -17,7 +17,7 @@ keywords = ["postgres", "postgresql", "asyncpg", "asyncio", "orm"]
 [tool.poetry.dependencies]
 python = "^3.8"
 asyncpg = ">=0.25,<0.28"
-pydantic = "^1.9.0"
+pydantic = "^1.9.0,<1.11"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
