@@ -97,7 +97,6 @@ class ForeignKey(Constraint):
             raise BadArgument("Must specify at least on field and ref_field.")
 
     def _creation_sql(self) -> Block[Any]:
-
         if (
             len(
                 {

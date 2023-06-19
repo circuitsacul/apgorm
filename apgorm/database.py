@@ -36,10 +36,8 @@ class Database:
     """
 
     __slots__: Iterable[str] = (
-        "_all_models",
         "_migrations_folder",
         "pool",
-        "_migrations",
         "default_padding",
     )
 
